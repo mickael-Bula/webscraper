@@ -17,6 +17,8 @@ class HomeController extends AbstractController
     {
         // je lance le scraper à la récupération des données
         $scraper = new DataScraper();
+
+        // le tableau récupéré est inversé pour faciliter les insertions suivantes
         $data = $scraper->getData();
 
         // récupération de lastDate en BDD
@@ -43,9 +45,8 @@ class HomeController extends AbstractController
         $cacRepository->saveNewData($newData);
 
         return $this->render('home/index.html.twig', [
-            'data' => $data,
+            'data' => array_reverse($data), // j'inverse à nouveau le tableau pour une présentation dans la vue par actualité
             'lastDate' => $lastDate,
-            'newData' => $newData,
         ]);
     }
 }

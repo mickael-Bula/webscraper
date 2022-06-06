@@ -26,6 +26,7 @@ class DataScraper
         foreach($splittedData as $chunck) {
             $data[] = array_slice($chunck, 0, 5);
         }
-        return $data;
+        // on retourne le tableau inversé car les mises à jour viendront compléter les enregistrements, donc à la fin
+        return array_reverse($data);
     }
 }
