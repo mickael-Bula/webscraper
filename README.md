@@ -20,3 +20,21 @@ Ensuite, il y a augmentation de l'espace mémoire de la version de php afin de p
 Puis, je précise le path de la version de composer.phar pour le lancer, suivi de la commande `create-project`.
 
 NOTE : ce problème n'est pas systématique, généralement l'installation se passe sans avoir à le spécifier.
+
+## utilisation du scraper de Symfony
+
+J'ai tenté d'ajouter Goutte à Symfony, mais il n'est pas reconnu dans cet environnement.
+J'ai donc ajouté ses éléments :
+
+```bash
+use Symfony\Component\BrowserKit\HttpBrowser;       # à la place de use Goutte\Client;
+```
+
+Ensuite j'ai dû adapter le client en le passant au constructeur en lieu et place du client de Goutte :
+
+```php
+public function __construct(HttpBrowser $client)
+    {
+        $this->client = $client;
+    }
+```
