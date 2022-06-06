@@ -4,13 +4,20 @@ namespace App\Service;
 
 class ReformatNumber
 {
+    /**
+     * conversion des données scrapées sous forme de chaîne vers le format float
+     */
     public static function fromString(string $stringNumber): float
     {
         $flatNumber = str_replace('.', '', $stringNumber);
-        return str_replace(',', '.', $flatNumber);
+        $flatNumber = str_replace(',', '.', $flatNumber);
+        return $flatNumber;
     }
-    
-    public static function fromNumber(float $flatNumber): string
+
+    /**
+     * conversion des données de la base en string
+     */
+    public static function fromNumber($flatNumber): string
     {
         return number_format($flatNumber, 2, ',', ' ');
     }

@@ -62,7 +62,7 @@ class CacRepository extends ServiceEntityRepository
             $entity->setOpening((float) ReformatNumber::fromString($eachData[2]));
             $entity->setHigher((float) ReformatNumber::fromString($eachData[3]));
             $entity->setLower((float) ReformatNumber::fromString($eachData[4]));
-
+            
             $this->getEntityManager()->persist($entity);
         }
         $this->getEntityManager()->flush();

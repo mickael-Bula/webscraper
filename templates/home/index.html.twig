@@ -11,7 +11,13 @@
 <div class="example-wrapper">
     <h1>récupération des données</h1>
 
-    <h3>La dernière date est {% if lastDate is not empty %}le {{ lastDate[0].createdAt|date('d/m/Y') }}{% else %} inconnue...{% endif %}</h3>
+    <h3>
+    {% if lastDate is not null %}
+    La dernière date est le {{ lastDate }}.
+    {% else %}
+    Il n'y a pas encore d'historique.
+    {% endif %}
+    </h3>
 
     {% for row in newData %}
         {% for eachRow in row %}

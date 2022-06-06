@@ -21,18 +21,23 @@ class HomeController extends AbstractController
 
         // récupération de lastDate en BDD
         $lastDate = $cacRepository->findLastDate();
+        if ( !empty($lastDate)) {
+            $lastDate = $lastDate[0]->getCreatedAt();
+            $lastDate = $lastDate->format('d/m/Y');
+        } else {
+            $lastDate = null;
+        }
 
         // tri des entrées postérieures à lastDate
+        $newData = [];
         foreach ($data as $row) {
-            if ($lastDate !== $row[0]) {
+            if ( $lastDate !== $row[0]) {
                 $newData[] = $row;
             }
             else {
                 break;
             }
         }
-        //! il faut encore que convertir les dates au même format pour comparaison
-        //! il faut ajouter les chiffres derrière la virgule 
 
         // enregistrement en BDD des données triées précédemment
         $cacRepository->saveNewData($newData);

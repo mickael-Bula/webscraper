@@ -64,7 +64,7 @@ class Cac
         return $this->closing;
     }
 
-    public function setClosing(int $closing): self
+    public function setClosing(float $closing): self
     {
         $this->closing = $closing;
 
@@ -76,7 +76,7 @@ class Cac
         return $this->opening;
     }
 
-    public function setOpening(int $opening): self
+    public function setOpening(float $opening): self
     {
         $this->opening = $opening;
 
@@ -88,7 +88,7 @@ class Cac
         return $this->higher;
     }
 
-    public function setHigher(int $higher): self
+    public function setHigher(float $higher): self
     {
         $this->higher = $higher;
 
@@ -100,7 +100,7 @@ class Cac
         return $this->lower;
     }
 
-    public function setLower(int $lower): self
+    public function setLower(float $lower): self
     {
         $this->lower = $lower;
 
