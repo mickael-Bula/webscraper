@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}scraping des données{% endblock %}
 
 {% block body %}
 <style>
@@ -9,15 +9,15 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>récupération des données</h1>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'C:/Users/bulam/OneDrive/Documents/php/webtrader/webtrader/src/Controller/HomeController.php'|file_link(0) }}">src/Controller/HomeController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'C:/Users/bulam/OneDrive/Documents/php/webtrader/webtrader/templates/home/index.html.twig'|file_link(0) }}">templates/home/index.html.twig</a></code></li>
-    </ul>
-    {% for eachData in data[0] %}
-    <h3>{{ eachData }}</h3>
+    <h3>La dernière date est {% if lastDate is not empty %}le {{ lastDate[0].createdAt|date('d/m/Y') }}{% else %} inconnue...{% endif %}</h3>
+
+    {% for row in newData %}
+        {% for eachRow in row %}
+            <p>{{ eachRow }}</p>
+        {% endfor %}
     {% endfor %}
+
 </div>
 {% endblock %}
