@@ -4,11 +4,6 @@ body {
     background-color: lightgray;
 }
 
-.container {
-    width: 80%;
-    margin: auto;
-}
-
 table {
     margin: auto;
     border-collapse: collapse;
