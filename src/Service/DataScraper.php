@@ -19,8 +19,8 @@ class DataScraper
         // si le tableau est vide le marché est fermé (false), sinon il est ouvert (true)
         $isOpen = count($greenClockIcon) > 0;
 
+        // je filtre le document pour ne récupérer que le contenu du tableau qui m'intéresse
         $rawData = $crawler
-            // je filtre le document pour ne récupérer que le contenu du tableau qui m'intéresse
             ->filter('#curr_table > tbody > tr > td')
             ->each(function ($node) {
                 return $node->text('rien à afficher');
@@ -28,7 +28,10 @@ class DataScraper
     
         // la fonction array_chunk() divise le tableau passé en paramètre avec une taille fixée par le second
         $splittedData = array_chunk($rawData, 7);
-    
+
+        // en fonction de l'état du marché, j'inclus ou non les données de la valeur du jour
+        $isOpen ? array_splice($splittedData, 0, 1) : $splittedData;
+
         // je boucle sur les résultats pour ne récupérer que les données utiles
         foreach($splittedData as $chunck) {
             $data[] = array_slice($chunck, 0, 5);
