@@ -36,6 +36,8 @@ class HomeController extends AbstractController
                 break;
             }
         }
+        // vérification de l'heure du jour
+
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement
         $reverseData = array_reverse($newData);
 
