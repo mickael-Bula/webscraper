@@ -51,9 +51,9 @@ class CacRepository extends ServiceEntityRepository
         ;
     }
 
-    public function saveNewData($newData): void
+    public function saveData($data): void
     {
-        foreach ($newData as $eachData) {
+        foreach ($data as $eachData) {
             $entity = new Cac();
             // reformatage de la date (d/m/Y) pour correspondre au format attendu par l'interface DateTime (d-m-Y)
             $date = str_replace('/', '-', $eachData[0]);

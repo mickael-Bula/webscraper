@@ -26,7 +26,6 @@ class HomeController extends AbstractController
         } else {
             $lastDate = null;
         }
-
         // tri des entrées postérieures à lastDate
         $newData = [];
         foreach ($data as $row) {
@@ -37,12 +36,14 @@ class HomeController extends AbstractController
                 break;
             }
         }
+        // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement
+        $reverseData = array_reverse($newData);
 
         // enregistrement en BDD des données triées précédemment
-        $cacRepository->saveNewData($newData);
+        $cacRepository->saveData($reverseData);
 
         return $this->render('home/index.html.twig', [
-            'data' => array_reverse($data), // j'inverse à nouveau le tableau pour une présentation dans la vue par actualité
+            'data' => $data,
             'lastDate' => $lastDate,
         ]);
     }
