@@ -26,15 +26,7 @@ NOTE : ce problème n'est pas systématique, généralement l'installation se pa
 J'ai tenté d'ajouter Goutte à Symfony, mais il n'est pas reconnu dans cet environnement.
 J'ai donc ajouté ses éléments :
 
-```bash
-use Symfony\Component\BrowserKit\HttpBrowser;       # à la place de use Goutte\Client;
-```
-
-Ensuite j'ai dû adapter le client en le passant au constructeur en lieu et place du client de Goutte :
-
 ```php
-public function __construct(HttpBrowser $client)
-    {
-        $this->client = $client;
-    }
+use Symfony\Component\BrowserKit\HttpBrowser;       // à la place de use Goutte\Client;
 ```
+
