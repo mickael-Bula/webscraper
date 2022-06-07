@@ -15,11 +15,8 @@ class HomeController extends AbstractController
      */
     public function index(CacRepository $cacRepository): Response
     {
-        // je lance le scraper à la récupération des données
-        $scraper = new DataScraper();
-
-        // le tableau récupéré est inversé pour faciliter les insertions suivantes
-        $data = $scraper->getData();
+        // récupération des données par le scraper
+        $data = DataScraper::getData();
 
         // récupération de lastDate en BDD
         $lastDate = $cacRepository->findLastDate();

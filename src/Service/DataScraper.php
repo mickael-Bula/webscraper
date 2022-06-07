@@ -6,10 +6,9 @@ use Symfony\Component\BrowserKit\HttpBrowser;
 
 class DataScraper
 {
-    public function getData() {
-
-        $client = new HttpBrowser();
-    
+    public static function getData(): array
+    {
+        $client = new HttpBrowser();    
         $crawler = $client->request('GET', 'https://fr.investing.com/indices/france-40-historical-data');
     
         $rawData = $crawler
