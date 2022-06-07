@@ -3,8 +3,9 @@
 {% block title %}scraping des données{% endblock %}
 
 {% block body %}
+<div class="container">
 
-    <h1>récupération des données</h1>
+    <h1>récupération des données End Of Day</h1>
 
     <h3>
     {% if lastDate is not null %}
@@ -31,7 +32,8 @@
         {% endfor %}
     </table>
 
-    {# changer les polices et mettre des bordures au tableau #}
+    {# changer les polices #}
+    {# asset() ne fonctionne pas dans Twig... #}
 
 </div>
 {% endblock %}
