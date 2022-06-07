@@ -23,7 +23,7 @@
             <th scope="col">plus haut</th>
             <th scope="col">plus bas</th>
         </tr>
-        {% for row in data %}
+        {% for row in displayData %}
             <tr>
             {% for eachRow in row %}
                 <td>{{ eachRow }}</td>
@@ -32,7 +32,6 @@
         {% endfor %}
     </table>
 
-    {# changer les polices #}
     {# asset() ne fonctionne pas dans Twig... #}
 
 </div>

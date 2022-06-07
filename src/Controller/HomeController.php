@@ -41,6 +41,9 @@ class HomeController extends AbstractController
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
         $cacRepository->saveData(array_reverse($newData));
 
-        return $this->render('home/index.html.twig', compact('data', 'lastDate'));
+        // je crée une portion de tableau pour affichage
+        $displayData = array_slice($data, 0, 10);
+
+        return $this->render('home/index.html.twig', compact('displayData', 'lastDate'));
     }
 }

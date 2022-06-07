@@ -1,5 +1,7 @@
 body {
     margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: lightgray;
 }
 
 .container {
@@ -8,6 +10,7 @@ body {
 }
 
 table {
+    margin: auto;
     border-collapse: collapse;
     border: 2px solid rgb(200, 200, 200);
     letter-spacing: 1px;
