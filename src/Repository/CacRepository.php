@@ -53,17 +53,17 @@ class CacRepository extends ServiceEntityRepository
 
     public function saveData($item): void
     {
-        foreach ($item as $eachitem) {
+        foreach ($item as $eachItem) {
             $entity = new Cac();
-            // reformatage de la date (d/m/Y) pour correspondre au format attendu par l'interface DateTime (d-m-Y)
-            $date = str_replace('/', '-', $eachitem[0]);
+            // reformat date (d/m/Y) to conform with expected DataTime format (d-m-Y)
+            $date = str_replace('/', '-', $eachItem[0]);
             $entity->setCreatedAt(\DateTime::createFromFormat('d-m-Y', $date));
-            $entity->setClosing((float) ReformatNumber::fromString($eachitem[1]));
-            $entity->setOpening((float) ReformatNumber::fromString($eachitem[2]));
-            $entity->setHigher((float) ReformatNumber::fromString($eachitem[3]));
-            $entity->setLower((float) ReformatNumber::fromString($eachitem[4]));
+            $entity->setClosing(ReformatNumber::fromString($eachItem[1]));
+            $entity->setOpening(ReformatNumber::fromString($eachItem[2]));
+            $entity->setHigher(ReformatNumber::fromString($eachItem[3]));
+            $entity->setLower(ReformatNumber::fromString($eachItem[4]));
             
-            // ### extrait de la doc de Doctrine : https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/ 
+            // ### excerpt from Doctrine documentation : https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/
             // "You can consider all values on Objects inserted and updated through Doctrine\ORM\EntityManager#persist() to be safe from SQL injection"
             $this->getEntityManager()->persist($entity);
         }

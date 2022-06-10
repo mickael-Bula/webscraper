@@ -5,17 +5,16 @@ namespace App\Service;
 class ReformatNumber
 {
     /**
-     * conversion des données scrapées sous forme de chaîne vers le format float
+     * convert scraped data from string to float
      */
     public static function fromString(string $stringNumber): float
     {
         $flatNumber = str_replace('.', '', $stringNumber);
-        $flatNumber = str_replace(',', '.', $flatNumber);
-        return $flatNumber;
+        return str_replace(',', '.', $flatNumber);
     }
 
     /**
-     * conversion des données de la base en string
+     * convert database's data to string
      */
     public static function fromNumber($flatNumber): string
     {
