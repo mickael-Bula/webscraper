@@ -27,23 +27,16 @@ class SaveDataInDatabase
         $em = $this->entityManager;
         $cacRepository = $em->getRepository(Cac::class);
 
-        // enfin, récupération de lastDate en BDD
-        $lastDate = $cacRepository->findLastDate();
-
-        if ( !empty($lastDate)) {
-            $lastDate = $lastDate[0]->getCreatedAt();
-            $lastDate = $lastDate->format('d/m/Y');
-        } else {
-            $lastDate = null;
-        }
+        // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
+        $lastDate = $cacRepository->findBy([], [], 1);
+        $lastDate = (!empty($lastDate)) ? $lastDate[0]->getCreatedAt()->format("d/m/Y") : null;
 
         // tri des entrées postérieures à lastDate
         $newData = [];
         foreach ($data as $row) {
-            if ( $lastDate !== $row[0]) {
+            if ($lastDate !== $row[0]) {
                 $newData[] = $row;
-            }
-            else {
+            } else {
                 break;
             }
         }
