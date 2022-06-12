@@ -1,40 +1,48 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}scraping des données{% endblock %}
+{% block title %}scraping des données
+{% endblock %}
 
 {% block body %}
-<div class="container ">
+	<div class="container ">
 
-    <h1>récupération des données End Of Day</h1>
+		<h1 class="row justify-content-center">récupération des données End Of Day</h1>
 
-    <div class="alert alert-primary" role="alert">
-    Test de l'intégration de Bootstrap
-    </div>
 
-    <h3>
-    {% if lastDate is not null %}
-    La dernière date est le {{ lastDate }}.
-    {% else %}
-    Il n'y a pas encore d'historique.
-    {% endif %}
-    </h3>
+		<h3 class="row justify-content-center">
+			{% if lastDate is not null %}
+				La dernière date est le
+				{{ lastDate }}.
+			{% else %}
+				Il n'y a pas encore d'historique.
+			{% endif %}
+		</h3>
+		<div class="container-fluid">
+			<div class="row justify-content-center">
+				<div class="col-12 col-lg-6">
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Date</th>
+								<th scope="col">clôture</th>
+								<th scope="col">ouverture</th>
+								<th scope="col">plus haut</th>
+								<th scope="col">plus bas</th>
+							</tr>
+						</thead>
+						{% for row in displayData %}
+							<tr>
+								<td>{{ row.createdAt|date("d/m/Y") }}</td>
+								<td>{{ row.closing }}</td>
+								<td>{{ row.opening }}</td>
+								<td>{{ row.higher }}</td>
+								<td>{{ row.lower }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
 
-    <table>
-        <tr>
-            <th scope="col">Date</th>
-            <th scope="col">clôture</th>
-            <th scope="col">ouverture</th>
-            <th scope="col">plus haut</th>
-            <th scope="col">plus bas</th>
-        </tr>
-        {% for row in displayData %}
-            <tr>
-            {% for eachRow in row %}
-                <td>{{ eachRow }}</td>
-            {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
-
-</div>
+	</div>
 {% endblock %}

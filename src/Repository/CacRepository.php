@@ -40,17 +40,6 @@ class CacRepository extends ServiceEntityRepository
         }
     }
 
-    public function findLastDate(): array
-    {
-        return $this
-            ->createQueryBuilder('c')
-            ->orderBy('c.createdAt', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
     public function saveData($data): void
     {
         foreach ($data as $eachData) {

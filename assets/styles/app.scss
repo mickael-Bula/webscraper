@@ -3,32 +3,4 @@
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
-    background-color: lightgray;
-}
-
-table {
-    margin: auto;
-    border-collapse: collapse;
-    border: 2px solid rgb(200, 200, 200);
-    letter-spacing: 1px;
-    font-size: .8rem;
-}
-
-td,
-th {
-    border: 1px solid rgb(190, 190, 190);
-    padding: 10px;
-}
-
-td {
-    text-align: center;
-}
-
-tr:nth-child(even) {
-    background-color: #eee;
-}
-
-th[scope="col"] {
-    background-color: #696969;
-    color: #fff;
 }
