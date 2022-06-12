@@ -27,13 +27,14 @@ class DataScraper
             });
     
         // la fonction array_chunk() divise le tableau passé en paramètre avec une taille fixée par le second
-        $splittedData = array_chunk($rawData, 7);
+        $splitData = array_chunk($rawData, 7);
 
         // en fonction de l'état du marché, j'inclus ou non les données de la valeur du jour
-        $isOpen ? array_splice($splittedData, 0, 1) : $splittedData;
+        $splitData = $isOpen ? array_splice($splitData, 0, 1) : $splitData;
 
         // je boucle sur les résultats pour ne récupérer que les données utiles
-        foreach($splittedData as $chunck) {
+        $data = [];
+        foreach($splitData as $chunck) {
             $data[] = array_slice($chunck, 0, 5);
         }
         // on retourne le tableau
