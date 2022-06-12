@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-// use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use App\Service\DataScraper;
 use App\Service\SaveDataInDatabase;
 
@@ -17,7 +17,7 @@ class HomeController extends AbstractController
     {
         // get data from scraper
         $data = DataScraper::getData();
-        
+
         // put database insertion in a dedicated service
         $lastDate = $saveDataInDatabase->appendData($data);
 
