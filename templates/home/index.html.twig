@@ -9,10 +9,10 @@
 		<h1 class="row justify-content-center">récupération des données End Of Day</h1>
 
 
-		<h3 class="row justify-content-center">
+		<h3 class="row justify-content-center mb-4">
 			{% if lastDate is not null %}
 				La dernière date est le
-				{{ lastDate }}.
+				{{ lastDate }}
 			{% else %}
 				Il n'y a pas encore d'historique.
 			{% endif %}
@@ -20,23 +20,24 @@
 		<div class="container-fluid">
 			<div class="row justify-content-center">
 				<div class="col-12 col-lg-6">
-					<table class="table table-striped table-hover">
+					{# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
+					<table class="table table-striped table-hover table-bordered d-none d-sm-table">
 						<thead>
 							<tr>
-								<th scope="col">Date</th>
-								<th scope="col">clôture</th>
-								<th scope="col">ouverture</th>
-								<th scope="col">plus haut</th>
-								<th scope="col">plus bas</th>
+								<th scope="col" class="text-center">Date</th>
+								<th scope="col" class="text-center">clôture</th>
+								<th scope="col" class="text-center">ouverture</th>
+								<th scope="col" class="text-center">plus haut</th>
+								<th scope="col" class="text-center">plus bas</th>
 							</tr>
 						</thead>
 						{% for row in displayData %}
 							<tr>
-								<td>{{ row.createdAt|date("d/m/Y") }}</td>
-								<td>{{ row.closing }}</td>
-								<td>{{ row.opening }}</td>
-								<td>{{ row.higher }}</td>
-								<td>{{ row.lower }}</td>
+								<td class="text-center">{{ row.createdAt|date("d/m/Y") }}</td>
+								<td class="text-center">{{ row.closing }}</td>
+								<td class="text-center">{{ row.opening }}</td>
+								<td class="text-center">{{ row.higher }}</td>
+								<td class="text-center">{{ row.lower }}</td>
 							</tr>
 						{% endfor %}
 					</table>
