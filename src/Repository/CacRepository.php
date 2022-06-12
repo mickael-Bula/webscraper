@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\Cac;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Service\ReformatNumber;
+use App\Service\Utils;
 
 /**
  * @extends ServiceEntityRepository<Cac>
@@ -47,10 +47,10 @@ class CacRepository extends ServiceEntityRepository
             // reformat date (d/m/Y) to conform with expected DataTime format (d-m-Y)
             $date = str_replace('/', '-', $item[0]);
             $entity->setCreatedAt(\DateTime::createFromFormat('d-m-Y', $date));
-            $entity->setClosing(ReformatNumber::fromString($item[1]));
-            $entity->setOpening(ReformatNumber::fromString($item[2]));
-            $entity->setHigher(ReformatNumber::fromString($item[3]));
-            $entity->setLower(ReformatNumber::fromString($item[4]));
+            $entity->setClosing(Utils::fromString($item[1]));
+            $entity->setOpening(Utils::fromString($item[2]));
+            $entity->setHigher(Utils::fromString($item[3]));
+            $entity->setLower(Utils::fromString($item[4]));
 
             // ### excerpt from Doctrine documentation : https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/
             // "You can consider all values on Objects inserted and updated through Doctrine\ORM\EntityManager#persist() to be safe from SQL injection"
