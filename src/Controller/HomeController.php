@@ -28,7 +28,6 @@ class HomeController extends AbstractController
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
-        $session->clear();
         if (!$session->has("cac")) {
             $cac = $managerRegistry->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
