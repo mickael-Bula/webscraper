@@ -28,6 +28,7 @@ class HomeController extends AbstractController
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
+        $session->clear();
         if (!$session->has("cac")) {
             $cac = $managerRegistry->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
@@ -39,7 +40,7 @@ class HomeController extends AbstractController
         $lastDate = $recentDate->getMostRecentDate();
 
         // je compare $lastDate avec la date la plus récente en session (et donc en BDD)
-        $lastDateInSession = $session->get("cac")[0]->getCreatedAt()->format("d/m/Y");
+        $lastDateInSession = $cac[0]->getCreatedAt()->format("d/m/Y");
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {

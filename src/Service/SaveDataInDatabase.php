@@ -29,7 +29,7 @@ class SaveDataInDatabase
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $cacRepository->findOneBy([]);
-        $lastDate = (!empty($lastDate)) ? $lastDate[0]->getCreatedAt()->format("d/m/Y") : null;
+        $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
 
         // tri des entrées postérieures à lastDate
         $newData = [];
