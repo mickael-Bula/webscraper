@@ -24,7 +24,19 @@ class HomeController extends AbstractController
     /**
      * @Route("/", name="app_home")
      */
-    public function index(SaveDataInDatabase $saveDataInDatabase, ManagerRegistry $managerRegistry): Response
+    public function index(): Response
+    {
+        return $this->render('home/index.html.twig');
+    }
+
+    /**
+     * @Route("/dashboard", name="app_dashboard")
+     *
+     * @param SaveDataInDatabase $saveDataInDatabase
+     * @param ManagerRegistry $managerRegistry
+     * @return Response
+     */
+    public function dashboard(SaveDataInDatabase $saveDataInDatabase, ManagerRegistry $managerRegistry): Response
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
@@ -55,6 +67,6 @@ class HomeController extends AbstractController
         // je crée une portion de tableau pour affichage
         $displayData = array_slice($cac, 0, 10);
 
-        return $this->render('home/index.html.twig', compact('displayData', 'lastDate'));
+        return $this->render('home/dashboard.html.twig', compact('displayData', 'lastDate'));
     }
 }

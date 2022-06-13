@@ -1,49 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}scraping des données
-{% endblock %}
+{% block title %}page d'accueil{% endblock %}
 
 {% block body %}
-	<div class="container ">
 
-		<h1 class="row justify-content-center">récupération des données End Of Day</h1>
+    <header class="py-5">
+        <div class="container px-lg-5">
+            <div class="p-4 p-lg-5 bg-light rounded-3 text-center position-relative">
+                <div class="m-4 m-lg-5">
+                    <h1 class="display-5 fw-bold">Bienvenue !</h1>
+                    <p class="fs-4">Simplifiez le suivi de vos investissements avec notre dashboard intégré. Suivez d'un coup d'oeil l'état de vos positions ouvertes, en attente ou vendues. Définissez vos niveaux d'intrevention sur le marché. Prémunissez-vous contre les achats au plus haut en achetant sur les replis significatifs.</p>
+                    <a class="btn btn-primary btn-lg" href="{{ path("app_dashboard") }}">voir le dashboard</a>
+                </div>
+                <div class="p-4 p-lg-5 underlying-shape text-center"></div>
+            </div>
+        </div>
+    </header>
+    <!-- Page Content-->
+    <section class="pt-4">
+        <div class="container px-lg-5">
+            <!-- Page Features-->
+            <div class="row gx-lg-5">
+                <div class="col-lg-6 col-xxl-4 mb-5">
+                    <div class="card bg-light border-0 h-100">
+                        <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-collection"></i></div>
+                            <h2 class="fs-4 fw-bold">Fresh new layout</h2>
+                            <p class="mb-0">With Bootstrap 5, we've created a fresh new layout for this template!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-xxl-4 mb-5">
+                    <div class="card bg-light border-0 h-100">
+                        <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-cloud-download"></i></div>
+                            <h2 class="fs-4 fw-bold">Free to download</h2>
+                            <p class="mb-0">As always, Start Bootstrap has a powerful collectin of free templates.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-xxl-4 mb-5">
+                    <div class="card bg-light border-0 h-100">
+                        <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-card-heading"></i></div>
+                            <h2 class="fs-4 fw-bold">Jumbotron hero header</h2>
+                            <p class="mb-0">The heroic part of this template is the jumbotron hero header!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-xxl-4 mb-5">
+                    <div class="card bg-light border-0 h-100">
+                        <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-bootstrap"></i></div>
+                            <h2 class="fs-4 fw-bold">Feature boxes</h2>
+                            <p class="mb-0">We've created some custom feature boxes using Bootstrap icons!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-xxl-4 mb-5">
+                    <div class="card bg-light border-0 h-100">
+                        <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-code"></i></div>
+                            <h2 class="fs-4 fw-bold">Simple clean code</h2>
+                            <p class="mb-0">We keep our dependencies up to date and squash bugs as they come!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-xxl-4 mb-5">
+                    <div class="card bg-light border-0 h-100">
+                        <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-patch-check"></i></div>
+                            <h2 class="fs-4 fw-bold">A name you trust</h2>
+                            <p class="mb-0">Start Bootstrap has been the leader in free Bootstrap templates since 2013!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-
-		<h3 class="row justify-content-center mb-4">
-			{% if lastDate is not null %}
-				La dernière date est le
-				{{ lastDate }}
-			{% else %}
-				Il n'y a pas encore d'historique.
-			{% endif %}
-		</h3>
-		<div class="container-fluid">
-			<div class="row justify-content-center">
-				<div class="col-12 col-lg-6">
-					{# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
-					<table class="table table-striped table-hover table-bordered d-none d-sm-table">
-						<thead>
-							<tr>
-								<th scope="col" class="text-center">Date</th>
-								<th scope="col" class="text-center">clôture</th>
-								<th scope="col" class="text-center">ouverture</th>
-								<th scope="col" class="text-center">plus haut</th>
-								<th scope="col" class="text-center">plus bas</th>
-							</tr>
-						</thead>
-						{% for row in displayData %}
-							<tr>
-								<td class="text-center">{{ row.createdAt|date("d/m/Y") }}</td>
-								<td class="text-center">{{ row.closing }}</td>
-								<td class="text-center">{{ row.opening }}</td>
-								<td class="text-center">{{ row.higher }}</td>
-								<td class="text-center">{{ row.lower }}</td>
-							</tr>
-						{% endfor %}
-					</table>
-				</div>
-			</div>
-		</div>
-
-	</div>
 {% endblock %}
