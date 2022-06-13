@@ -9,10 +9,20 @@ body {
 .underlying-shape {
     position: absolute;
     top: 70%;
-    left: -70px;
+    left: -10em;
     z-index: -1;
     width: 25%;
     height: 50%;
     background-color: #bedafd;
     border-radius: 50px;
+}
+
+// Custom SCSS for feature component with Bootstrap icon
+.feature {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 4rem;
+    width: 4rem;
+    font-size: 2rem;
 }
