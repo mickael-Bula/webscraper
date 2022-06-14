@@ -1,3 +1,6 @@
+// Override Bootstrap variables
+$enable-negative-margins: true;
+
 @import '~bootstrap/scss/bootstrap';
 
 body {

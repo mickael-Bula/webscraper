@@ -40,6 +40,8 @@ class HomeController extends AbstractController
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
+        // $session->clear();
+        // die();
         if (!$session->has("cac")) {
             $cac = $managerRegistry->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
@@ -56,17 +58,15 @@ class HomeController extends AbstractController
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
             $data = DataScraper::getData();
-            // et j'enregistre les 10 données les plus récentes en session
-            $cac = array_slice($data, 0, 10);
-            $session->set("cac", $cac);
 
             // j'externalise l'insertion en BDD dans un service dédié
-            $lastDate = $saveDataInDatabase->appendData($cac);
+            $lastDate = $saveDataInDatabase->appendData($data);
+
+            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
+            $cac = $managerRegistry->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
+            $session->set("cac", $cac);
         }
 
-        // je crée une portion de tableau pour affichage
-        $displayData = array_slice($cac, 0, 10);
-
-        return $this->render('home/dashboard.html.twig', compact('displayData', 'lastDate'));
+        return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));
     }
 }
