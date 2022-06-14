@@ -24,18 +24,18 @@ class Utils
     /**
      * calculate the date which should be the most recent in the database 
      */
-    public function getMostRecentDate()
+    public function getMostRecentDate(): string
     {
-        // je récupère l'heure au format 24h depuis la timezone de Paris
+        // je récupère l'heure au format 24 h depuis la timezone de Paris
         date_default_timezone_set('Europe/Paris');
 
         // je récupère le numéro du jour courant
         $day = date('w');
 
         // Avant 18:00 on considère que le marché est ouvert : le dernier jour complet est donc celui de la veille.
-        // On tient également compte des jours de week end (non ouvrés)
+        // On tient également compte des jours de week-end (non ouvrés)
         if (date("G") >= "18") {
-            // $eves = ["numéro du jour dans la semaine" => "nombre de jours à retrancher pour obtenir la veille ouvrée"]
+            // $eves = ["numéro du jour dans la semaine" → "nombre de jours à retrancher pour obtenir la veille ouvrée"]
             $eves = ["0" => "2", "6" => "1"];
             $default = "0";
         } else {

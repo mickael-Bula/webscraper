@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Cac;
+use App\Entity\User;
+use App\Entity\LastHigh;
 use App\Repository\CacRepository;
+use App\Repository\LastHighRepository;
 use App\Service\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,14 +36,16 @@ class HomeController extends AbstractController
      *
      * @param SaveDataInDatabase $saveDataInDatabase
      * @param CacRepository $cacRepository
+     * @param LastHighRepository $lastHighRepository
      * @return Response
      */
-    public function dashboard(SaveDataInDatabase $saveDataInDatabase, CacRepository $cacRepository): Response
+    public function dashboard(
+        SaveDataInDatabase $saveDataInDatabase,
+        CacRepository $cacRepository,
+        LastHighRepository $lastHighRepository): Response
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
-        // $session->clear();
-        // die();
         if (!$session->has("cac")) {
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
@@ -60,13 +64,59 @@ class HomeController extends AbstractController
             $data = DataScraper::getData();
 
             // j'externalise l'insertion en BDD dans un service dédié
-            $lastDate = $saveDataInDatabase->appendData($data);
+            $newData = $saveDataInDatabase->appendData($data);
+
+            // j'actualise la table LastHigh si un nouveau plus haut a été réalisé
+            // TODO : maj de la table avec le plus haut deu tableau retourné $$newData
 
             // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
         }
 
+        // j'actualise $lastDate pour affichage
+        $lastDate = $cac[0]->getCreatedAt()->format("d/m/Y");
+
+        // TODO : il faudra mettre tout ce la dans un service
+        // je récupère le dernier plus haut en session ou en BDD
+        if (!$session->has("lastHigh")) {
+            $lastHigh = $lastHighRepository->findOneBy([], ["id" => "DESC"]);
+            // si j'ai un résultat autre que null je le mets en session
+            if (!is_null($lastHigh)) {
+                $session->set("lastHigh", $lastHigh);
+            } else {
+                // sinon, par défaut, on assigne la dernière valeur disponible comme plus haut
+                $entity = new LastHigh();
+                $higher = $cac[0]->getHigher();
+                $entity->setHigher($higher);
+                $entity->setBuyLimit($higher - ($higher * 0.1));    // buyLimit est 10% sous higher
+                $entity->setDailyHigher($cac[0]);
+                if ($this->getUser()) {
+                    $this->__invoke($entity);
+                }
+
+                $lastHighRepository->add($entity, true);
+
+                $session->set("lastHigh", $cac[0]->getHigher());
+            }
+        }
+        // je récupère la valeur du plus haut
+        $lastHigh = $session->get("lastHigh");
+
+
+
         return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));
+    }
+
+    /**
+     * J'utilise cette méthode pour passer une instance de UserInterface alors que doctrine attend un User::Entity
+     * @param $entity
+     * @return void
+     */
+    public function __invoke($entity) {
+        /** @var $user User */
+        $user = $this->getUser();
+
+        $entity->setUser($user);
     }
 }

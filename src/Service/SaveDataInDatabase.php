@@ -16,12 +16,12 @@ class SaveDataInDatabase
     }
 
     /**
-     * cette méthode insère dans la base les données postérieures à la dernière entrée disponible
-     * 
+     * Cette méthode insère dans la base les données postérieures à la dernière entrée disponible
+     *
      * @param array
-     * @return string|null
+     * @return array|null
      */
-    public function appendData($data): ?string
+    public function appendData($data): ?array
     {
         // je précise le Repository que je veux utiliser à mon EntityManager
         $em = $this->entityManager;
@@ -43,7 +43,7 @@ class SaveDataInDatabase
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
         $cacRepository->saveData(array_reverse($newData));
 
-        // on retourne la dernière date insérée en BDD pour information et affichage (on s'assure que le service a fonctionné)
-        return $lastDate;
+        // on retourne les données insérées en base pour la mise à jour de lastHigh
+        return $newData;
     }
 }

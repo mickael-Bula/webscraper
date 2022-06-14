@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -34,6 +36,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string")
      */
     private string $password;
+
+    /**
+     * @ORM\OneToMany(targetEntity=LastHigh::class, mappedBy="user")
+     */
+    private $lastHighs;
+
+    public function __construct()
+    {
+        $this->lastHighs = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -122,5 +134,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, LastHigh>
+     */
+    public function getLastHighs(): Collection
+    {
+        return $this->lastHighs;
+    }
+
+    public function addLastHigh(LastHigh $lastHigh): self
+    {
+        if (!$this->lastHighs->contains($lastHigh)) {
+            $this->lastHighs[] = $lastHigh;
+            $lastHigh->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLastHigh(LastHigh $lastHigh): self
+    {
+        if ($this->lastHighs->removeElement($lastHigh)) {
+            // set the owning side to null (unless already changed)
+            if ($lastHigh->getUser() === $this) {
+                $lastHigh->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
