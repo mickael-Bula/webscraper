@@ -3,13 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Cac;
+use App\Repository\CacRepository;
 use App\Service\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\DataScraper;
 use App\Service\SaveDataInDatabase;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class HomeController extends AbstractController
@@ -33,17 +33,17 @@ class HomeController extends AbstractController
      * @Route("/dashboard", name="app_dashboard")
      *
      * @param SaveDataInDatabase $saveDataInDatabase
-     * @param ManagerRegistry $managerRegistry
+     * @param CacRepository $cacRepository
      * @return Response
      */
-    public function dashboard(SaveDataInDatabase $saveDataInDatabase, ManagerRegistry $managerRegistry): Response
+    public function dashboard(SaveDataInDatabase $saveDataInDatabase, CacRepository $cacRepository): Response
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
         // $session->clear();
         // die();
         if (!$session->has("cac")) {
-            $cac = $managerRegistry->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
+            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
         }
         $cac = $session->get("cac");
@@ -63,7 +63,7 @@ class HomeController extends AbstractController
             $lastDate = $saveDataInDatabase->appendData($data);
 
             // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
-            $cac = $managerRegistry->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
+            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
         }
 
