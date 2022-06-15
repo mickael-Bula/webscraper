@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LastHighRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,6 +20,16 @@ class LastHigh
     private $id;
 
     /**
+     * @ORM\OneToOne(targetEntity=Cac::class, cascade={"persist", "remove"})
+     */
+    private $dailyCac;
+
+    /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="higher")
+     */
+    private $users;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $higher;
@@ -28,18 +40,61 @@ class LastHigh
     private $buyLimit;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="lastHighs")
+     * @ORM\OneToMany(targetEntity=Position::class, mappedBy="buyLimit")
      */
-    private $user;
+    private $positions;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Cac::class, cascade={"persist", "remove"})
-     */
-    private $dailyHigher;
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+        $this->positions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getDailyCac(): ?Cac
+    {
+        return $this->dailyCac;
+    }
+
+    public function setDailyCac(?Cac $dailyCac): self
+    {
+        $this->dailyCac = $dailyCac;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setHigher($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getHigher() === $this) {
+                $user->setHigher(null);
+            }
+        }
+
+        return $this;
     }
 
     public function getHigher(): ?float
@@ -66,26 +121,32 @@ class LastHigh
         return $this;
     }
 
-    public function getUser(): ?User
+    /**
+     * @return Collection<int, Position>
+     */
+    public function getPositions(): Collection
     {
-        return $this->user;
+        return $this->positions;
     }
 
-    public function setUser(?User $user): self
+    public function addPosition(Position $position): self
     {
-        $this->user = $user;
+        if (!$this->positions->contains($position)) {
+            $this->positions[] = $position;
+            $position->setBuyLimit($this);
+        }
 
         return $this;
     }
 
-    public function getDailyHigher(): ?Cac
+    public function removePosition(Position $position): self
     {
-        return $this->dailyHigher;
-    }
-
-    public function setDailyHigher(?Cac $dailyHigher): self
-    {
-        $this->dailyHigher = $dailyHigher;
+        if ($this->positions->removeElement($position)) {
+            // set the owning side to null (unless already changed)
+            if ($position->getBuyLimit() === $this) {
+                $position->setBuyLimit(null);
+            }
+        }
 
         return $this;
     }

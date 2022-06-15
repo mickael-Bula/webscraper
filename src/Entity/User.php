@@ -38,18 +38,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
     /**
-     * @ORM\OneToMany(targetEntity=LastHigh::class, mappedBy="user")
+     * @ORM\ManyToOne(targetEntity=LastHigh::class)
      */
-    private $lastHighs;
+    private $higher;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Position::class, mappedBy="User")
+     */
+    private $positions;
 
     public function __construct()
     {
-        $this->lastHighs = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->positions = new ArrayCollection();
     }
 
     public function getEmail(): ?string
@@ -136,30 +136,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    /**
-     * @return Collection<int, LastHigh>
-     */
-    public function getLastHighs(): Collection
+    public function getHigher(): ?LastHigh
     {
-        return $this->lastHighs;
+        return $this->higher;
     }
 
-    public function addLastHigh(LastHigh $lastHigh): self
+    public function setHigher(?LastHigh $higher): self
     {
-        if (!$this->lastHighs->contains($lastHigh)) {
-            $this->lastHighs[] = $lastHigh;
-            $lastHigh->setUser($this);
+        $this->higher = $higher;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Position>
+     */
+    public function getPositions(): Collection
+    {
+        return $this->positions;
+    }
+
+    public function addPosition(Position $position): self
+    {
+        if (!$this->positions->contains($position)) {
+            $this->positions[] = $position;
+            $position->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeLastHigh(LastHigh $lastHigh): self
+    public function removePosition(Position $position): self
     {
-        if ($this->lastHighs->removeElement($lastHigh)) {
+        if ($this->positions->removeElement($position)) {
             // set the owning side to null (unless already changed)
-            if ($lastHigh->getUser() === $this) {
-                $lastHigh->setUser(null);
+            if ($position->getUser() === $this) {
+                $position->setUser(null);
             }
         }
 
