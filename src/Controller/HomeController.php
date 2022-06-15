@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\LastHigh;
-use App\Entity\Cac;
 use App\Repository\CacRepository;
 use App\Repository\LastHighRepository;
+use App\Repository\UserRepository;
 use App\Service\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Service\DataScraper;
 use App\Service\SaveDataInDatabase;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class HomeController extends AbstractController
 {
@@ -33,6 +34,8 @@ class HomeController extends AbstractController
     }
 
     /**
+     * @IsGranted("ROLE_USER")
+     *
      * @Route("/dashboard", name="app_dashboard")
      *
      * @param SaveDataInDatabase $saveDataInDatabase
@@ -43,7 +46,8 @@ class HomeController extends AbstractController
     public function dashboard(
         SaveDataInDatabase $saveDataInDatabase,
         CacRepository $cacRepository,
-        LastHighRepository $lastHighRepository): Response
+        LastHighRepository $lastHighRepository,
+        UserRepository $userRepository): Response
     {
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
@@ -79,23 +83,24 @@ class HomeController extends AbstractController
         $lastDate = $cac[0]->getCreatedAt()->format("d/m/Y");
 
         // TODO : il faudra mettre tout cela dans un service
-        // TODO : il faut que le plus haut corresponde au User en session
-        // je récupère le dernier plus haut en session ou en BDD
+        // je récupère le dernier plus haut du User en session
         if (!$session->has("lastHigh")) {
-            $lastHigh = $lastHighRepository->findOneBy([], ["id" => "DESC"])->getHigher();
+
+            // s'il n'existe pas je le récupère en BDD à partir de l'id de l'utilisateur connecté
+            $userId = $this->getUser()->getId();
+            $lastHigh = $userRepository->find($userId)->getHigher()->getHigher();
+
             // si j'ai un résultat autre que null je le mets en session
             if (!is_null($lastHigh)) {
                 $session->set("lastHigh", $lastHigh);
             } else {
-                // sinon, par défaut, on assigne la dernière valeur disponible comme plus haut
+                // sinon, par défaut, on assigne la dernière valeur disponible comme nouveau plus haut
                 $entity = new LastHigh();
                 $higher = $cac[0]->getHigher();
                 $entity->setHigher($higher);
                 $entity->setBuyLimit($higher - ($higher * 0.1));    // buyLimit est 10% sous higher
                 $entity->setDailyCac($cac[0]);
-                if ($this->getUser()) {
-                    $this->__invoke($entity);
-                }
+                $entity->addUser($userRepository->find($userId));
 
                 $lastHighRepository->add($entity, true);
 
@@ -104,19 +109,8 @@ class HomeController extends AbstractController
         }
         // je récupère la valeur du plus haut
         $lastHigh = $session->get("lastHigh");
+        dump($lastHigh);
 
         return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));
-    }
-
-    /**
-     * J'utilise cette méthode pour passer une instance de UserInterface alors que doctrine attend un User::Entity
-     * @param $entity
-     * @return void
-     */
-    public function __invoke($entity) {
-        /** @var $user User */
-        $user = $this->getUser();
-
-        $entity->addUser($user);
     }
 }

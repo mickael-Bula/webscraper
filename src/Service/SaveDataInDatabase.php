@@ -68,7 +68,7 @@ class SaveDataInDatabase
         // je récupère le dernier plus haut de la table LastHigh
         $lastHighInDatabase = $this->lastHighRepository->findOneBy([], ["id" => "DESC"]);
 
-        // si le résultat est 'null', je dois créer une nouvelle entrée, sion j'actualise celle présente
+        // si le résultat est 'null', je dois créer une nouvelle entrée, sinon j'actualise celle présente
         if (is_null($lastHighInDatabase)) {
 
             // je crée une nouvelle instance de LastHigh et je l'hydrate
