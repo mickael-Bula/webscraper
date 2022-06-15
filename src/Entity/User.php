@@ -38,7 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LastHigh::class)
+     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="users")
      */
     private $higher;
 
