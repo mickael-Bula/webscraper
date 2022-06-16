@@ -4,19 +4,28 @@ namespace App\Service;
 
 use App\Entity\Cac;
 use App\Entity\LastHigh;
+use App\Entity\Position;
 use App\Repository\LastHighRepository;
+use App\Repository\PositionRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class SaveDataInDatabase
 {
     private $entityManager;
-    private $lastHighRepository;
+    private $userInterface;
+    private $userRepository;
 
     // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
-    public function __construct(EntityManagerInterface $entityManager, LastHighRepository $lastHighRepository)
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        UserInterface $userInterface,
+        UserRepository $userRepository)
     {
         $this->entityManager = $entityManager;
-        $this->lastHighRepository = $lastHighRepository;
+        $this->userInterface = $userInterface;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -66,7 +75,8 @@ class SaveDataInDatabase
         $newDataDailyCacHigher = array_filter($newData, fn(Cac $item) => $item->getHigher() === $newDataHigher)[0];
 
         // je récupère le dernier plus haut de la table LastHigh
-        $lastHighInDatabase = $this->lastHighRepository->findOneBy([], ["id" => "DESC"]);
+        $lastHighRepository = $this->entityManager->getRepository(LastHigh::class);
+        $lastHighInDatabase = $lastHighRepository->findOneBy([], ["id" => "DESC"]);
 
         // si le résultat est 'null', je dois créer une nouvelle entrée, sinon j'actualise celle présente
         if (is_null($lastHighInDatabase)) {
@@ -78,7 +88,7 @@ class SaveDataInDatabase
             $lastHighEntity->setDailyCac($newDataDailyCacHigher);
 
             // je persiste les données et je les insère en base
-            $this->lastHighRepository->add($lastHighEntity, true);
+            $lastHighRepository->add($lastHighEntity, true);
         } else {
             // si un nouveau plus haut a été réalisé, j'actualise la table LastHigh
             if ($newDataHigher > $lastHighInDatabase) {
@@ -88,8 +98,22 @@ class SaveDataInDatabase
                 $lastHighInDatabase->setBuyLimit($newDataHigher - ($newDataHigher * 0.1));
                 $lastHighInDatabase->setDailyCac($newDataDailyCacHigher);
 
-                $this->lastHighRepository->add($lastHighInDatabase, true);
+                $lastHighRepository->add($lastHighInDatabase, true);
             }
         }
+    }
+
+    public function updatePositions($buyLimit)
+    {
+        // je récupère l'id de l'utilisateur en session
+        $userId = $this->userInterface->getId();
+        $user = $this->userRepository->find($userId);   // TODO : p-ê pas nécessaire, de même que son repo ds constructor
+
+        // je récupère les positions en attente liées à l'utilisateur identifié
+        $positionRepository = $this->entityManager->getRepository(Position::class);
+        $positions = $positionRepository->findBy(["user_id" => $userId, "isWaiting" => true]);
+        dump($positions, $user); die();
+
+        // s'il n'y a pas de position, on les crée
     }
 }

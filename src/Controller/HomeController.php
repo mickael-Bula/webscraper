@@ -98,11 +98,15 @@ class HomeController extends AbstractController
                 $entity = new LastHigh();
                 $higher = $cac[0]->getHigher();
                 $entity->setHigher($higher);
-                $entity->setBuyLimit($higher - ($higher * 0.1));    // buyLimit est 10% sous higher
+                $buyLimit = $higher - ($higher * 0.1);  // buyLimit est 10% sous higher
+                $entity->setBuyLimit($buyLimit);
                 $entity->setDailyCac($cac[0]);
                 $entity->addUser($userRepository->find($userId));
 
                 $lastHighRepository->add($entity, true);
+
+                // j'appelle la méthode de SaveDataInDatabase qui met à jour les positions liées à une buyLimit
+                $saveDataInDatabase->updatePositions($buyLimit);
 
                 $session->set("lastHigh", $cac[0]->getHigher());
             }
@@ -110,6 +114,9 @@ class HomeController extends AbstractController
         // je récupère la valeur du plus haut
         $lastHigh = $session->get("lastHigh");
         dump($lastHigh);
+
+        // je teste la méthode updatePositions() avec lastHigh en param au lieu de buyLimit (à changer)
+        $saveDataInDatabase->updatePositions($lastHigh);
 
         return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));
     }
