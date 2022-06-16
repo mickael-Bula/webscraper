@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Entity\LastHigh;
+use App\Entity\{ User, Cac, LastHigh };
 use App\Repository\CacRepository;
 use App\Repository\LastHighRepository;
 use App\Repository\UserRepository;
 use App\Service\Utils;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,16 +39,19 @@ class HomeController extends AbstractController
      * @Route("/dashboard", name="app_dashboard")
      *
      * @param SaveDataInDatabase $saveDataInDatabase
-     * @param CacRepository $cacRepository
-     * @param LastHighRepository $lastHighRepository
+     * @param ManagerRegistry $doctrine
+     * @param UserRepository $userRepository
      * @return Response
      */
     public function dashboard(
         SaveDataInDatabase $saveDataInDatabase,
-        CacRepository $cacRepository,
-        LastHighRepository $lastHighRepository,
+        ManagerRegistry $doctrine,
         UserRepository $userRepository): Response
     {
+        // on passe par le ManagerRegistry() pour récupérer les repository du Cac et de LastHigh
+        $cacRepository = $doctrine->getRepository(Cac::class);
+        $lastHighRepository = $doctrine->getRepository(LastHigh::class);
+
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
         if (!$session->has("cac")) {
@@ -72,7 +75,7 @@ class HomeController extends AbstractController
             $newData = $saveDataInDatabase->appendData($data);
 
             // j'externalise également la vérification d'un nouveau plus haut et la modification en BDD qui en résulte
-            $saveDataInDatabase->checkNewHigher($lastHighRepository, $newData);
+            $saveDataInDatabase->checkNewHigher($newData);
 
             // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
@@ -113,7 +116,6 @@ class HomeController extends AbstractController
         }
         // je récupère la valeur du plus haut
         $lastHigh = $session->get("lastHigh");
-        dump($lastHigh);
 
         // je teste la méthode updatePositions() avec lastHigh en param au lieu de buyLimit (à changer)
         $saveDataInDatabase->updatePositions($lastHigh);

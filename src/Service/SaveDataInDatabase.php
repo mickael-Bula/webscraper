@@ -2,30 +2,27 @@
 
 namespace App\Service;
 
-use App\Entity\Cac;
-use App\Entity\LastHigh;
-use App\Entity\Position;
-use App\Repository\LastHighRepository;
-use App\Repository\PositionRepository;
+use App\Entity\{ Cac, LastHigh, Position };
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Security;
 
 class SaveDataInDatabase
 {
     private $entityManager;
-    private $userInterface;
     private $userRepository;
+    private $security;
 
     // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserInterface $userInterface,
-        UserRepository $userRepository)
+        UserRepository $userRepository,
+        Security $security
+    )
     {
         $this->entityManager = $entityManager;
-        $this->userInterface = $userInterface;
         $this->userRepository = $userRepository;
+        $this->security = $security;
     }
 
     /**
@@ -37,8 +34,7 @@ class SaveDataInDatabase
     public function appendData($data): ?array
     {
         // je précise le Repository que je veux utiliser à mon EntityManager
-        $em = $this->entityManager;
-        $cacRepository = $em->getRepository(Cac::class);
+        $cacRepository = $this->entityManager->getRepository(Cac::class);
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $cacRepository->findOneBy([], ["id" => "DESC"]);
@@ -106,14 +102,41 @@ class SaveDataInDatabase
     public function updatePositions($buyLimit)
     {
         // je récupère l'id de l'utilisateur en session
-        $userId = $this->userInterface->getId();
-        $user = $this->userRepository->find($userId);   // TODO : p-ê pas nécessaire, de même que son repo ds constructor
+        $userId = $this->security->getUser()->getId();
+        $user = $this->userRepository->find($userId);
 
         // je récupère les positions en attente liées à l'utilisateur identifié
         $positionRepository = $this->entityManager->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["user_id" => $userId, "isWaiting" => true]);
-        dump($positions, $user); die();
+        $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => false]);
 
-        // s'il n'y a pas de position, on les crée
+        // si le résultat est vide, on crée les trois positions liées à buyLimit
+        if (count($positions) === 0) {
+            $delta = [1, 2, 4];                                         // représente les % d'écart entre les lignes
+            for ($i=0; $i < 3 ;$i++) {
+                $position = new Position();
+                $position->setBuyLimit($buyLimit);
+                $positionDelta = $buyLimit - ($buyLimit * $delta[$i]);  // les positions sont prises à -1, -2 et -4 %
+                $position->setBuyTarget($positionDelta);
+                $position->setIsWaiting(true);
+                $position->setSellTarget($positionDelta * 1.1); // objectif fixé à +10 %
+                $position->setUser($user);
+                // TODO : mettre des prePersist ici pour les sellTarget toujours fixés à buyTarget +10 %
+                // TODO : vérifier la présence des valeurs par défaut (comme isRunning = false)
+            }
+        } else {
+            $i = 0;
+            foreach ($positions as $position) {
+                $delta = [1, 2, 4];
+                // TODO : faire un update des positions en ajustant les buyLimit et buyTarget
+                // TODO : essayer de factoriser cette partie de code en partie redondante
+                $position->setBuyLimit($buyLimit);
+                $positionDelta = $buyLimit - ($buyLimit * $delta[$i]);  // les positions sont prises à -1, -2 et -4 %
+                $position->setBuyTarget($positionDelta);
+                $position->setIsWaiting(true);
+                $position->setSellTarget($positionDelta * 1.1); // objectif fixé à +10 %
+                $position->setUser($user);
+                $i++;
+            }
+        }
     }
 }
