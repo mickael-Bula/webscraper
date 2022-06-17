@@ -40,8 +40,16 @@ class CacRepository extends ServiceEntityRepository
         }
     }
 
-    public function saveData($data): void
+    /**
+     * méthode qui enregistre en BDD des objets Cac hydratés avec les données issues du 'scraping'
+     * un tableau des objets insérés est retourné
+     *
+     * @param $data
+     * @return array
+     */
+    public function saveData($data): array
     {
+        $cacEntities = [];
         foreach ($data as $item) {
             $entity = new Cac();
             // reformat date (d/m/Y) to conform with expected DataTime format (d-m-Y)
@@ -55,8 +63,11 @@ class CacRepository extends ServiceEntityRepository
             // ### excerpt from Doctrine documentation : https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/
             // "You can consider all values on Objects inserted and updated through Doctrine\ORM\EntityManager#persist() to be safe from SQL injection"
             $this->getEntityManager()->persist($entity);
+            $cacEntities[] = $entity;
         }
         $this->getEntityManager()->flush();
+
+        return $cacEntities;
     }
 
     //    /**

@@ -34,7 +34,7 @@ class SaveDataInDatabase
      * @param array
      * @return array|null
      */
-    public function appendData($data): ?array
+    public function appendData(array $data): ?array
     {
         // je précise le Repository que je veux utiliser à mon EntityManager
         $cacRepository = $this->entityManager->getRepository(Cac::class);
@@ -42,6 +42,7 @@ class SaveDataInDatabase
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $cacRepository->findOneBy([], ["id" => "DESC"]);
         $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
+
         // tri des entrées postérieures à lastDate
         $newData = [];
         foreach ($data as $row) {
@@ -53,10 +54,10 @@ class SaveDataInDatabase
         }
 
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
-        $cacRepository->saveData(array_reverse($newData));
+        return $cacRepository->saveData(array_reverse($newData));
 
         // on retourne les données insérées en base pour la mise à jour de lastHigh
-        return $newData;
+        // return $newData;
     }
 
     /**
@@ -88,13 +89,18 @@ class SaveDataInDatabase
 
             // je persiste les données et je les insère en base
             $lastHighRepository->add($lastHighEntity, true);
+
+            // je mets également à jour les positions en rapport avec la nouvelle buyLimit
+            // TODO : il faudrait automatiser cette mise à jour dès que buyLimit est modifié
         } else {
             // si un nouveau plus haut a été réalisé, j'actualise la table LastHigh
-            if ($newDataHigher > $lastHighInDatabase) {
-
+            $lastHigherInDB = $lastHighInDatabase->getDailyCac()->getHigher();
+            if ($newDataDailyCacHigher->getHigher() > $lastHigherInDB) {
+                dump($newDataDailyCacHigher->getHigher, $lastHigherInDB);
                 // j'hydrate le dernier plus haut de la table LastHigh avec les données mises à jour
-                $lastHighInDatabase->setHigher($newDataHigher);
-                $lastHighInDatabase->setBuyLimit($newDataHigher - ($newDataHigher * 0.1));
+                $newHigher = $newDataDailyCacHigher->getHigher();
+                $lastHighInDatabase->setHigher($newHigher);
+                $lastHighInDatabase->setBuyLimit($newHigher - ($newHigher * 0.1));
                 $lastHighInDatabase->setDailyCac($newDataDailyCacHigher);
 
                 $lastHighRepository->add($lastHighInDatabase, true);

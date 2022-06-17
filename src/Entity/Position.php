@@ -59,7 +59,7 @@ class Position
     private $isRunning = false;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LastHigh::class, cascade={"persist"}, inversedBy="positions")
+     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="positions")
      */
     private $buyLimit;
 
