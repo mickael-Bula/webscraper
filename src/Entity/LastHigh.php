@@ -40,7 +40,7 @@ class LastHigh
     private $buyLimit;
 
     /**
-     * @ORM\OneToMany(targetEntity=Position::class, mappedBy="buyLimit",  cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=Position::class, mappedBy="buyLimit",  cascade={"persist", "remove"})
      */
     private $positions;
 

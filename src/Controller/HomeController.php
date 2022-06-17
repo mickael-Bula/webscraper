@@ -2,9 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\{ User, Cac, LastHigh };
-use App\Repository\CacRepository;
-use App\Repository\LastHighRepository;
+use App\Entity\Cac;
 use App\Repository\UserRepository;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
@@ -40,17 +38,14 @@ class HomeController extends AbstractController
      *
      * @param SaveDataInDatabase $saveDataInDatabase
      * @param ManagerRegistry $doctrine
-     * @param UserRepository $userRepository
      * @return Response
      */
     public function dashboard(
         SaveDataInDatabase $saveDataInDatabase,
-        ManagerRegistry $doctrine,
-        UserRepository $userRepository): Response
+        ManagerRegistry $doctrine): Response
     {
-        // on passe par le ManagerRegistry() pour récupérer les repository du Cac et de LastHigh
+        // on passe par le ManagerRegistry() pour récupérer les repository du Cac
         $cacRepository = $doctrine->getRepository(Cac::class);
-        $lastHighRepository = $doctrine->getRepository(LastHigh::class);
 
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
         $session = $this->requestStack->getSession();
@@ -87,14 +82,9 @@ class HomeController extends AbstractController
 
         // si lastHigh n'existe pas en session, je l'y ajoute en passant par un Service dédié
         if (!$session->has("lastHigh")) {
-            // j'externalise dans un Service la présence du dernier plus haut du User en session
+            // j'externalise dans un Service la vérification du dernier plus haut du User en session
             $saveDataInDatabase->setHigher();
         }
-        $lastHigh = $session->get("lastHigh");
-
-        // TODO : il faudrait vérifier s'il est nécessaire de faire un update des positions plutôt que systématiquement
-        // je mets à jour les positions relativement à lastHigh
-        $saveDataInDatabase->updatePositions($lastHigh);
 
         return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));
     }

@@ -61,7 +61,7 @@ class SaveDataInDatabase
     }
 
     /**
-     * J'actualise la table LastHigh si un nouveau plus haut a été réalisé
+     * J'actualise la table LastHigh du User connecté si un nouveau plus haut a été réalisé
      *
      * @param $newData
      * @return void
@@ -91,12 +91,13 @@ class SaveDataInDatabase
             $lastHighRepository->add($lastHighEntity, true);
 
             // je mets également à jour les positions en rapport avec la nouvelle buyLimit
-            // TODO : il faudrait automatiser cette mise à jour dès que buyLimit est modifié
+            $this->updatePositions($lastHighEntity);
         } else {
-            // si un nouveau plus haut a été réalisé, j'actualise la table LastHigh
+
+            // si higher existe en BDD et qu'un nouveau plus haut a été réalisé, j'actualise la table LastHigh
             $lastHigherInDB = $lastHighInDatabase->getDailyCac()->getHigher();
             if ($newDataDailyCacHigher->getHigher() > $lastHigherInDB) {
-                dump($newDataDailyCacHigher->getHigher, $lastHigherInDB);
+
                 // j'hydrate le dernier plus haut de la table LastHigh avec les données mises à jour
                 $newHigher = $newDataDailyCacHigher->getHigher();
                 $lastHighInDatabase->setHigher($newHigher);
@@ -104,6 +105,9 @@ class SaveDataInDatabase
                 $lastHighInDatabase->setDailyCac($newDataDailyCacHigher);
 
                 $lastHighRepository->add($lastHighInDatabase, true);
+
+                // je mets également à jour les positions en rapport avec la nouvelle buyLimit
+                $this->updatePositions($lastHighInDatabase);
             }
         }
     }
