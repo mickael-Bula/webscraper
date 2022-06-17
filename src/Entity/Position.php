@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=PositionRepository::class)
+ * @ORM\HasLifecycleCallbacks
  */
 class Position
 {
@@ -28,9 +29,14 @@ class Position
     private $sellTarget;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="date", nullable=true)
      */
     private $buyDate;
+
+    /**
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $sellDate;
 
     /**
      * @ORM\Column(type="boolean", options={"default" : "0"})
@@ -53,7 +59,7 @@ class Position
     private $isRunning = false;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="positions")
+     * @ORM\ManyToOne(targetEntity=LastHigh::class, cascade={"persist"}, inversedBy="positions")
      */
     private $buyLimit;
 
@@ -171,6 +177,33 @@ class Position
     public function setUser(?User $User): self
     {
         $this->User = $User;
+
+        return $this;
+    }
+
+    /**
+     * méthode appelée avant chaque Event persist et update de l'entité Position pour fixer la cible de revente à +10%
+     *
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     *
+     * @return void
+     */
+    public function SellTargetEvent()
+    {
+        if ($this->buyTarget) {
+            $this->setSellTarget($this->buyTarget * 1.1);
+        }
+    }
+
+    public function getSellDate(): ?\DateTimeInterface
+    {
+        return $this->sellDate;
+    }
+
+    public function setSellDate(?\DateTimeInterface $sellDate): self
+    {
+        $this->sellDate = $sellDate;
 
         return $this;
     }

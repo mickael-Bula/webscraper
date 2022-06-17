@@ -66,6 +66,7 @@ class HomeController extends AbstractController
 
         // je compare $lastDate avec la date la plus récente en session (et donc en BDD)
         $lastDateInSession = $cac[0]->getCreatedAt()->format("d/m/Y");
+        // dump($lastDate, $lastDateInSession);die();
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
@@ -85,39 +86,15 @@ class HomeController extends AbstractController
         // j'actualise $lastDate pour affichage
         $lastDate = $cac[0]->getCreatedAt()->format("d/m/Y");
 
-        // TODO : il faudra mettre tout cela dans un service
-        // je récupère le dernier plus haut du User en session
+        // si lastHigh n'existe pas en session, je l'y ajoute en passant par un Service dédié
         if (!$session->has("lastHigh")) {
-
-            // s'il n'existe pas je le récupère en BDD à partir de l'id de l'utilisateur connecté
-            $userId = $this->getUser()->getId();
-            $lastHigh = $userRepository->find($userId)->getHigher()->getHigher();
-
-            // si j'ai un résultat autre que null je le mets en session
-            if (!is_null($lastHigh)) {
-                $session->set("lastHigh", $lastHigh);
-            } else {
-                // sinon, par défaut, on assigne la dernière valeur disponible comme nouveau plus haut
-                $entity = new LastHigh();
-                $higher = $cac[0]->getHigher();
-                $entity->setHigher($higher);
-                $buyLimit = $higher - ($higher * 0.1);  // buyLimit est 10% sous higher
-                $entity->setBuyLimit($buyLimit);
-                $entity->setDailyCac($cac[0]);
-                $entity->addUser($userRepository->find($userId));
-
-                $lastHighRepository->add($entity, true);
-
-                // j'appelle la méthode de SaveDataInDatabase qui met à jour les positions liées à une buyLimit
-                $saveDataInDatabase->updatePositions($buyLimit);
-
-                $session->set("lastHigh", $cac[0]->getHigher());
-            }
+            // j'externalise dans un Service la présence du dernier plus haut du User en session
+            $saveDataInDatabase->setHigher();
         }
-        // je récupère la valeur du plus haut
         $lastHigh = $session->get("lastHigh");
 
-        // je teste la méthode updatePositions() avec lastHigh en param au lieu de buyLimit (à changer)
+        // TODO : il faudrait vérifier s'il est nécessaire de faire un update des positions plutôt que systématiquement
+        // je mets à jour les positions relativement à lastHigh
         $saveDataInDatabase->updatePositions($lastHigh);
 
         return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));

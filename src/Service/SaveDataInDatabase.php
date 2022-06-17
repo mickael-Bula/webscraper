@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\{ Cac, LastHigh, Position };
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 class SaveDataInDatabase
@@ -12,17 +13,19 @@ class SaveDataInDatabase
     private $entityManager;
     private $userRepository;
     private $security;
+    private $requestStack;
 
     // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
     public function __construct(
         EntityManagerInterface $entityManager,
         UserRepository $userRepository,
-        Security $security
-    )
+        Security $security,
+        RequestStack $requestStack)
     {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->security = $security;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -62,7 +65,7 @@ class SaveDataInDatabase
      * @param $newData
      * @return void
      */
-    public function checkNewHigher($newData)
+    public function checkNewHigher($newData): void
     {
         // je récupère le plus haut des dernières données ajoutées en BDD
         $newDataHigher = max(array_map(fn($item) => $item->getHigher(), $newData));
@@ -99,7 +102,46 @@ class SaveDataInDatabase
         }
     }
 
-    public function updatePositions($buyLimit)
+    /**
+     * méthode qui enregistre en session le plus haut de l'utilisateur connecté
+     *
+     * @return void
+     */
+    public function setHigher(): void
+    {
+        // je récupère la session après injection du service RequestStack dans le constructeur
+        $session = $this->requestStack->getSession();
+
+        // je récupère le User en session ou en BDD à partir de son id
+        $userId = $this->security->getUser()->getId();
+        $user = $this->userRepository->find($userId);
+        $lastHigh = $user->getHigher();  // je récupère une instance de LastHigh
+
+        // si $lastHigh->getHigher() est 'null', j'assigne comme nouveau plus haut le dernier cac.higher
+        if (is_null($lastHigh->getHigher())) {
+            $entity = new LastHigh();
+            $cac = $session->get("cac");
+            $higher = $cac[0]->getHigher();
+            $entity->setHigher($higher);
+            $buyLimit = $higher - ($higher * 0.1);  // buyLimit est 10% sous higher
+            $entity->setBuyLimit($buyLimit);
+            $entity->setDailyCac($cac[0]);
+            $entity->addUser($user);
+
+            $this->entityManager->getRepository(LastHigh::class)->add($entity, true);
+
+            // j'appelle la méthode de SaveDataInDatabase qui met à jour les positions liées à une buyLimit
+            $this->updatePositions($entity);
+
+            // j'enregistre en session et je quitte
+            $session->set("lastHigh", $cac[0]->getHigher());
+            return;
+        }
+        // sinon, si $lastHigh->getHigher() n'est pas 'null', je l'enregistre en session
+        $session->set("lastHigh", $lastHigh);
+    }
+
+    public function updatePositions(LastHigh $entity)
     {
         // je récupère l'id de l'utilisateur en session
         $userId = $this->security->getUser()->getId();
@@ -107,36 +149,23 @@ class SaveDataInDatabase
 
         // je récupère les positions en attente liées à l'utilisateur identifié
         $positionRepository = $this->entityManager->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => false]);
+        $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => true]);
 
-        // si le résultat est vide, on crée les trois positions liées à buyLimit
-        if (count($positions) === 0) {
-            $delta = [1, 2, 4];                                         // représente les % d'écart entre les lignes
-            for ($i=0; $i < 3 ;$i++) {
-                $position = new Position();
-                $position->setBuyLimit($buyLimit);
-                $positionDelta = $buyLimit - ($buyLimit * $delta[$i]);  // les positions sont prises à -1, -2 et -4 %
-                $position->setBuyTarget($positionDelta);
-                $position->setIsWaiting(true);
-                $position->setSellTarget($positionDelta * 1.1); // objectif fixé à +10 %
-                $position->setUser($user);
-                // TODO : mettre des prePersist ici pour les sellTarget toujours fixés à buyTarget +10 %
-                // TODO : vérifier la présence des valeurs par défaut (comme isRunning = false)
-            }
-        } else {
-            $i = 0;
-            foreach ($positions as $position) {
-                $delta = [1, 2, 4];
-                // TODO : faire un update des positions en ajustant les buyLimit et buyTarget
-                // TODO : essayer de factoriser cette partie de code en partie redondante
-                $position->setBuyLimit($buyLimit);
-                $positionDelta = $buyLimit - ($buyLimit * $delta[$i]);  // les positions sont prises à -1, -2 et -4 %
-                $position->setBuyTarget($positionDelta);
-                $position->setIsWaiting(true);
-                $position->setSellTarget($positionDelta * 1.1); // objectif fixé à +10 %
-                $position->setUser($user);
-                $i++;
-            }
+        // je fixe les % d'écart entre les lignes
+        $delta = [0, 2, 4];
+
+        // je boucle sur le tableau des positions s'il n'est pas vide, sinon j'en crée de nouvelles
+        for ($i=0; $i < 3; $i++) {
+            $position = (count($positions) === 3) ? $positions[$i] : new Position();
+            $position->setBuyLimit($entity);
+            $buyLimit = $entity->getBuyLimit();
+            $positionDelta = $buyLimit - ($buyLimit * $delta[$i] /100);  // les positions sont prises à 0, -2 et -4 %
+            $position->setBuyTarget($positionDelta);
+            $position->setIsWaiting(true);
+            $position->setUser($user);
+
+            $this->entityManager->persist($position);
         }
+        $this->entityManager->flush();
     }
 }
