@@ -67,6 +67,7 @@ class CacRepository extends ServiceEntityRepository
         }
         $this->getEntityManager()->flush();
 
+        // on retourne un tableau des objets insérés
         return $cacEntities;
     }
 

@@ -59,8 +59,8 @@ class HomeController extends AbstractController
         $recentDate = new Utils();
         $lastDate = $recentDate->getMostRecentDate();
 
-        // je compare $lastDate avec la date la plus récente en session (et donc en BDD)
-        $lastDateInSession = $cac[0]->getCreatedAt()->format("d/m/Y");
+        // je compare $lastDate avec la date la plus récente en session (et donc en BDD : si la base est vide j'affecte 'null')
+        $lastDateInSession = (!empty($cac)) ? $cac[0]->getCreatedAt()->format("d/m/Y") : null;
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {

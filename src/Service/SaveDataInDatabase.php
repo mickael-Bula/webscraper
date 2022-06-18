@@ -44,20 +44,19 @@ class SaveDataInDatabase
         $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
 
         // tri des entrées postérieures à lastDate
-        $newData = [];
-        foreach ($data as $row) {
-            if ($lastDate !== $row[0]) {
-                $newData[] = $row;
-            } else {
-                break;
-            }
-        }
+        $newData = array_filter($data, fn($row) => $row->getCreatedAt() > $lastDate);
+        // TODO : vérifier la validité du code de substitution précédent avant de supprimer ce qui est commenté
+        // $newData = [];
+        // foreach ($data as $row) {
+        //     if ($lastDate !== $row[0]) {
+        //         $newData[] = $row;
+        //     } else {
+        //         break;
+        //     }
+        // }
 
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
         return $cacRepository->saveData(array_reverse($newData));
-
-        // on retourne les données insérées en base pour la mise à jour de lastHigh
-        // return $newData;
     }
 
     /**
@@ -71,7 +70,7 @@ class SaveDataInDatabase
         // je récupère le plus haut des dernières données ajoutées en BDD
         $newDataHigher = max(array_map(fn($item) => $item->getHigher(), $newData));
 
-        // je récupère l'objet Cac qui a fait le nouveau plus haut
+        // je récupère l'objet Cac qui a fait le nouveau plus haut (si la base n'a pas encore de données je retourne 'null')
         $newDataDailyCacHigher = array_filter($newData, fn(Cac $item) => $item->getHigher() === $newDataHigher)[0];
 
         // je récupère le dernier plus haut de la table LastHigh
@@ -122,13 +121,14 @@ class SaveDataInDatabase
         // je récupère la session après injection du service RequestStack dans le constructeur
         $session = $this->requestStack->getSession();
 
-        // je récupère le User en session ou en BDD à partir de son id
-        $userId = $this->security->getUser()->getId();
-        $user = $this->userRepository->find($userId);
+        // je récupère le User en session ou en BDD à partir de son id (je précise à l'IDE que getId() se trouve dans l'Entity User)
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $user = $this->userRepository->find( $user->getId());
         $lastHigh = $user->getHigher();  // je récupère une instance de LastHigh
 
         // si $lastHigh->getHigher() est 'null', j'assigne comme nouveau plus haut le dernier cac.higher
-        if (is_null($lastHigh->getHigher())) {
+        if (is_null($lastHigh)) {
             $entity = new LastHigh();
             $cac = $session->get("cac");
             $higher = $cac[0]->getHigher();
@@ -153,8 +153,10 @@ class SaveDataInDatabase
 
     public function updatePositions(LastHigh $entity)
     {
-        // je récupère l'id de l'utilisateur en session
-        $userId = $this->security->getUser()->getId();
+        // je récupère l'utilisateur en session ainsi que son id
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $userId = $user->getId();
         $user = $this->userRepository->find($userId);
 
         // je récupère les positions en attente liées à l'utilisateur identifié
