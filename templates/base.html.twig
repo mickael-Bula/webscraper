@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-100">
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,13 +8,11 @@
         <meta name="author" content="Mickaël BULA">
         <meta name="keyword" content="trading, bourse, investissement, retracement">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        {# ajout des favicon #}
+        {# ajout des 'favicon' créés sur le site favicon.io #}
         <link rel="apple-touch-icon" sizes="180x180" href={{ asset("assets/images/favicon/apple-touch-icon.png") }}>
         <link rel="icon" type="image/png" sizes="32x32" href={{ asset("assets/images/favicon/favicon-32x32.png") }}>
         <link rel="icon" type="image/png" sizes="16x16" href={{ asset("assets/images/favicon/favicon-16x16.png") }}>
         <link rel="manifest" href={{ asset("assets/images/favicon/site.webmanifest") }}>
-        {# la ligne suivante est le favicon par défaut de Symfony #}
-        {# <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>"> #}
         {# ajout des favicon #}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +27,7 @@
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
-    <body>
+    <body class="d-flex flex-column h-100">
         {% include 'header.html.twig' %}
 
         {% block body %}{% endblock %}
