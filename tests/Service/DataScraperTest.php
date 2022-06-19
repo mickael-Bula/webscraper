@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Tests\Service;
+namespace App\Tests\Service;
 
 use PHPUnit\Framework\TestCase;
 use App\Service\DataScraper;

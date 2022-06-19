@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Cac;
-use App\Repository\UserRepository;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -56,8 +55,7 @@ class HomeController extends AbstractController
         $cac = $session->get("cac");
 
         // je demande à un Service de calculer la date la plus récente attendue et conservée en base de données
-        $recentDate = new Utils();
-        $lastDate = $recentDate->getMostRecentDate();
+        $lastDate = (new Utils())->getMostRecentDate();
 
         // je compare $lastDate avec la date la plus récente en session (et donc en BDD : si la base est vide j'affecte 'null')
         $lastDateInSession = (!empty($cac)) ? $cac[0]->getCreatedAt()->format("d/m/Y") : null;

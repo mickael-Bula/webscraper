@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\{ Cac, LastHigh, Position };
+use App\Entity\{ Cac, LastHigh, Position, User };
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -22,10 +22,10 @@ class SaveDataInDatabase
         Security $security,
         RequestStack $requestStack)
     {
-        $this->entityManager = $entityManager;
-        $this->userRepository = $userRepository;
-        $this->security = $security;
-        $this->requestStack = $requestStack;
+        $this->entityManager    = $entityManager;
+        $this->userRepository   = $userRepository;
+        $this->security         = $security;
+        $this->requestStack     = $requestStack;
     }
 
     /**

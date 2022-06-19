@@ -4,7 +4,6 @@ namespace App\Tests\Service;
 
 use PHPUnit\Framework\TestCase;
 use App\Service\Utils;
-use DateTime;
 
 class UtilsTest extends TestCase
 {
@@ -66,7 +65,7 @@ class UtilsTest extends TestCase
         // je convertis le timestamp en chaîne
         $eve = date("d/m/Y", $eve);
         
-        // je teste enfin par comparaison cette chaîne avec celle recupérée du Service
+        // je teste enfin par comparaison cette chaîne avec celle récupérée du Service
         $this->assertEquals($eve, $date);
     }
 }
