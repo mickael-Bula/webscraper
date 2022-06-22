@@ -31,16 +31,17 @@ class SaveDataInDatabase
     /**
      * Cette méthode insère dans la base les données postérieures à la dernière entrée disponible
      *
-     * @param array
+     * @param array $data
+     * @param $entity
      * @return array|null
      */
-    public function appendData(array $data): ?array
+    public function appendData(array $data, $entity): ?array
     {
         // je précise le Repository que je veux utiliser à mon EntityManager
-        $cacRepository = $this->entityManager->getRepository(Cac::class);
+        $entityRepository = $this->entityManager->getRepository($entity);
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
-        $lastDate = $cacRepository->findOneBy([], ["id" => "DESC"]);
+        $lastDate = $entityRepository->findOneBy([], ["id" => "DESC"]);
         $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
 
         // tri des entrées postérieures à lastDate
@@ -54,7 +55,7 @@ class SaveDataInDatabase
         }
 
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
-        return $cacRepository->saveData(array_reverse($newData));
+        return $entityRepository->saveData(array_reverse($newData));
     }
 
     /**

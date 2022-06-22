@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Cac;
+use App\Entity\Lvc;
 use App\Entity\Position;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
@@ -63,10 +64,11 @@ class HomeController extends AbstractController
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
-            $data = DataScraper::getData();
+            // je lance la récupération des données du cac
+            $data = DataScraper::getData('https://fr.investing.com/indices/france-40-historical-data');
 
-            // j'externalise l'insertion en BDD dans un service dédié
-            $newData = $saveDataInDatabase->appendData($data);
+            // j'externalise l'insertion des données du Cac en BDD dans un service dédié
+            $newData = $saveDataInDatabase->appendData($data, Cac::class);
 
             // j'externalise également la vérification d'un nouveau plus haut et la modification en BDD qui en résulte
             $saveDataInDatabase->checkNewHigher($newData);
@@ -74,6 +76,12 @@ class HomeController extends AbstractController
             // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
+
+            // je récupère ensuite les données du LVC
+            $lvcData = DataScraper::getData('https://www.investing.com/etfs/lyxor-leverage-cac-40-historical-data');
+
+            // puis je sauvegarde en BDD
+            $saveDataInDatabase->appendData($lvcData, Lvc::class);
         }
 
         // si lastHigh n'existe pas en session, je l'y ajoute en passant par un Service dédié

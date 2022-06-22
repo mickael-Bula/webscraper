@@ -52,7 +52,7 @@ class CacRepository extends ServiceEntityRepository
         $cacEntities = [];
         foreach ($data as $item) {
             $entity = new Cac();
-            // reformat date (d/m/Y) to conform with expected DataTime format (d-m-Y)
+            // reformat date () to conform with expected DataTime format (d-m-Y)
             $date = str_replace('/', '-', $item[0]);
             $entity->setCreatedAt(\DateTime::createFromFormat('d-m-Y', $date));
             $entity->setClosing(Utils::fromString($item[1]));

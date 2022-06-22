@@ -4,12 +4,10 @@
 
 {% block body %}
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
-    <div class="container-fluid">
+    <div class="container-fluid container-md">
 
         <h1 class="row h3 mx-sm-1 ms-lg-4 custom-min-width">récupération des données End Of Day</h1>
-
-        </article>
-        <div class="row mx-sm-1 ms-lg-4">
+        <div class="mx-sm-1 ms-lg-4">
             <div class="col-md-6 col-lg-5 col-xl-4 col-xxl-3 p-2 custom-table d-none d-sm-flex">
                 {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
                 <table class="table table-sm table-hover d-none d-sm-table">
@@ -33,6 +31,16 @@
                     {% endfor %}
                 </table>
             </div>
+        </div>
+        <div class="row">
+            {% for position in positions %}
+            <p>
+                date : {{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }},
+                nombre : INCONNU
+                véhicule : PAS PRECISE,
+                buyTarget : {{ position.buyTarget|format_number({fraction_digit: 2}) }}
+            </p>
+            {% endfor %}
         </div>
 
     </div>

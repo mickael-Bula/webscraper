@@ -6,10 +6,10 @@ use Symfony\Component\BrowserKit\HttpBrowser;
 
 class DataScraper
 {
-    public static function getData(): array
+    public static function getData($stock): array
     {
         $client = new HttpBrowser();    
-        $crawler = $client->request('GET', 'https://fr.investing.com/indices/france-40-historical-data');
+        $crawler = $client->request('GET', $stock);
 
         // on vérifie si le marché est fermé pour s'assurer de la pertinence de données à enregistrer
         $greenClockIcon = $crawler
