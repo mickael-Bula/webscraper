@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Cac;
+use App\Entity\Position;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -75,15 +76,19 @@ class HomeController extends AbstractController
             $session->set("cac", $cac);
         }
 
-        // j'actualise $lastDate pour affichage
-        $lastDate = $cac[0]->getCreatedAt()->format("d/m/Y");
-
         // si lastHigh n'existe pas en session, je l'y ajoute en passant par un Service dédié
         if (!$session->has("lastHigh")) {
             // j'externalise dans un Service la vérification du dernier plus haut du User en session
             $saveDataInDatabase->setHigher();
         }
 
-        return $this->render('home/dashboard.html.twig', compact('cac', 'lastDate'));
+        // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'ai besoin de son id)
+        $user = $saveDataInDatabase->getCurrentUser();
+
+        // je récupère toutes les positions en attente pour affichage
+        $positionRepository = $doctrine->getRepository(Position::class);
+        $positions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
+
+        return $this->render('home/dashboard.html.twig', compact('cac', 'positions'));
     }
 }

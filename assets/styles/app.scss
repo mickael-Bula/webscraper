@@ -1,7 +1,9 @@
 // Override Bootstrap variables
 $enable-negative-margins: true;
+$enable-responsive-font-sizes: true;
 
 @import '~bootstrap/scss/bootstrap';
+@import 'table.scss';
 
 body {
     margin: 0;
@@ -65,11 +67,6 @@ body {
     background-color: #D1ECFA;
 }
 
-.custom-table {
-    /* Created with https://www.css-gradient.com */
-    background: rgba(223, 239, 241, 1.0);
-    background: -webkit-linear-gradient(top left, rgba(223, 239, 241, 1.0), rgba(135, 230, 239, 1.0));
-    background: -moz-linear-gradient(top left, rgba(223, 239, 241, 1.0), rgba(135, 230, 239, 1.0));
-    background: linear-gradient(to bottom right, rgba(223, 239, 241, 1.0), rgba(135, 230, 239, 1.0));
-    border-radius: 10px;
+.custom-min-width {
+    min-width: 380px;
 }

@@ -4,43 +4,34 @@
 
 {% block body %}
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
-    <div class="container ">
+    <div class="container-fluid">
 
-        <h1 class="row justify-content-center">récupération des données End Of Day</h1>
+        <h1 class="row h3 mx-sm-1 ms-lg-4 custom-min-width">récupération des données End Of Day</h1>
 
-        <h3 class="row justify-content-center mb-4">
-            {% if lastDate is not null %}
-                La dernière date est le
-                {{ lastDate }}
-            {% else %}
-                Il n'y a pas encore d'historique.
-            {% endif %}
-        </h3>
-        <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="col-12 col-lg-6 p-3 custom-table">
-                    {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
-                    <table class="table table-hover d-none d-sm-table">
-                        <thead>
+        </article>
+        <div class="row mx-sm-1 ms-lg-4">
+            <div class="col-md-6 col-lg-5 col-xl-4 col-xxl-3 p-2 custom-table d-none d-sm-flex">
+                {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
+                <table class="table table-sm table-hover d-none d-sm-table">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="text-center">Date</th>
+                        <th scope="col" class="text-center">clôture</th>
+                        <th scope="col" class="text-center">ouverture</th>
+                        <th scope="col" class="text-center">plus haut</th>
+                        <th scope="col" class="text-center">plus bas</th>
+                    </tr>
+                    </thead>
+                    {% for row in cac %}
                         <tr>
-                            <th scope="col" class="text-center">Date</th>
-                            <th scope="col" class="text-center">clôture</th>
-                            <th scope="col" class="text-center">ouverture</th>
-                            <th scope="col" class="text-center">plus haut</th>
-                            <th scope="col" class="text-center">plus bas</th>
+                            <td class="text-center">{{ row.createdAt|date("d/m/y") }}</td>
+                            <td class="text-center">{{ row.closing }}</td>
+                            <td class="text-center">{{ row.opening }}</td>
+                            <td class="text-center">{{ row.higher }}</td>
+                            <td class="text-center">{{ row.lower }}</td>
                         </tr>
-                        </thead>
-                        {% for row in cac %}
-                            <tr>
-                                <td class="text-center">{{ row.createdAt|date("d/m/Y") }}</td>
-                                <td class="text-center">{{ row.closing }}</td>
-                                <td class="text-center">{{ row.opening }}</td>
-                                <td class="text-center">{{ row.higher }}</td>
-                                <td class="text-center">{{ row.lower }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+                    {% endfor %}
+                </table>
             </div>
         </div>
 

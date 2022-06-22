@@ -115,19 +115,30 @@ class SaveDataInDatabase
     }
 
     /**
+     * Je récupère le User en session ou en BDD à partir de son id
+     * (je précise à l'IDE que getId() se réfère à l'Entity User)
+     *
+     * @return User
+     */
+    public function getCurrentUser(): User
+    {
+        /** @var User $user */
+        $user = $this->security->getUser();
+        return $this->userRepository->find( $user->getId());
+    }
+
+    /**
      * méthode qui enregistre en session le plus haut de l'utilisateur connecté
      *
      * @return void
      */
     public function setHigher(): void
     {
-        // je récupère la session après injection du service RequestStack dans le constructeur
+        // je récupère l'accès à la session qui a été injectée dans le constructeur
         $session = $this->requestStack->getSession();
 
-        // je récupère le User en session ou en BDD à partir de son id (je précise à l'IDE que getId() se trouve dans l'Entity User)
-        /** @var User $user */
-        $user = $this->security->getUser();
-        $user = $this->userRepository->find( $user->getId());
+        // je récupère le User en session
+        $user = $this->getCurrentUser();
         $lastHigh = $user->getHigher();  // je récupère une instance de LastHigh
 
         // si $lastHigh->getHigher() est 'null', j'assigne comme nouveau plus haut le dernier cac.higher
@@ -156,9 +167,8 @@ class SaveDataInDatabase
 
     public function updatePositions(LastHigh $entity)
     {
-        // je récupère l'utilisateur en session ainsi que son id
-        /** @var User $user */
-        $user = $this->security->getUser();
+        // je récupère l'utilisateur en session
+        $user = $this->getCurrentUser();
         $userId = $user->getId();
         $user = $this->userRepository->find($userId);
 
@@ -171,6 +181,10 @@ class SaveDataInDatabase
 
         // je boucle sur le tableau des positions s'il n'est pas vide, sinon j'en crée de nouvelles
         for ($i=0; $i < 3; $i++) {
+            /*
+            à chaque tour de boucle je vérifie le tableau positions :
+            s'il n'est pas vide je récupère l'indice courant $i, sinon je crée une nouvelle position
+            */
             $position = (count($positions) === 3) ? $positions[$i] : new Position();
             $position->setBuyLimit($entity);
             $buyLimit = $entity->getBuyLimit();
