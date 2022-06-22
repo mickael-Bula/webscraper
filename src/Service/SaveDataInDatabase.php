@@ -44,16 +44,14 @@ class SaveDataInDatabase
         $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
 
         // tri des entrées postérieures à lastDate
-        $newData = array_filter($data, fn($row) => $row->getCreatedAt() > $lastDate);
-        // TODO : vérifier la validité du code de substitution précédent avant de supprimer ce qui est commenté
-        // $newData = [];
-        // foreach ($data as $row) {
-        //     if ($lastDate !== $row[0]) {
-        //         $newData[] = $row;
-        //     } else {
-        //         break;
-        //     }
-        // }
+         $newData = [];
+         foreach ($data as $row) {
+             if ($lastDate !== $row[0]) {
+                 $newData[] = $row;
+             } else {
+                 break;
+             }
+        }
 
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
         return $cacRepository->saveData(array_reverse($newData));
@@ -70,8 +68,13 @@ class SaveDataInDatabase
         // je récupère le plus haut des dernières données ajoutées en BDD
         $newDataHigher = max(array_map(fn($item) => $item->getHigher(), $newData));
 
-        // je récupère l'objet Cac qui a fait le nouveau plus haut (si la base n'a pas encore de données je retourne 'null')
-        $newDataDailyCacHigher = array_filter($newData, fn(Cac $item) => $item->getHigher() === $newDataHigher)[0];
+        // Je récupère l'objet Cac qui a fait le nouveau plus haut (si la base n'a pas encore de données je retourne 'null')
+        $newDataDailyCacHigher = array_values(array_filter($newData, fn(Cac $item) => $item->getHigher() === $newDataHigher))[0];
+        /*
+        NOTE : ci-dessus, si j'utilise array_values() c'est pour réindexer le tableau de résultat obtenu avec array_filter().
+        En effet, array_filter() conservant par défaut les indices du tableau filtré, je dois procéder à une
+        réindexation si je veux pouvoir en récupérer le premier indice.
+        */
 
         // je récupère le dernier plus haut de la table LastHigh
         $lastHighRepository = $this->entityManager->getRepository(LastHigh::class);
