@@ -6,11 +6,10 @@
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
     <div class="container-fluid">
 
-        <h1 class="row h3 mx-sm-1 ms-lg-4 custom-min-width">récupération des données End Of Day</h1>
-
         <div class="row">
             {# colonne de gauche pour le tableau #}
             <div class="col-auto ms-lg-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
+                <h1 class="h3 custom-min-width">récupération des données End Of Day</h1>
                 <div class="p-2 custom-table d-none d-sm-flex">
                     {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
                     <table class="table table-sm table-hover d-none d-sm-table">
@@ -36,18 +35,52 @@
                 </div>
             </div>
             {# colonne de droite pour les cercles #}
-            <div class="col my-container">
-                <div class="circle circle--orange circle-shadow"></div>
-                <div id="orange" class="my-card">
-                    <div class="h4">Positions en attente</div>
-                    <div class="my-card-positions">
-                        <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                        <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                        <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+            <div class="col">
+                <div class="row">
+                    <div class="col my-container">
+                        <div class="circle circle--orange circle-shadow"></div>
+                        <div id="orange" class="my-card">
+                            <div class="h4">Positions en attente</div>
+                            <div class="my-card-positions">
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                            </div>
+                            <div class="my-card-icon my-card-icon--orange my-card-icon-shadow"><i class="bi bi-bank"></i></div>
+                        </div>
                     </div>
-                    <div class="my-card-icon my-card-icon--orange my-card-icon-shadow"><i class="bi bi-bank"></i></div>
+                </div>
+                <div class="row">
+                    <div class="col my-container">
+                        <div class="circle circle--red circle-shadow"></div>
+                        <div id="red" class="my-card">
+                            <div class="h4">Positions en cours</div>
+                            <div class="my-card-positions">
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                            </div>
+                            <div class="my-card-icon my-card-icon--red my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col my-container">
+                    <div class="circle circle--green circle-shadow"></div>
+                    <div id="green" class="my-card">
+                        <div class="h4">Positions en cours</div>
+                        <div class="my-card-positions">
+                            <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                            <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                            <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                        </div>
+                        <div class="my-card-icon my-card-icon--green my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         </div>
 
         <div class="row">
