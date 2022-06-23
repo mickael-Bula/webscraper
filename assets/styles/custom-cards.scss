@@ -1,0 +1,141 @@
+.my-container {
+  position: relative;
+  height: 300px;
+}
+
+.circle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 300px;
+  height: 300px;
+  border-radius: 300px;
+  background-image: linear-gradient(147deg, #db8d56 0%, #f07d11 74%);
+  transform: translate(70%, -50%);
+}
+
+.my-card {
+  display: block;
+  position: relative;
+  padding: 0;
+  top: 50%;
+  left: calc(100% - 120px);
+  width: 0;
+  border: none;
+  height: 150px;
+  border-radius: 10px;
+  background: white;
+  transform: translate(50%, -50%);
+  transition: all .2s;
+}
+
+.my-card.active {
+  padding: 1em;
+  left: calc(100% - 630px);
+  width: 400px;
+}
+
+.h4 {
+  visibility: hidden;
+}
+
+.h4.active {
+  display: flex;
+  justify-content: center;
+  animation: hideAnimation 0s ease-in .3s;
+  animation-fill-mode: forwards;
+}
+
+.my-card-positions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  visibility: hidden;
+}
+
+.my-card-positions.active {
+  animation: hideAnimation 0s ease-in .3s;
+  animation-fill-mode: forwards;
+}
+
+.my-card-icon {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 25%;
+  left: -5%;
+  color: #FFF;
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+}
+
+.my-card-icon > i {
+  font-size: 2.5em;
+}
+
+/* j'essaie d'assombrir au survol mais reste sans effet */
+.my-card-icon--orange:hover {
+  background-image: linear-gradient(147deg, darken(#f19451, 20%) 0%, darken(#f07d11, 20%) 74%);
+}
+
+.my-card--orange {
+  color: #f07d11;
+  border: 1px solid #f07d11;
+}
+
+.my-card--red {
+  color: #ce2525;
+  border: 1px solid #ce2525;
+}
+
+.my-card--green {
+  color:rgb(18, 128, 18);
+  border: 1px solid rgb(18, 128, 18);
+}
+
+.my-card-icon--orange {
+  background-image: linear-gradient(147deg, #f19451 0%, #f07d11 74%);
+}
+
+.my-card-icon--red {
+  background-image: linear-gradient(147deg, #eb5e5e 0%, #ce2525 74%);
+}
+
+.my-card-icon--green {
+  background-image: linear-gradient(147deg, #489438 0%, #1b7708 74%);
+}
+
+/* ombre intérieure des icônes */
+.my-card-icon-shadow {
+  box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.circle--orange {
+  background-image: linear-gradient(147deg, #fcaf78 0%, #fca04a 74%);
+}
+
+.circle--red {
+  background-image: linear-gradient(147deg, #fa9d9d 0%, #f55252 74%);
+}
+
+.circle--green {
+  background-image: linear-gradient(147deg, #c7f7bd 0%, #67bd56 74%);
+
+}
+
+/* ombre intérieure des cercles */
+.circle-shadow {
+  box-shadow: inset 0 0 20px 0 rgba(255, 255, 255, 0.9);
+}
+
+/*
+essayer d'utiliser au max les classes BS (par exemple color, border...)
+*/
+
+@keyframes hideAnimation {
+  to {
+    visibility: visible;
+  }
+}

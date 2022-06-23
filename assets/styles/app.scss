@@ -4,6 +4,7 @@ $enable-responsive-font-sizes: true;
 
 @import '~bootstrap/scss/bootstrap';
 @import 'table.scss';
+@import 'custom-cards';
 
 body {
     margin: 0;

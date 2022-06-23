@@ -15,9 +15,6 @@ class UtilsTest extends TestCase
     {
         $utils = new Utils();
         $this->assertEquals(6541.72, $utils->fromString("6.541,72"));
-        $date = strtotime('May 23, 2022');
-        $date = date('d-m-Y', $date);
-        dump(\DateTime::createFromFormat('d-m-Y', $date));
     }
 
     public function testGetMostRecentDate(): void

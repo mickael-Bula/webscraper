@@ -4,34 +4,52 @@
 
 {% block body %}
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
-    <div class="container-fluid container-md">
+    <div class="container-fluid">
 
         <h1 class="row h3 mx-sm-1 ms-lg-4 custom-min-width">récupération des données End Of Day</h1>
-        <div class="mx-sm-1 ms-lg-4">
-            <div class="col-md-6 col-lg-5 col-xl-4 col-xxl-3 p-2 custom-table d-none d-sm-flex">
-                {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
-                <table class="table table-sm table-hover d-none d-sm-table">
-                    <thead>
-                    <tr>
-                        <th scope="col" class="text-center">Date</th>
-                        <th scope="col" class="text-center">clôture</th>
-                        <th scope="col" class="text-center">ouverture</th>
-                        <th scope="col" class="text-center">plus haut</th>
-                        <th scope="col" class="text-center">plus bas</th>
-                    </tr>
-                    </thead>
-                    {% for row in cac %}
+
+        <div class="row">
+            {# colonne de gauche pour le tableau #}
+            <div class="col-auto ms-lg-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
+                <div class="p-2 custom-table d-none d-sm-flex">
+                    {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
+                    <table class="table table-sm table-hover d-none d-sm-table">
+                        <thead>
                         <tr>
-                            <td class="text-center">{{ row.createdAt|date("d/m/y") }}</td>
-                            <td class="text-center">{{ row.closing }}</td>
-                            <td class="text-center">{{ row.opening }}</td>
-                            <td class="text-center">{{ row.higher }}</td>
-                            <td class="text-center">{{ row.lower }}</td>
+                            <th scope="col" class="text-center">Date</th>
+                            <th scope="col" class="text-center">clôture</th>
+                            <th scope="col" class="text-center">ouverture</th>
+                            <th scope="col" class="text-center">plus haut</th>
+                            <th scope="col" class="text-center">plus bas</th>
                         </tr>
-                    {% endfor %}
-                </table>
+                        </thead>
+                        {% for row in cac %}
+                            <tr>
+                                <td class="text-center">{{ row.createdAt|date("d/m/y") }}</td>
+                                <td class="text-center">{{ row.closing }}</td>
+                                <td class="text-center">{{ row.opening }}</td>
+                                <td class="text-center">{{ row.higher }}</td>
+                                <td class="text-center">{{ row.lower }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {# colonne de droite pour les cercles #}
+            <div class="col my-container">
+                <div class="circle circle--orange circle-shadow"></div>
+                <div id="orange" class="my-card">
+                    <div class="h4">Positions en attente</div>
+                    <div class="my-card-positions">
+                        <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                        <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                        <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                    </div>
+                    <div class="my-card-icon my-card-icon--orange my-card-icon-shadow"><i class="bi bi-bank"></i></div>
+                </div>
             </div>
         </div>
+
         <div class="row">
             {% for position in positions %}
             <p>
