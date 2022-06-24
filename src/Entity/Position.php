@@ -66,7 +66,7 @@ class Position
     private $isRunning = false;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="positions")
+     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="positions", cascade={"persist"})
      */
     private $buyLimit;
 
@@ -74,6 +74,16 @@ class Position
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="positions")
      */
     private $User;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $lvcBuyTarget;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $lvcSellTarget;
 
     public function getId(): ?int
     {
@@ -201,6 +211,9 @@ class Position
         if ($this->buyTarget) {
             $this->setSellTarget($this->buyTarget * 1.1);
         }
+        if ($this->lvcBuyTarget) {
+            $this->setLvcSellTarget($this->lvcSellTarget + 1.2);
+        }
     }
 
     public function getSellDate(): ?\DateTimeInterface
@@ -211,6 +224,30 @@ class Position
     public function setSellDate(?\DateTimeInterface $sellDate): self
     {
         $this->sellDate = $sellDate;
+
+        return $this;
+    }
+
+    public function getLvcBuyTarget(): ?float
+    {
+        return $this->lvcBuyTarget;
+    }
+
+    public function setLvcBuyTarget(float $lvcBuyTarget): self
+    {
+        $this->lvcBuyTarget = $lvcBuyTarget;
+
+        return $this;
+    }
+
+    public function getLvcSellTarget(): ?float
+    {
+        return $this->lvcSellTarget;
+    }
+
+    public function setLvcSellTarget(?float $lvcSellTarget): self
+    {
+        $this->lvcSellTarget = $lvcSellTarget;
 
         return $this;
     }

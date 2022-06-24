@@ -56,10 +56,10 @@ class LvcRepository extends ServiceEntityRepository
             $date = strtotime($item[0]);
             $date = date('d-m-Y', $date);
             $entity->setCreatedAt(\DateTime::createFromFormat('d-m-Y', $date));
-            $entity->setClosing(Utils::fromString($item[1]));
-            $entity->setOpening(Utils::fromString($item[2]));
-            $entity->setHigher(Utils::fromString($item[3]));
-            $entity->setLower(Utils::fromString($item[4]));
+            $entity->setClosing(Utils::stringToNumber($item[1]));
+            $entity->setOpening(Utils::stringToNumber($item[2]));
+            $entity->setHigher(Utils::stringToNumber($item[3]));
+            $entity->setLower(Utils::stringToNumber($item[4]));
 
             $this->getEntityManager()->persist($entity);
         }

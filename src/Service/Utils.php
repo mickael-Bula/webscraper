@@ -5,12 +5,25 @@ namespace App\Service;
 class Utils
 {
     /**
-     * convert scraped data from string to float
+     *  convert scraped data from string to float
+     *
+     * @param string $stringNumber
+     * @return float
      */
     public static function fromString(string $stringNumber): float
     {
         $flatNumber = str_replace('.', '', $stringNumber);
         return str_replace(',', '.', $flatNumber);
+    }
+
+    /**
+     * retourne un nombre décimal avec un point comme séparateur
+     *
+     * @param string $stringNumber
+     * @return float
+     */
+    public static function stringToNumber(string $stringNumber): float{
+        return str_replace(',', '.', $stringNumber);
     }
 
     /**

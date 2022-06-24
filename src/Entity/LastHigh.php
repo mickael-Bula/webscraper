@@ -44,6 +44,21 @@ class LastHigh
      */
     private $positions;
 
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $lvcHigher;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $lvcBuyLimit;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Lvc::class, cascade={"persist", "remove"})
+     */
+    private $dailyLvc;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -147,6 +162,42 @@ class LastHigh
                 $position->setBuyLimit(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLvcHigher(): ?float
+    {
+        return $this->lvcHigher;
+    }
+
+    public function setLvcHigher(float $lvcHigher): self
+    {
+        $this->lvcHigher = $lvcHigher;
+
+        return $this;
+    }
+
+    public function getLvcBuyLimit(): ?float
+    {
+        return $this->lvcBuyLimit;
+    }
+
+    public function setLvcBuyLimit(float $lvcBuyLimit): self
+    {
+        $this->lvcBuyLimit = $lvcBuyLimit;
+
+        return $this;
+    }
+
+    public function getDailyLvc(): ?Lvc
+    {
+        return $this->dailyLvc;
+    }
+
+    public function setDailyLvc(?Lvc $dailyLvc): self
+    {
+        $this->dailyLvc = $dailyLvc;
 
         return $this;
     }

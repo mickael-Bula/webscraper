@@ -70,32 +70,39 @@ class HomeController extends AbstractController
             // j'externalise l'insertion des données du Cac en BDD dans un service dédié
             $newData = $saveDataInDatabase->appendData($data, Cac::class);
 
-            // j'externalise également la vérification d'un nouveau plus haut et la modification en BDD qui en résulte
-            $saveDataInDatabase->checkNewHigher($newData);
-
-            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
-
             // je récupère ensuite les données du LVC
             $lvcData = DataScraper::getData('https://www.investing.com/etfs/lyxor-leverage-cac-40-historical-data');
 
             // puis je sauvegarde en BDD
             $saveDataInDatabase->appendData($lvcData, Lvc::class);
-        }
 
+            // j'externalise ensuite la vérification d'un nouveau plus haut et les modifications en BDD qui en résulte
+            $saveDataInDatabase->checkNewHigher($newData);
+
+            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
+            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
+            $session->set("cac", $cac);
+        }
+        // TODO : je ne suis même pas sûr d'avoir besoin de lastHigh en session...
+        // si lastHigh n'existe pas en session, je le récupère en passant par le User
+        // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'aurai besoin de son id)
+        $user = $saveDataInDatabase->getCurrentUser();
+        if (!$session->has("lastHigh")) {
+            $session->set("lastHigh", $user->getHigher());
+        }
+        /*  TODO : tout ce qui suit semble inutile : à vérifier !
         // si lastHigh n'existe pas en session, je l'y ajoute en passant par un Service dédié
         if (!$session->has("lastHigh")) {
             // j'externalise dans un Service la vérification du dernier plus haut du User en session
             $saveDataInDatabase->setHigher();
         }
-
-        // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'ai besoin de son id)
-        $user = $saveDataInDatabase->getCurrentUser();
+        */
 
         // je récupère toutes les positions en attente pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
         $waitingPositions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
+
+        $saveDataInDatabase->updatePositions($session->get("lastHigh"));
 
         return $this->render('home/dashboard.html.twig', compact('cac', 'waitingPositions'));
     }
