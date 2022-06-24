@@ -43,7 +43,11 @@
                             <div class="h5">Positions en attente</div>
                             <div class="my-card-positions">
                                 {% for position in waitingPositions %}
-                                    <div>{{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }} +23 LVC @ {{ position.buyTarget|format_number({fraction_digit: 2}) }} CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}</div>
+                                    <div>
+                                        {{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }}
+                                        +23 LVC @ {{ position.lvcBuyTarget|format_number({fraction_digit: 2}) }}
+                                        CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}
+                                    </div>
                                 {% endfor %}
                             </div>
                             <div class="my-card-icon my-card-icon--orange my-card-icon-shadow"><i class="bi bi-bank"></i></div>

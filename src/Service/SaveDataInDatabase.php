@@ -42,8 +42,15 @@ class SaveDataInDatabase
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $entityRepository->findOneBy([], ["id" => "DESC"]);
-        $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
 
+        // je détermine le format de la date en fonction de l'entité reçue en argument
+        if ($lastDate instanceof Cac) {
+            $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
+        } else if ($lastDate instanceof Lvc) {
+            $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("M d, Y") : null;
+        }
+        dump("dans appendData, où l'on vérifie l'instance qui est appelée");
+        dump($lastDate, $data);
         // tri des entrées postérieures à lastDate
          $newData = [];
          foreach ($data as $row) {
@@ -232,6 +239,7 @@ class SaveDataInDatabase
             $lvcBuyLimit = $entity->getLvcBuyLimit();
             $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta[1][$i] /100);  // les positions sont prises à 0, -4 et -8 %
             $position->setLvcBuyTarget($positionDeltaLvc);
+            $position->setLvcBuyTarget($positionDeltaLvc * 1.2);
 
             $this->entityManager->persist($position);
         }

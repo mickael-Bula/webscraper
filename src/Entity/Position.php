@@ -211,9 +211,6 @@ class Position
         if ($this->buyTarget) {
             $this->setSellTarget($this->buyTarget * 1.1);
         }
-        if ($this->lvcBuyTarget) {
-            $this->setLvcSellTarget($this->lvcSellTarget + 1.2);
-        }
     }
 
     public function getSellDate(): ?\DateTimeInterface
