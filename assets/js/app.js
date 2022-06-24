@@ -14,7 +14,7 @@ const app = {
             document.querySelector(`.my-card--${color} > .my-card-positions`).classList.remove("active");
             card.classList.remove("active");
             // j'ajoute un timer pour faire disparaître la bordure une fois l'élément refermé
-            setTimeout(() => card.classList.remove(`my-card--${color}`), 200);
+            setTimeout(() => card.classList.remove(`my-card--${color}`), 150);
         } else {
             card.className=`my-card my-card--${color} active`;
             document.querySelector(`.my-card--${color} > .h5`).className="h5 active";

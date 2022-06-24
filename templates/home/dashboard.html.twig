@@ -6,9 +6,9 @@
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
     <div class="container-fluid">
 
-        <div class="row">
+        <div class="row ms-lg-4">
             {# colonne de gauche pour le tableau #}
-            <div class="col-auto ms-lg-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
+            <div class="col-auto mt-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
                 <h1 class="h3 custom-min-width">récupération des données End Of Day</h1>
                 <div class="p-2 custom-table d-none d-sm-flex">
                     {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
@@ -42,9 +42,9 @@
                         <div id="orange" class="my-card">
                             <div class="h5">Positions en attente</div>
                             <div class="my-card-positions">
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                {% for position in waitingPositions %}
+                                    <div>{{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }} +23 LVC @ 23.16 CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}</div>
+                                {% endfor %}
                             </div>
                             <div class="my-card-icon my-card-icon--orange my-card-icon-shadow"><i class="bi bi-bank"></i></div>
                         </div>
@@ -64,33 +64,21 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col my-container">
-                    <div class="circle circle--green circle-shadow"></div>
-                    <div id="green" class="my-card">
-                        <div class="h5">Positions en cours</div>
-                        <div class="my-card-positions">
-                            <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                            <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                            <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                <div class="row">
+                    <div class="col my-container">
+                        <div class="circle circle--green circle-shadow"></div>
+                        <div id="green" class="my-card">
+                            <div class="h5">Positions en cours</div>
+                            <div class="my-card-positions">
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                            </div>
+                            <div class="my-card-icon my-card-icon--green my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
                         </div>
-                        <div class="my-card-icon my-card-icon--green my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        {# 3ème ligne à supprimer en l'intégrant dans les cards positions #}
-        <div class="row">
-            {% for position in positions %}
-            <p>
-                date : {{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }},
-                nombre : INCONNU
-                véhicule : PAS PRECISE,
-                buyTarget : {{ position.buyTarget|format_number({fraction_digit: 2}) }}
-            </p>
-            {% endfor %}
         </div>
 
     </div>

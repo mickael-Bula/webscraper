@@ -95,8 +95,8 @@ class HomeController extends AbstractController
 
         // je récupère toutes les positions en attente pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
+        $waitingPositions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
 
-        return $this->render('home/dashboard.html.twig', compact('cac', 'positions'));
+        return $this->render('home/dashboard.html.twig', compact('cac', 'waitingPositions'));
     }
 }
