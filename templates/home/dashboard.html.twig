@@ -43,7 +43,7 @@
                             <div class="h5">Positions en attente</div>
                             <div class="my-card-positions">
                                 {% for position in waitingPositions %}
-                                    <div>{{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }} +23 LVC @ 23.16 CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}</div>
+                                    <div>{{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }} +23 LVC @ {{ position.buyTarget|format_number({fraction_digit: 2}) }} CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}</div>
                                 {% endfor %}
                             </div>
                             <div class="my-card-icon my-card-icon--orange my-card-icon-shadow"><i class="bi bi-bank"></i></div>
@@ -56,9 +56,9 @@
                         <div id="red" class="my-card">
                             <div class="h5">Positions en cours</div>
                             <div class="my-card-positions">
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                {% for position in waitingPositions %}
+                                    <div>{{ constant('App\\Entity\\Position::LINE_VALUE') }}</div>
+                                {% endfor %}
                             </div>
                             <div class="my-card-icon my-card-icon--red my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
                         </div>

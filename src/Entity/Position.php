@@ -12,6 +12,13 @@ use Doctrine\ORM\Mapping as ORM;
 class Position
 {
     /**
+     * déclaration d'une constante pour gérer la valeur d'une ligne
+     *
+     * @var integer
+     */
+    public const LINE_VALUE = 1000;
+
+    /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
