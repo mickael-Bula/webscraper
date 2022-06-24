@@ -2,11 +2,8 @@
 
 .custom-table {
   /* Created with https://www.css-gradient.com */
-  background: rgba(223, 239, 241, 1.0);
-  background: -webkit-linear-gradient(top left, rgba(223, 239, 241, 1.0), rgba(135, 230, 239, 1.0));
-  background: -moz-linear-gradient(top left, rgba(223, 239, 241, 1.0), rgba(135, 230, 239, 1.0));
-  background: linear-gradient(to bottom right, rgba(223, 239, 241, 1.0), rgba(135, 230, 239, 1.0));
+  background: white;
   border-radius: 10px;
-  box-shadow: -10px -10px 15px rgba(255,255,255,0.5), 10px 10px 15px rgba(70,70,70,0.12);
+  box-shadow: 0 0 15px rgba(70,70,70,0.5);
   min-width: 500px;
 }
