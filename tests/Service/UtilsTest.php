@@ -15,6 +15,14 @@ class UtilsTest extends TestCase
     {
         $utils = new Utils();
         $this->assertEquals(6541.72, $utils->fromString("6.541,72"));
+
+        $date1 = "2030-01-12";
+        $date2 = "2020-12-14";
+        if ($date1 < $date2)
+            echo "$date1 is less than $date2";
+        else
+            echo "$date1 is greater than $date2";
+        $this->assertGreaterThanOrEqual($date1, $date2);
     }
 
     public function testGetMostRecentDate(): void

@@ -45,7 +45,7 @@ class HomeController extends AbstractController
         SaveDataInDatabase $saveDataInDatabase,
         ManagerRegistry $doctrine): Response
     {
-        // on passe par le ManagerRegistry() pour récupérer les repository du Cac
+        // on passe par le ManagerRegistry() pour récupérer le repository du Cac
         $cacRepository = $doctrine->getRepository(Cac::class);
 
         // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
@@ -55,11 +55,10 @@ class HomeController extends AbstractController
             $session->set("cac", $cac);
         }
         $cac = $session->get("cac");
-
-        // je demande à un Service de calculer la date la plus récente attendue et conservée en base de données
+        // je demande à un Service de calculer la date la plus récente attendue en base de données
         $lastDate = (new Utils())->getMostRecentDate();
 
-        // je compare $lastDate avec la date la plus récente en session (et donc en BDD : si la base est vide j'affecte 'null')
+        // je compare $lastDate avec la date la plus récente en session (si la base est vide j'affecte 'null')
         $lastDateInSession = (!empty($cac)) ? $cac[0]->getCreatedAt()->format("d/m/Y") : null;
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
@@ -83,20 +82,9 @@ class HomeController extends AbstractController
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
         }
-        // TODO : je ne suis même pas sûr d'avoir besoin de lastHigh en session...
-        // si lastHigh n'existe pas en session, je le récupère en passant par le User
+
         // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'aurai besoin de son id)
         $user = $saveDataInDatabase->getCurrentUser();
-        if (!$session->has("lastHigh")) {
-            $session->set("lastHigh", $user->getHigher());
-        }
-        /*  TODO : tout ce qui suit semble inutile : à vérifier !
-        // si lastHigh n'existe pas en session, je l'y ajoute en passant par un Service dédié
-        if (!$session->has("lastHigh")) {
-            // j'externalise dans un Service la vérification du dernier plus haut du User en session
-            $saveDataInDatabase->setHigher();
-        }
-        */
 
         // je récupère toutes les positions en attente pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);

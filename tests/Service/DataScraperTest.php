@@ -14,7 +14,7 @@ class DataScraperTest extends TestCase
     {
         // je crée un objet de la classe dataScraper pouir lancer le scraping
         $dataScraper = new DataScraper();
-        $data = $dataScraper->getData();
+        $data = $dataScraper->getData('https://fr.investing.com/indices/france-40-historical-data');
 
         // je fais une série de tests sur les données récupérées
         $this->assertNotCount(0, $data);

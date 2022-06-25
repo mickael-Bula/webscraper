@@ -43,14 +43,16 @@ class SaveDataInDatabase
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $entityRepository->findOneBy([], ["id" => "DESC"]);
 
-        // je détermine le format de la date en fonction de l'entité reçue en argument
+        /* les données scrapées ($data) ayant des formats de date différents, je dois reformater celles reçues
+        de la BDD pour qu'elles leur correspondent */
         if ($lastDate instanceof Cac) {
+            // si $data représente les données du Cac, le format de date est "23/05/2022"
             $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
         } else if ($lastDate instanceof Lvc) {
+            // si $data représente les données du Lvc, le format de date est "May 23, 2022"
             $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("M d, Y") : null;
         }
-        dump("dans appendData, où l'on vérifie l'instance qui est appelée");
-        dump($lastDate, $data);
+
         // tri des entrées postérieures à lastDate
          $newData = [];
          foreach ($data as $row) {
@@ -168,47 +170,6 @@ class SaveDataInDatabase
         return $this->userRepository->find( $user->getId());
     }
 
-    // TODO : la méthode serHigher() semble totalement inutile : à supprimer après vérifications !
-    /**
-     * méthode qui enregistre en session le plus haut de l'utilisateur connecté
-     *
-     * @return void
-     */
-    public function setHigher(): void
-    {
-        // je récupère l'accès à la session qui a été injectée dans le constructeur
-        $session = $this->requestStack->getSession();
-
-        // je récupère le User en session
-        $user = $this->getCurrentUser();
-        $lastHigh = $user->getHigher();  // je récupère une instance de LastHigh
-
-
-        // TODO : $lastHigh->getHigher() ne peut pas être null puisqu'enregistré juste avant l'appel à cette méthode...
-        // si $lastHigh->getHigher() est 'null', j'assigne comme nouveau plus haut le dernier cac.higher
-        if (is_null($lastHigh)) {
-            $entity = new LastHigh();
-            $cac = $session->get("cac");
-            $higher = $cac[0]->getHigher();
-            $entity->setHigher($higher);
-            $buyLimit = $higher - ($higher * 0.1);  // buyLimit est 10% sous higher
-            $entity->setBuyLimit($buyLimit);
-            $entity->setDailyCac($cac[0]);
-            $entity->addUser($user);
-
-            $this->entityManager->getRepository(LastHigh::class)->add($entity, true);
-
-            // j'appelle la méthode de SaveDataInDatabase qui met à jour les positions liées à une buyLimit
-            $this->updatePositions($entity);
-
-            // j'enregistre en session et je quitte
-            $session->set("lastHigh", $cac[0]->getHigher());
-            return;
-        }
-        // sinon, si $lastHigh->getHigher() n'est pas 'null', je l'enregistre en session
-        $session->set("lastHigh", $lastHigh);
-    }
-
     public function updatePositions(LastHigh $entity)
     {
         // je récupère l'utilisateur en session
@@ -239,7 +200,7 @@ class SaveDataInDatabase
             $lvcBuyLimit = $entity->getLvcBuyLimit();
             $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta[1][$i] /100);  // les positions sont prises à 0, -4 et -8 %
             $position->setLvcBuyTarget($positionDeltaLvc);
-            $position->setLvcBuyTarget($positionDeltaLvc * 1.2);
+            $position->setLvcSellTarget($positionDeltaLvc * 1.2);
 
             $this->entityManager->persist($position);
         }
