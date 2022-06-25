@@ -90,7 +90,8 @@ class HomeController extends AbstractController
         $positionRepository = $doctrine->getRepository(Position::class);
         $waitingPositions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
 
-        $saveDataInDatabase->updatePositions($session->get("lastHigh"));
+        // TODO : pour tester les positions en BDD
+        // $saveDataInDatabase->updatePositions($session->get("lastHigh"));
 
         return $this->render('home/dashboard.html.twig', compact('cac', 'waitingPositions'));
     }
