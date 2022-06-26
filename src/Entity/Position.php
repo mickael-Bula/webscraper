@@ -85,6 +85,11 @@ class Position
      */
     private $lvcSellTarget;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $quantity;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -245,6 +250,18 @@ class Position
     public function setLvcSellTarget(?float $lvcSellTarget): self
     {
         $this->lvcSellTarget = $lvcSellTarget;
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): self
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }

@@ -125,7 +125,7 @@ class SaveDataInDatabase
         $lastHighEntity = new LastHigh();
         $lastHighEntity->setHigher($lastHigher);
         $buyLimit = $lastHigher - ($lastHigher * 0.1);    // buyLimit est 10% sous higher
-        $lastHighEntity->setBuyLimit($buyLimit);
+        $lastHighEntity->setBuyLimit(round($buyLimit, 2));
         $lastHighEntity->setDailyCac($cac);
         $lastHighEntity->addUser($user);
 
@@ -136,16 +136,16 @@ class SaveDataInDatabase
         // j'hydrate l'instance LastHigh avec les données de l'objet Lvc récupéré
         $lastHighEntity->setLvcHigher($lvcHigher);
         $lvcBuyLimit = $lvcHigher - ($lvcHigher * 0.2);     // lvcBuyLimit fixée à 20% en raison d'un levier x2
-        $lastHighEntity->setLvcBuyLimit($lvcBuyLimit);
+        $lastHighEntity->setLvcBuyLimit(round($lvcBuyLimit, 2));
         $lastHighEntity->setDailyLvc($lvc);
 
         // je persiste les données et je les insère en base
-        $lastHighInDatabase = $lastHighRepository->add($lastHighEntity, true);
+        $lastHighRepository->add($lastHighEntity, true);
 
-        // je crée également les positions en rapport avec la nouvelle buyLimit
+            // je crée également les positions en rapport avec la nouvelle buyLimit
         $this->setPositions($lastHighEntity);
 
-        return $lastHighInDatabase;
+        return $lastHighRepository->findOneBy([], ["id" => "DESC"]);
     }
 
     /**
@@ -164,7 +164,7 @@ class SaveDataInDatabase
         // j'hydrate le dernier plus haut de la table LastHigh avec les données mises à jour
         $newHigher = $cac->getHigher();
         $lastHigh->setHigher($newHigher);
-        $lastHigh->setBuyLimit($newHigher - ($newHigher * 0.1));
+        $lastHigh->setBuyLimit(round($newHigher - ($newHigher * 0.1), 2));
         $lastHigh->setDailyCac($cac);
 
         // je récupère le lvc contemporain à $cac
@@ -173,7 +173,7 @@ class SaveDataInDatabase
 
         // j'hydrate également les données du lvc correspondant
         $lastHigh->setLvcHigher($lvcHigher);
-        $lastHigh->setLvcBuyLimit($lvcHigher - ($lvcHigher * 0.2));
+        $lastHigh->setLvcBuyLimit(round($lvcHigher - ($lvcHigher * 0.2), 2));
         $lastHigh->setDailyLvc($lvc);
 
         // je persite et j'enregistre les données
@@ -220,13 +220,14 @@ class SaveDataInDatabase
             $position->setBuyLimit($entity);
             $buyLimit = $entity->getBuyLimit();
             $positionDeltaCac = $buyLimit - ($buyLimit * $delta[0][$i] /100);  // les positions sont prises à 0, -2 et -4 %
-            $position->setBuyTarget($positionDeltaCac);
+            $position->setBuyTarget(round($positionDeltaCac, 2));
             $position->setIsWaiting(true);
             $position->setUser($user);
             $lvcBuyLimit = $entity->getLvcBuyLimit();
             $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta[1][$i] /100);  // les positions sont prises à 0, -4 et -8 %
-            $position->setLvcBuyTarget($positionDeltaLvc);
-            $position->setLvcSellTarget($positionDeltaLvc * 1.2);
+            $position->setLvcBuyTarget(round($positionDeltaLvc, 2));
+            $position->setQuantity(round(Position::LINE_VALUE / $positionDeltaLvc));
+            $position->setLvcSellTarget(round($positionDeltaLvc * 1.2, 2));
 
             $this->entityManager->persist($position);
         }
