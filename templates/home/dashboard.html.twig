@@ -45,7 +45,8 @@
                                 {% for position in waitingPositions %}
                                     <div>
                                         {{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }}
-                                        +23 LVC @ {{ position.lvcBuyTarget|format_number({fraction_digit: 2}) }}
+                                        + {{ position.quantity }}
+                                        LVC @ {{ position.lvcBuyTarget|format_number({fraction_digit: 2}) }}
                                         CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}
                                     </div>
                                 {% endfor %}
@@ -60,9 +61,18 @@
                         <div id="red" class="my-card">
                             <div class="h5">Positions en cours</div>
                             <div class="my-card-positions">
-                                {% for position in waitingPositions %}
-                                    <div>{{ constant('App\\Entity\\Position::LINE_VALUE') }}</div>
-                                {% endfor %}
+                                {% if runningPositions|length > 0 %}
+                                    {% for position in runningPositions %}
+                                        <div>
+                                            {{ position.buyLimit.dailyCac.createdAt|date("d/m/y") }}
+                                            + {{ position.quantity }}
+                                            LVC @ {{ position.lvcBuyTarget|format_number({fraction_digit: 2}) }}
+                                            CAC={{ position.buyTarget|format_number({fraction_digit: 2}) }}
+                                        </div>
+                                    {% endfor %}
+                                    {% else %}
+                                        <p class="h6">Aucune position en cours.</p>
+                                {% endif %}
                             </div>
                             <div class="my-card-icon my-card-icon--red my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
                         </div>
@@ -72,11 +82,15 @@
                     <div class="col my-container">
                         <div class="circle circle--green circle-shadow"></div>
                         <div id="green" class="my-card">
-                            <div class="h5">Positions en cours</div>
+                            <div class="h5">Positions fermées</div>
                             <div class="my-card-positions">
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
-                                <div>22/06/2022 +23 LVC @ 23.16 CAC=6100</div>
+                                {% if closedPositions|length > 0 %}
+                                    {% for position in closedPositions %}
+                                        <div>24/06/22 -23 LVC @ 26.17 CAC=6320</div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="h6">Aucune position close.</p>
+                                {% endif %}
                             </div>
                             <div class="my-card-icon my-card-icon--green my-card-icon-shadow"><i class="bi bi-currency-euro"></i></div>
                         </div>
