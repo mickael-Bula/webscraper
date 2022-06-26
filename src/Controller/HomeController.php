@@ -76,7 +76,7 @@ class HomeController extends AbstractController
             $saveDataInDatabase->appendData($lvcData, Lvc::class);
 
             // j'externalise ensuite la vérification d'un nouveau plus haut et les modifications en BDD qui en résulte
-            $saveDataInDatabase->checkNewHigher($newData);
+            $saveDataInDatabase->checkNewData($newData);
 
             // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);

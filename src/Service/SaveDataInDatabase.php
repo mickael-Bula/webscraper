@@ -70,91 +70,117 @@ class SaveDataInDatabase
     /**
      * J'actualise la table LastHigh du User connecté si un nouveau plus haut a été réalisé
      *
-     * @param $newData
+     * @param array $newData qui représente un tableau d'objets Cac
      * @return void
      */
-    public function checkNewHigher($newData): void
+    public function checkNewData(array $newData): void
     {
-        // je récupère le User en session
-        $user = $this->getCurrentUser();
-
-        // je récupère le repository du Lvc
-        $lvcRepository = $this->entityManager->getRepository(Lvc::class);
-
-        // je récupère le plus haut des dernières données ajoutées en BDD
-        $newDataHigher = max(array_map(fn($item) => $item->getHigher(), $newData));
-
-        // Je récupère l'objet Cac qui a fait le nouveau plus haut
-        $newDataDailyCacHigher = array_values(array_filter($newData, fn(Cac $item) => $item->getHigher() === $newDataHigher))[0];
-        /*
-        NOTE : ci-dessus, si j'utilise array_values() c'est pour réindexer le tableau de résultat obtenu avec array_filter().
-        En effet, array_filter() conservant par défaut les indices du tableau filtré, je dois procéder à une
-        réindexation si je veux pouvoir en récupérer le premier indice.
-        */
-
         // je récupère le dernier plus haut de la table LastHigh
         $lastHighRepository = $this->entityManager->getRepository(LastHigh::class);
         $lastHighInDatabase = $lastHighRepository->findOneBy([], ["id" => "DESC"]);
 
-        // si le résultat est 'null', je dois créer une nouvelle entrée, sinon j'actualise celle présente
+        // si le résultat est 'null', je crée un 'last_high' et je le récupère
         if (is_null($lastHighInDatabase)) {
-
-            // je récupère le plus récent plus haut des données scrapées (le last_High pas défaut)
-            $lastHighInNewData = $newData[0];
-            $lastHigher = $lastHighInNewData->getHigher();
-
-            // je crée une nouvelle instance de LastHigh et je l'hydrate
-            $lastHighEntity = new LastHigh();
-            $lastHighEntity->setHigher($lastHigher);
-            $buyLimit = $lastHigher - ($lastHigher * 0.1);    // buyLimit est 10% sous higher
-            $lastHighEntity->setBuyLimit($buyLimit);
-            $lastHighEntity->setDailyCac($lastHighInNewData);
-            $lastHighEntity->addUser($user);
-
-            // à partir de l'entity Cac, je récupère l'objet LVC contemporain
-            $lvc = $lvcRepository->findOneBy(["createdAt" => $lastHighInNewData->getCreatedAt()]);
-            $lvcHigher = $lvc->getHigher();
-
-            // j'hydrate l'instance LastHigh avec les données de l'objet Lvc récupéré
-            $lastHighEntity->setLvcHigher($lvcHigher);
-            $lvcBuyLimit = $lvcHigher - ($lvcHigher * 0.2);     // lvcBuyLimit fixée à 20% en raison d'un levier x2
-            $lastHighEntity->setLvcBuyLimit($lvcBuyLimit);
-            $lastHighEntity->setDailyLvc($lvc);
-
-            // je persiste les données et je les insère en base
-            $lastHighRepository->add($lastHighEntity, true);
-
-            // je mets également à jour les positions en rapport avec la nouvelle buyLimit
-            $this->updatePositions($lastHighEntity);
+            // par défaut j'affecte la plus récente donnée du CAC comme dernier plus haut
+            $lastHighInDatabase = $this->setHigher($newData[0]);
         }
-        else {
 
-            // si higher existe en BDD et qu'un nouveau plus haut a été réalisé, j'actualise la table LastHigh
-            $lastHigherInDB = $lastHighInDatabase->getHigher();
-            if ($newDataDailyCacHigher->getHigher() > $lastHigherInDB) {
+        // je boucle sur les nouvelles données du CAC et vérifie si lastHigh.buyLimit ou lastHigh.higher ont été touchés
+        foreach ($newData as $row) {
 
-                // j'hydrate le dernier plus haut de la table LastHigh avec les données mises à jour
-                $newHigher = $newDataDailyCacHigher->getHigher();
-                $lastHighInDatabase->setHigher($newHigher);
-                $lastHighInDatabase->setBuyLimit($newHigher - ($newHigher * 0.1));
-                $lastHighInDatabase->setDailyCac($newDataDailyCacHigher);
+            // si buyLimit a été touchée, je passe les positions 'en attente' à 'en cours' et je crée un nouveau lastHigh
+            if ($row->getLower() < $lastHighInDatabase->getBuyLimit()) {
+                // je change l'état des positions en isRunning
+                $this->updatePositions();
+                // j'appelle la méthode setHigher en lui fournissant l'itération courante de l'objet Cac
+                $lastHighInDatabase = $this->setHigher($row);
+            }
 
-                // je récupère le lvc contemporain à $newDataDailyCacHigher
-                $lvc = $lvcRepository->findOneBy(["createdAt" => $newDataDailyCacHigher->getCreatedAt()]);
-                $lvcHigher = $lvc->getHigher();
-
-                // j'hydrate également avec les données du lvc correspondant
-                $lastHighInDatabase->setLvcHigher($lvcHigher);
-                $lastHighInDatabase->setLvcBuyLimit($lvcHigher - ($lvcHigher * 0.2));
-                $lastHighInDatabase->setDailyLvc($lvc);
-
-                // je persite et j'enregistre les données
-                $lastHighRepository->add($lastHighInDatabase, true);
-
-                // je mets également à jour les positions en rapport avec la nouvelle buyLimit
-                $this->updatePositions($lastHighInDatabase);
+            // si lastHigh a été dépassé, je l'actualise
+            if ($row->getHigher() > $lastHighInDatabase->getHigher()) {
+                $this->updateHigher($row, $lastHighInDatabase);
             }
         }
+    }
+
+    /**
+     * méthode pour créer un nouveau plus haut en BDD
+     *
+     * @param Cac $cac l'objet cac qui a fait le plus haut
+     * @return LastHigh
+     */
+    public function setHigher(Cac $cac): LastHigh
+    {
+        // je récupère le User en session
+        $user = $this->getCurrentUser();
+
+        // je récupère les repositories nécessaires
+        $lvcRepository = $this->entityManager->getRepository(Lvc::class);
+        $lastHighRepository = $this->entityManager->getRepository(LastHigh::class);
+
+        // je récupère le plus haut de l'objet Cac transmis en paramètre
+        $lastHigher = $cac->getHigher();
+
+        // je crée une nouvelle instance de LastHigh et je l'hydrate
+        $lastHighEntity = new LastHigh();
+        $lastHighEntity->setHigher($lastHigher);
+        $buyLimit = $lastHigher - ($lastHigher * 0.1);    // buyLimit est 10% sous higher
+        $lastHighEntity->setBuyLimit($buyLimit);
+        $lastHighEntity->setDailyCac($cac);
+        $lastHighEntity->addUser($user);
+
+        // à partir de l'entity Cac, je récupère l'objet LVC contemporain
+        $lvc = $lvcRepository->findOneBy(["createdAt" => $cac->getCreatedAt()]);
+        $lvcHigher = $lvc->getHigher();
+
+        // j'hydrate l'instance LastHigh avec les données de l'objet Lvc récupéré
+        $lastHighEntity->setLvcHigher($lvcHigher);
+        $lvcBuyLimit = $lvcHigher - ($lvcHigher * 0.2);     // lvcBuyLimit fixée à 20% en raison d'un levier x2
+        $lastHighEntity->setLvcBuyLimit($lvcBuyLimit);
+        $lastHighEntity->setDailyLvc($lvc);
+
+        // je persiste les données et je les insère en base
+        $lastHighInDatabase = $lastHighRepository->add($lastHighEntity, true);
+
+        // je crée également les positions en rapport avec la nouvelle buyLimit
+        $this->setPositions($lastHighEntity);
+
+        return $lastHighInDatabase;
+    }
+
+    /**
+     * méthode pour mettre à jour un plus haut existant en BDD
+     *
+     * @param Cac $cac l'objet cac qui a fait le nouveau plus haut
+     * @param LastHigh $lastHigh représente le plus haut à actualiser
+     * @return void
+     */
+    public function updateHigher(Cac $cac, LastHigh $lastHigh): void
+    {
+        // je récupère les repositories nécessaires
+        $lvcRepository = $this->entityManager->getRepository(Lvc::class);
+        $lastHighRepository = $this->entityManager->getRepository(LastHigh::class);
+
+        // j'hydrate le dernier plus haut de la table LastHigh avec les données mises à jour
+        $newHigher = $cac->getHigher();
+        $lastHigh->setHigher($newHigher);
+        $lastHigh->setBuyLimit($newHigher - ($newHigher * 0.1));
+        $lastHigh->setDailyCac($cac);
+
+        // je récupère le lvc contemporain à $cac
+        $lvc = $lvcRepository->findOneBy(["createdAt" => $cac->getCreatedAt()]);
+        $lvcHigher = $lvc->getHigher();
+
+        // j'hydrate également les données du lvc correspondant
+        $lastHigh->setLvcHigher($lvcHigher);
+        $lastHigh->setLvcBuyLimit($lvcHigher - ($lvcHigher * 0.2));
+        $lastHigh->setDailyLvc($lvc);
+
+        // je persite et j'enregistre les données
+        $lastHighRepository->add($lastHigh, true);
+
+        // je mets également à jour les positions en rapport avec la nouvelle buyLimit
+        $this->setPositions($lastHigh);
     }
 
     /**
@@ -170,7 +196,7 @@ class SaveDataInDatabase
         return $this->userRepository->find( $user->getId());
     }
 
-    public function updatePositions(LastHigh $entity)
+    public function setPositions(LastHigh $entity)
     {
         // je récupère l'utilisateur en session
         $user = $this->getCurrentUser();
@@ -181,7 +207,7 @@ class SaveDataInDatabase
         $positionRepository = $this->entityManager->getRepository(Position::class);
         $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => true]);
 
-        // je fixe les % d'écart entre les lignes
+        // je fixe les % d'écart entre les lignes pour le cac et pour le lvc (qui a un levier x2)
         $delta = [[0, 2, 4], [0, 4, 8]];
 
         // je boucle sur le tableau des positions s'il n'est pas vide, sinon j'en crée de nouvelles
@@ -205,5 +231,22 @@ class SaveDataInDatabase
             $this->entityManager->persist($position);
         }
         $this->entityManager->flush();
+    }
+
+    public function updatePositions()
+    {
+        // je récupère l'utilisateur en session
+        $user = $this->getCurrentUser();
+        $userId = $user->getId();
+
+        // je récupère les positions en attente liées à l'utilisateur identifié
+        $positionRepository = $this->entityManager->getRepository(Position::class);
+        $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => true]);
+
+        // je passe l'état de ces positions de isWaiting à isRunning
+        foreach ($positions as $position) {
+            $position->setIsWaiting(false);
+            $position->setIsRunning(true);
+        }
     }
 }
