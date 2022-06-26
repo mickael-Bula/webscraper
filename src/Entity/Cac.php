@@ -42,11 +42,6 @@ class Cac
      */
     private $lower;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Lvc::class, mappedBy="tracker", cascade={"persist", "remove"})
-     */
-    private $lvc;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -108,28 +103,6 @@ class Cac
     public function setLower(float $lower): self
     {
         $this->lower = $lower;
-
-        return $this;
-    }
-
-    public function getLvc(): ?Lvc
-    {
-        return $this->lvc;
-    }
-
-    public function setLvc(?Lvc $lvc): self
-    {
-        // unset the owning side of the relation if necessary
-        if ($lvc === null && $this->lvc !== null) {
-            $this->lvc->setTracker(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($lvc !== null && $lvc->getTracker() !== $this) {
-            $lvc->setTracker($this);
-        }
-
-        $this->lvc = $lvc;
 
         return $this;
     }
