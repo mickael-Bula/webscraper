@@ -4,9 +4,9 @@
 
 {% block body %}
 
-    <header class="py-5 mt-4">
-        <div class="container px-lg-5">
-            <div class="p-4 p-lg-5 custom-card text-center position-relative">
+    <section class="py-5 mt-4">
+        <div class="container">
+            <div class="p-4 p-lg-5 custom-card custom-card--gradient text-center position-relative">
                 <div class="m-4 m-lg-5">
                     <h1 class="display-5 fw-bold">Bienvenue !</h1>
                     <p class="fs-4">Simplifiez le suivi de vos investissements avec notre dashboard intégré. Suivez d'un coup d'oeil l'état de vos positions ouvertes, en attente ou vendues. Définissez vos niveaux d'intervention sur le marché. Prémunissez-vous contre les achats au plus haut en achetant uniquement sur des replis significatifs.</p>
@@ -15,41 +15,67 @@
                 <div class="p-4 p-lg-5 d-none d-md-block underlying-shape text-center"></div>
             </div>
         </div>
-    </header>
+    </section>
     <!-- Page Content-->
     <section class="pt-4">
         <div class="container px-lg-5">
             <!-- Page Features-->
             <div class="row gx-lg-5">
                 <div class="col-lg-6 col-xxl-4 mb-5">
-                    <div class="card custom-card--mini border-0 h-100">
+                    <a href="#CAC" class="card custom-card--mini border-0 h-100">
                         <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
                             <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-bar-chart"></i></div>
                             <h2 class="fs-4 fw-bold">Suivi du CAC40</h2>
                             <p class="mb-0">Suivez avec Webtrader l'indice de référence de la bourse de Paris</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-6 col-xxl-4 mb-5">
-                    <div class="card custom-card--mini border-0 h-100">
+                    <a href="#data" class="card custom-card--mini border-0 h-100">
                         <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
                             <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-server"></i></div>
                             <h2 class="fs-4 fw-bold">Historique de données</h2>
                             <p class="mb-0">Retrouvez l'ensemble de vos positions depuis n'importe quel support</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-6 col-xxl-4 mb-5">
-                    <div class="card custom-card--mini border-0 h-100">
+                    <a href="#portfolio" class="card custom-card--mini border-0 h-100">
                         <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
                             <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-pie-chart-fill"></i></div>
                             <h2 class="fs-4 fw-bold">Gestion de vos positions</h2>
                             <p class="mb-0">Suivez facilement l'ensemble de vos ordres en attente et en cours</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
+    </section>
+    <section>
+        <article class="CAC">
+            <div class="container p-4 p-lg-5 px-lg-5 custom-card text-center" id="CAC">
+                <h2 class="display-6 fw-bold">Suivi du CAC40</h2>
+                <p class="fs-3">Ne perdez plus votre temps à rechercher l'information au sujet de vos actions particulières : contentez-vous de suivre l'indice de référence de la place de Paris.</p>
+                <p class="fs-2">Nous utilisons un <span class="fw-bold">tracker</span> qui réplique les variations du CAC40 à la hausse et à la baisse. C'est sur cet indice que les décisions d'investissement sont prises.</p>
+                <p class="fs-2">Dopez vos investissements en profitant d'un effet de levier <span class="fw-bold">x2</span></p>
+            </div>
+        </article>
+        <article>
+            <div class="container p-4 p-lg-5 px-lg-5 custom-card custom-card--light text-center" id="data">
+                <h2 class="display-6 fw-bold">Historique de données</h2>
+                <p class="fs-3">Ne perdez plus votre temps à rechercher l'information au sujet de vos actions particulières : contentez-vous de suivre l'indice de référence de la place de Paris.</p>
+                <p class="fs-2">Nous utilisons un <span class="fw-bold">tracker</span> qui réplique les variations du CAC40 à la hausse et à la baisse : c'est sur cet indice que les décisions d'investissement sont prises.</p>
+                <p class="fs-2">Dopez vos investissements en profitant d'un effet de levier <span class="fw-bold">x2</span></p>
+            </div>
+        </article>
+        <article class="portfolio">
+            <div class="container p-4 p-lg-5 px-lg-5 custom-card custom-card--teal text-center" id="portfolio">
+                <h2 class="display-6 fw-bold">Gestion de vos positions</h2>
+                <p class="fs-3">Ne perdez plus votre temps à rechercher l'information au sujet de vos actions particulières : contentez-vous de suivre l'indice de référence de la place de Paris.</p>
+                <p class="fs-2">Nous utilisons un <span class="fw-bold">tracker</span> qui réplique les variations du CAC40 à la hausse et à la baisse : c'est sur cet indice que les décisions d'investissement sont prises.</p>
+                <p class="fs-2">Dopez vos investissements en profitant d'un effet de levier <span class="fw-bold">x2</span></p>
+            </div>
+        </article>
     </section>
 
 {% endblock %}

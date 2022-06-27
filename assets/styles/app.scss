@@ -7,8 +7,11 @@ $enable-responsive-font-sizes: true;
 @import 'table.scss';
 @import 'custom-cards';
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    margin: 0;
     background-color: #EDEEF1;
     font-family: 'Roboto', sans-serif;
 }
@@ -60,15 +63,39 @@ body {
 
 // Custom gradient for background's homepage card
 .custom-card {
-    background-image: linear-gradient(-71deg, rgb(21, 195, 154), rgb(74, 110, 224) 95%);
     border-radius: 10px;
     color: white;
+    &--gradient {
+        background-image: linear-gradient(-71deg, rgb(21, 195, 154), rgb(74, 110, 224) 95%);
+    }
+    &--teal {
+        color: $gray-700;
+    }
+    &--light {
+        color: $gray-700;
+    }
 }
 
 .custom-card--mini {
     background-color: #D1ECFA;
+    color: inherit;
+    text-decoration: inherit;
+    transition: background-color .5s;
+    &:hover {
+        transition: background-color .5s;
+        background-color: darken(#D1ECFA, 5%);
+    }
 }
 
 .custom-min-width {
     min-width: 380px;
 }
+
+.CAC {
+    background-color: $blue-400;
+}
+
+.portfolio {
+    background-color: $teal-400;
+}
+
