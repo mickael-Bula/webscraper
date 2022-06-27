@@ -10,6 +10,7 @@ import './styles/app.scss';
 
 // import de mon fichier js qui, placé ici, compile sans problème
 import './js/app.js';
+import './js/_main.js';
 
 import 'bootstrap';
 

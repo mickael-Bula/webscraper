@@ -95,8 +95,8 @@ body {
 .CAC {
     background-color: $blue-400;
     opacity: .5;
-    /* il faut ajouter un laoder pour webpack si l'on veut ajouter des images depuis scss */
-    /* background-image: url("./public/assets/images/stocks.jpg"); */
+    /* il faut passer par l'ajout d'un fichier js pour demander à webpack de compiler les images */
+    background-image: url("../images/stocks.jpg");
 }
 
 .portfolio {
