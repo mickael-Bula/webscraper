@@ -103,15 +103,16 @@ body {
     width: 100%;
     height: 100%;
     opacity: .1;
-    background-size: cover;
 }
 
 .CAC {
     background-color: $blue-400;
+    text-shadow: 0 0 2px #565656;
 }
 
 .CAC:before {
     background-image: url(../images/stocks.jpg);
+    background-size: contain;
 }
 
 .portfolio {
@@ -121,5 +122,6 @@ body {
 .portfolio:before {
     background-image: url(../images/NewYork.jpg);
     background-position: center;
+    background-size: cover;
 }
 

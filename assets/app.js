@@ -7,10 +7,13 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.scss';
+import './styles/scroll-up.scss';
 
-// import de mon fichier js qui, placé ici, compile sans problème
+// import de mes fichiers js qui, placé ici, sont compilés sans problèmes
 import './js/app.js';
+import './js/scroll-up';
 
+// import des images pour qu'elles soient compilées par wabpack
 import './images/stocks.jpg';
 
 import 'bootstrap';
