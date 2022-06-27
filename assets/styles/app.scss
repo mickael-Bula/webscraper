@@ -82,6 +82,7 @@ body {
     text-decoration: inherit;
     transition: background-color .5s;
     &:hover {
+        color: inherit;
         transition: background-color .5s;
         background-color: darken(#D1ECFA, 5%);
     }
@@ -93,6 +94,9 @@ body {
 
 .CAC {
     background-color: $blue-400;
+    opacity: .5;
+    /* il faut ajouter un laoder pour webpack si l'on veut ajouter des images depuis scss */
+    /* background-image: url("./public/assets/images/stocks.jpg"); */
 }
 
 .portfolio {
