@@ -92,14 +92,34 @@ body {
     min-width: 380px;
 }
 
+.transparent-bg {
+    position: relative;
+    overflow: hidden
+}
+
+.transparent-bg:before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    opacity: .1;
+    background-size: cover;
+}
+
 .CAC {
     background-color: $blue-400;
-    opacity: .5;
-    /* il faut passer par l'ajout d'un fichier js pour demander à webpack de compiler les images */
-    background-image: url("../images/stocks.jpg");
+}
+
+.CAC:before {
+    background-image: url(../images/stocks.jpg);
 }
 
 .portfolio {
     background-color: $teal-400;
+}
+
+.portfolio:before {
+    background-image: url(../images/NewYork.jpg);
+    background-position: center;
 }
 
