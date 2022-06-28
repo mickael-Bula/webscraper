@@ -10,9 +10,10 @@
             {# colonne de gauche pour le tableau #}
             <div class="col-auto mt-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
                 <h1 class="h3 custom-min-width">récupération des données End Of Day</h1>
-                <div class="p-2 custom-table d-none d-sm-flex">
+                <div class="custom-table--title text-center p-1">cotations du CAC40</div>
+                <div class="p-2 custom-table d-none d-sm-flex custom-table--paddingless">
                     {# le tableau n'apparaît pas pour la largeur small, display-table pour les autres #}
-                    <table class="table table-sm table-hover d-none d-sm-table">
+                    <table class="table table-sm table-hover d-none d-sm-table custom-table--margin-bottom">
                         <thead>
                         <tr>
                             <th scope="col" class="text-center">Date</th>
@@ -22,6 +23,7 @@
                             <th scope="col" class="text-center">plus bas</th>
                         </tr>
                         </thead>
+                        <tbody class="custom-table--borderless">
                         {% for row in cac %}
                             <tr>
                                 <td class="text-center">{{ row.createdAt|date("d/m/y") }}</td>
@@ -31,6 +33,7 @@
                                 <td class="text-center">{{ row.lower }}</td>
                             </tr>
                         {% endfor %}
+                        </tbody>
                     </table>
                 </div>
             </div>
