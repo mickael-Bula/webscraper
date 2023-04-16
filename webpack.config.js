@@ -10,9 +10,10 @@ Encore
     // directory where compiled assets will be stored
     .setOutputPath('public/build/')
     // public path used by the web server to access the output path
-    .setPublicPath('/build')
+    // .setPublicPath('/build')                 // pour une utilisation en local
+    .setPublicPath('/webtrader/public/build')   // pour une utilisation depuis un sous-domaine de Wampserver
     // only needed for CDN's or sub-directory deploy
-    //.setManifestKeyPrefix('build/')
+    .setManifestKeyPrefix('build/')             // activer cette méthode dans le cas d'une appli logée dans un sous-domaine
 
     /*
      * ENTRY CONFIG

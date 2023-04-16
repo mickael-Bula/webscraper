@@ -37,7 +37,7 @@ class SaveDataInDatabase
      */
     public function appendData(array $data, $entity): ?array
     {
-        // je précise le Repository que je veux utiliser à mon EntityManager
+        // je précise à l'EntityManager le Repository que je veux utiliser
         $entityRepository = $this->entityManager->getRepository($entity);
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
@@ -48,7 +48,8 @@ class SaveDataInDatabase
         if ($lastDate instanceof Cac) {
             // si $data représente les données du Cac, le format de date est "23/05/2022"
             $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
-        } else if ($lastDate instanceof Lvc) {
+        }
+        if ($lastDate instanceof Lvc) {
             // si $data représente les données du Lvc, le format de date est "May 23, 2022"
             $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("M d, Y") : null;
         }

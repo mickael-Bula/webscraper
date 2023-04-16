@@ -35,3 +35,18 @@ npm run build   # et le lancement du build qui crée les fichiers nécessaires
 ```
 
 Après cela, asset() fonctionne sans souci.
+
+## Lancement de l'appli depuis Wampserver
+
+Logée au sein du répertoire www e Wampserver, l'appli ne se trouve plus à la racine du web serveur.
+Pour que le chemin vers le répertoire public soit reconnu lors du lancement du build de webpack, il faut donc modifier l'argument fourniu à la méthode SetPublicPath() :
+
+```js
+Encore
+    // directory where compiled assets will be stored
+    .setOutputPath('public/build/')             // non modifié
+    // public path used by the web server to access the output path
+    .setPublicPath('/webtrader/public/build')   // le véritable chemin public doit prendre en colmpte le sous-domaine webtrader
+    // only needed for CDN's or sub-directory deploy
+    .setManifestKeyPrefix('build/')             // j'active cette méthode pour que les clés du manifest.json correspondent à 'build/foo.js'
+```
