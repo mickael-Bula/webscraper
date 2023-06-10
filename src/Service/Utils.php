@@ -57,8 +57,16 @@ class Utils
         }
         $lastDay = array_key_exists($day, $eves) ? $eves[$day] : $default;
 
-        // je recalcule la date pour tenir compte des contraintes précédentes
-        $currentDate = new \DateTime();
-        return $currentDate->sub(new \DateInterval("P{$lastDay}D"))->format("d/m/Y");
+        // Calcul de la date la plus récente en tenant compte des contraintes de jours ouvrés
+        return $this->getCurrentDate($lastDay);
+    }
+
+    /**
+     * @param string $lastDay
+     * @return string
+     */
+    private function getCurrentDate(string $lastDay): string
+    {
+        return (new \DateTime)->sub(new \DateInterval("P{$lastDay}D"))->format("d/m/Y");
     }
 }

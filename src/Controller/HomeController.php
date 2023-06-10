@@ -43,7 +43,8 @@ class HomeController extends AbstractController
      */
     public function dashboard(
         SaveDataInDatabase $saveDataInDatabase,
-        ManagerRegistry $doctrine): Response
+        ManagerRegistry $doctrine
+    ): Response
     {
         // on passe par le ManagerRegistry() pour récupérer le repository du Cac
         $cacRepository = $doctrine->getRepository(Cac::class);
