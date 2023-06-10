@@ -143,7 +143,7 @@ class SaveDataInDatabase
         // je persiste les données et je les insère en base
         $lastHighRepository->add($lastHighEntity, true);
 
-            // je crée également les positions en rapport avec la nouvelle buyLimit
+        // je crée également les positions en rapport avec la nouvelle buyLimit
         $this->setPositions($lastHighEntity);
 
         return $lastHighRepository->findOneBy([], ["id" => "DESC"]);

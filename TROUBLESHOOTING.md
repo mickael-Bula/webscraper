@@ -20,3 +20,16 @@ public function getCurrentUser(): User
     }
 ````
 
+## ajout des formulaires d' enregistremetn d'un nouvel utilisateur et de réinitialisation de mot de passe
+
+J'ai ajouté ces formulaires à l'aide des bundles suivants :
+- symfony composer require symfonycasts/reset-password-bundle
+- symfony composer require symfonycasts/verify-email-bundle
+
+Puis, après avoir fait les migrations, j'ai lancé la commande : 
+
+```bash
+symfony php bin/console make:registration-form
+```
+
+Ceci m'a permis d'ajouter un nouvel utilisateur pour se nouveau accéder à l'appli (impossible de modifier le mot de passe de l'utilisateur initial)

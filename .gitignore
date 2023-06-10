@@ -29,3 +29,5 @@ yarn-error.log
 ###> symfony CLI ###
 /.php-version
 ###< symfony CLI ###
+
+.idea/*

@@ -38,7 +38,7 @@ Après cela, asset() fonctionne sans souci.
 
 ## Lancement de l'appli depuis Wampserver
 
-Logée au sein du répertoire www e Wampserver, l'appli ne se trouve plus à la racine du web serveur.
+Logée au sein du répertoire www de Wampserver, l'appli ne se trouve plus à la racine du web serveur.
 Pour que le chemin vers le répertoire public soit reconnu lors du lancement du build de webpack, il faut donc modifier l'argument fourniu à la méthode SetPublicPath() :
 
 ```js
