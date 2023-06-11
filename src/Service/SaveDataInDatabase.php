@@ -79,16 +79,15 @@ class SaveDataInDatabase
         $lastHighRepository = $this->entityManager->getRepository(LastHigh::class);
         $lastHighInDatabase = $lastHighRepository->findOneBy([], ["id" => "DESC"]);
 
-        // si le résultat est 'null', je crée un 'last_high' et je le récupère
+        // si le résultat est 'null', je crée un 'last_high' en lui affectant par défaut le dernier plus haut de Cac, puis je le récupère
         if (is_null($lastHighInDatabase)) {
-            // par défaut j'affecte la plus récente donnée du CAC comme dernier plus haut
             $lastHighInDatabase = $this->setHigher($newData[0]);
         }
 
         // je boucle sur les nouvelles données du CAC et vérifie si lastHigh.buyLimit ou lastHigh.higher ont été touchés
         foreach ($newData as $row) {
 
-            // si buyLimit a été touchée, je passe les positions 'en attente' à 'en cours' et je crée un nouveau lastHigh
+            // si buyLimit a été touchée, je passe les positions de 'en attente' à 'en cours' et je crée un nouveau lastHigh
             if ($row->getLower() < $lastHighInDatabase->getBuyLimit()) {
                 // je change l'état des positions en isRunning
                 $this->updatePositions();
@@ -124,7 +123,7 @@ class SaveDataInDatabase
         // je crée une nouvelle instance de LastHigh et je l'hydrate
         $lastHighEntity = new LastHigh();
         $lastHighEntity->setHigher($lastHigher);
-        $buyLimit = $lastHigher - ($lastHigher * 0.1);    // buyLimit est 10% sous higher
+        $buyLimit = $lastHigher - ($lastHigher * Position::SPREAD);    // buyLimit est 500 points sous higher
         $lastHighEntity->setBuyLimit(round($buyLimit, 2));
         $lastHighEntity->setDailyCac($cac);
         $lastHighEntity->addUser($user);
@@ -135,7 +134,9 @@ class SaveDataInDatabase
 
         // j'hydrate l'instance LastHigh avec les données de l'objet Lvc récupéré
         $lastHighEntity->setLvcHigher($lvcHigher);
-        $lvcBuyLimit = $lvcHigher - ($lvcHigher * 0.2);     // lvcBuyLimit fixée à 20% en raison d'un levier x2
+
+        // lvcBuyLimit fixée au double du SPREAD en raison d'un levier x2
+        $lvcBuyLimit = $lvcHigher - ($lvcHigher * (Position::SPREAD * 2));
         $lastHighEntity->setLvcBuyLimit(round($lvcBuyLimit, 2));
         $lastHighEntity->setDailyLvc($lvc);
 
@@ -193,19 +194,17 @@ class SaveDataInDatabase
     {
         /** @var User $user */
         $user = $this->security->getUser();
-        return $this->userRepository->find( $user->getId());
+        return $this->userRepository->find($user->getId());
     }
 
     public function setPositions(LastHigh $entity)
     {
-        // je récupère l'utilisateur en session
+        // je récupère depuis la session l'instance courante de User
         $user = $this->getCurrentUser();
-        $userId = $user->getId();
-        $user = $this->userRepository->find($userId);
 
         // je récupère les positions en attente liées à l'utilisateur identifié
         $positionRepository = $this->entityManager->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => true]);
+        $positions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
 
         // je fixe les % d'écart entre les lignes pour le cac et pour le lvc (qui a un levier x2)
         $delta = [[0, 2, 4], [0, 4, 8]];
@@ -238,11 +237,10 @@ class SaveDataInDatabase
     {
         // je récupère l'utilisateur en session
         $user = $this->getCurrentUser();
-        $userId = $user->getId();
 
         // je récupère les positions en attente liées à l'utilisateur identifié
         $positionRepository = $this->entityManager->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["User" => $userId, "isWaiting" => true]);
+        $positions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
 
         // je passe l'état de ces positions de isWaiting à isRunning
         foreach ($positions as $position) {

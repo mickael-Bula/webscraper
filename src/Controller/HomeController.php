@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Cac;
 use App\Entity\Lvc;
 use App\Entity\Position;
+use App\Entity\User;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -84,15 +85,19 @@ class HomeController extends AbstractController
             $session->set("cac", $cac);
         }
 
+        // TODO : Si possible, simplifier le code en se passant de la méthode $saveDataInDatabase->getCurrentUser()
         // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'aurai besoin de son id)
-        $user = $saveDataInDatabase->getCurrentUser();
+        // $user = $saveDataInDatabase->getCurrentUser();
+
+        // je récupère l'utilisateur en session. Je précise le type User pour récupérer l'id, inaccessible depuis $this->getUser()
+        /** @var User $user */
+        $user = $this->getUser();
 
         // je récupère toutes les positions en attente pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
         $waitingPositions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
         $runningPositions = $positionRepository->findBy(["User" => $user->getId(), "isRunning" => true]);
         $closedPositions = $positionRepository->findBy(["User" => $user->getId(), "isClosed" => true]);
-
 
         return $this->render(
             'home/dashboard.html.twig',

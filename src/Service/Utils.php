@@ -22,7 +22,8 @@ class Utils
      * @param string $stringNumber
      * @return float
      */
-    public static function stringToNumber(string $stringNumber): float{
+    public static function stringToNumber(string $stringNumber): float
+    {
         return str_replace(',', '.', $stringNumber);
     }
 
