@@ -143,6 +143,15 @@
       <path value="$PROJECT_DIR$/vendor/twig/intl-extra" />
     </include_path>
   </component>
+  <component name="PhpProjectServersManager">
+    <servers>
+      <server host="webtrader" id="f40fcbfe-e0bd-4bbb-abfa-d29eb7204984" name="wampserver" use_path_mappings="true">
+        <path_mappings>
+          <mapping local-root="$PROJECT_DIR$" remote-root="C:/wamp64/www/webtrader" />
+        </path_mappings>
+      </server>
+    </servers>
+  </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.4" />
   <component name="PhpUnit">
     <phpunit_settings>

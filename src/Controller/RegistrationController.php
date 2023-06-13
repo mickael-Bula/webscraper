@@ -19,7 +19,13 @@ class RegistrationController extends AbstractController
     /**
      * @Route("/register", name="app_register")
      */
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, customAuthenticator $authenticator, EntityManagerInterface $entityManager): Response
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        UserAuthenticatorInterface $userAuthenticator,
+        customAuthenticator $authenticator,
+        EntityManagerInterface $entityManager
+    ): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -33,6 +39,8 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
+            // ajout à l'utilisateur le role par défaut retourné par getRoles()
+            $user->setRoles($user->getRoles());
 
             $entityManager->persist($user);
             $entityManager->flush();

@@ -23,7 +23,7 @@ class Position
      *
      * @var integer
      */
-    public const SPREAD = 0.05; // on fixe ici la limite à 5 % de baisse
+    public const SPREAD = 0.06; // on fixe ici la limite à 6 % de baisse, le palier d'achat étant fixé à 2 % pout 3 lignes
 
     /**
      * @ORM\Id

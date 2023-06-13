@@ -57,6 +57,7 @@ class HomeController extends AbstractController
             $session->set("cac", $cac);
         }
         $cac = $session->get("cac");
+
         // je demande à un Service de calculer la date la plus récente attendue en base de données
         $lastDate = (new Utils())->getMostRecentDate();
 
@@ -77,6 +78,8 @@ class HomeController extends AbstractController
             // puis je sauvegarde en BDD
             $saveDataInDatabase->appendData($lvcData, Lvc::class);
 
+            // TODO : il faut que la vérification d'un nouveau plus haut soit effectuée dans tous les cas, donc hors du if
+            // TODO : en outre, le point haut et le niveau d'achat doivent être liés à un utilisateur
             // j'externalise ensuite la vérification d'un nouveau plus haut et les modifications en BDD qui en résulte
             $saveDataInDatabase->checkNewData($newData);
 
@@ -85,13 +88,13 @@ class HomeController extends AbstractController
             $session->set("cac", $cac);
         }
 
-        // TODO : Si possible, simplifier le code en se passant de la méthode $saveDataInDatabase->getCurrentUser()
-        // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'aurai besoin de son id)
-        // $user = $saveDataInDatabase->getCurrentUser();
-
         // je récupère l'utilisateur en session. Je précise le type User pour récupérer l'id, inaccessible depuis $this->getUser()
         /** @var User $user */
         $user = $this->getUser();
+
+        // TODO : J'évite d'appeler la ligne suivante en hydratant dans checkNewData le owning side de la relation OneToMany User LastHigh
+        // Si l'utilisateur n'a pas de plus haut à ce stade, on lui affecte le dernier plus haut du Cac en BDD
+//        if (is_null($user->getHigher())) $user->setHigher($cacRepository->findOneBy([], ['id' => 'DESC']));
 
         // je récupère toutes les positions en attente pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
