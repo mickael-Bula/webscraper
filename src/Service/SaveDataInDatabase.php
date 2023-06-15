@@ -84,32 +84,67 @@ class SaveDataInDatabase
      * @param array $newData qui représente un tableau d'objets Cac
      * @return void
      */
-    public function checkNewData(array $newData): void
+    public function checkLastHigh(array $newData): void
     {
         // je récupère le plus haut de l'utilisateur en session
         $lastHighInDatabase = $this->getLastHigher();
 
-        // si le résultat est 'null', je crée un 'last_high' en lui affectant par défaut le dernier plus haut de Cac, puis je le récupère
+        // si le résultat est 'null', je crée un 'last_high' en lui affectant par défaut le dernier plus haut du Cac, puis je le récupère
         if (is_null($lastHighInDatabase)) {
             $lastHighInDatabase = $this->setHigher($newData[0]);
         }
-
         // je boucle sur les nouvelles données du CAC et vérifie si lastHigh.buyLimit ou lastHigh.higher ont été touchés
         foreach ($newData as $row) {
-
-            // si buyLimit a été touchée, je passe les positions de 'en attente' à 'en cours' et je crée un nouveau lastHigh
-            if ($row->getLower() < $lastHighInDatabase->getBuyLimit()) {
-                // je change l'état des positions en isRunning
-                $this->updatePositions();
-                // j'appelle la méthode setHigher en lui fournissant l'itération courante de l'objet Cac
-                $lastHighInDatabase = $this->setHigher($row);
-            }
-
             // si lastHigh a été dépassé, je l'actualise
             if ($row->getHigher() > $lastHighInDatabase->getHigher()) {
                 $this->updateHigher($row, $lastHighInDatabase);
             }
         }
+    }
+
+    /**
+     * @param array $lvcData
+     * @return void
+     */
+    public function checkLvcData(array $lvcData): void
+    {
+        // récupère les positions isWaiting du User
+        $positions = $this->getPositionsOfCurrentUser("isWaiting");
+
+        // je boucle sur les données du LVC et vérifie, pour chacune des positions en cours, si lvc.lower < position.LvcBuyTarget
+        foreach ($lvcData as $lvc) {
+            foreach ($positions as $position) {
+                /** @var Lvc $lvc */
+                /** @var Position $position */
+                if ($lvc->getLower() < $position->getLvcBuyTarget()) {
+                    $this->updatePosition($lvc, $position);
+
+                    // si la position mise à jour est la première de sa série, on génère un nouveau point haut
+                    if ($this->checkisFirst($position)) {
+                        $cac = $position->getBuyLimit()->getDailyCac();
+                        $this->setHigher($cac);
+                    }
+
+                    // Si des positions en attente ont un LastHigh antérieur au plus haut courant, on les supprime
+                    $positions = $this->checkIsWaitingPositions($position);
+                    if (count($positions) > 1) $this->removeIsWaitingPositions($positions);
+                }
+                //TODO : faire de même avec les positions à clôturer
+            }
+        }
+    }
+
+    /**
+     * Retourne les positions en attente liées à l'utilisateur identifié
+     * @param $status L'état de la position (isWaiting, isRunning ou isClosed)
+     * @return array
+     */
+    private function getPositionsOfCurrentUser($status): array
+    {
+        $user = $this->getCurrentUser();
+        $positionRepository = $this->entityManager->getRepository(Position::class);
+
+        return $positionRepository->findBy(["User" => $user->getId(), $status => true]);
     }
 
     /**
@@ -153,7 +188,7 @@ class SaveDataInDatabase
         // je persiste les données et je les insère en base
         $lastHighRepository->add($lastHighEntity, true);
 
-            // je crée également les positions en rapport avec la nouvelle buyLimit
+        // je crée également les positions en rapport avec la nouvelle buyLimit
         $this->setPositions($lastHighEntity);
 
         return $lastHighEntity;
@@ -208,24 +243,24 @@ class SaveDataInDatabase
         return $this->userRepository->find($user->getId());
     }
 
+    /**
+     * met à jour les positions en attente d'un utilisateur
+     * @param LastHigh $entity
+     * @return void
+     */
     public function setPositions(LastHigh $entity)
     {
         // je récupère depuis la session l'instance courante de User
         $user = $this->getCurrentUser();
 
-        // je récupère les positions en attente liées à l'utilisateur identifié
-        $positionRepository = $this->entityManager->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
+        // Je récupère également les positions en attente du user
+        $positions = $this->getPositionsOfCurrentUser("isWaiting");
 
         // je fixe les % d'écart entre les lignes pour le cac et pour le lvc (qui a un levier x2)
         $delta = [[0, 2, 4], [0, 4, 8]];
 
         // je boucle sur le tableau des positions s'il n'est pas vide, sinon j'en crée de nouvelles
         for ($i=0; $i < 3; $i++) {
-            /*
-            à chaque tour de boucle je vérifie le tableau positions :
-            s'il n'est pas vide je récupère l'indice courant $i, sinon je crée une nouvelle position
-            */
             $position = (count($positions) === 3) ? $positions[$i] : new Position();
             $position->setBuyLimit($entity);
             $buyLimit = $entity->getBuyLimit();
@@ -244,20 +279,70 @@ class SaveDataInDatabase
         $this->entityManager->flush();
     }
 
-    public function updatePositions()
+    /**
+     * Change le status d'une position dont la limite d'achat a été atteinte
+     * @param Lvc $lvc
+     * @param Position $position
+     * @return void
+     */
+    public function updatePosition(Lvc $lvc, Position $position)
     {
-        // je récupère l'utilisateur en session
-        $user = $this->getCurrentUser();
+        // INFO : doit afficher 14/06/23 -23 LVC @ 32.15 PX=7400
+        $position->setIsWaiting(false);
+        $position->setIsRunning(true);
+        $position->setBuyDate($lvc->getCreatedAt());
+    }
 
-        // je récupère les positions en attente liées à l'utilisateur identifié
-        $positionRepository = $this->entityManager->getRepository(Position::class);
-        $positions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
+    /**
+     * Clôture une position dont l'objectif de vente a été atteint
+     * @param Position $position
+     * @return void
+     */
+    public function closePosition(Position $position)
+    {
+        $position->setIsRunning(false);
+        $position->setIsClosed(true);
+    }
 
-        // je passe l'état de ces positions de isWaiting à isRunning
-        foreach ($positions as $position) {
-            $position->setIsWaiting(false);
-            $position->setIsRunning(true);
+    /**
+     * Retourne les positions 'isWaiting' dont la buyLimit_id est inférieure à celle de la position courante
+     * @param Position $position
+     * @return array|null
+     */
+    public function checkIsWaitingPositions(Position $position): ?array
+    {;
+        return $this
+            ->entityManager
+            ->getRepository(Position::class)
+            ->getIsWaitingPositionsByBuyLimitID($position);
+    }
+
+    /**
+     * @param array $positions
+     * @return void
+     */
+    public function removeIsWaitingPositions(array $positions)
+    {
+        $em = $this->entityManager;
+
+        foreach ($positions as $row) {
+            $em->remove($row);
+            $em->flush();
         }
     }
-    // TODO : il faut encore gérer la partie revente d'une position
+
+    /**
+     * Vérifie si une seule position en cours existe relativement à sa buyLimit
+     * @param Position $position
+     * @return bool
+     */
+    public function checkisFirst(Position $position): bool
+    {
+        $positions = $this
+            ->entityManager
+            ->getRepository(Position::class)
+            ->findBy(["isRunning" => true, "buyLimit" => $position->getBuyLimit()]);
+
+        return $positions == 1;
+    }
 }
