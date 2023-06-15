@@ -38,4 +38,23 @@ class PositionRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    /**
+     * Récupère les positions en attente qui ont une buyLimit inférieure à celle de la position courante
+     * @param Position $position
+     * @return float|int|mixed|string
+     */
+    public function getIsWaitingPositionsByBuyLimitID(Position $position)
+    {
+        $qb = $this
+            ->createQueryBuilder('p')
+            ->where('p.isWaiting = true')
+            ->andWhere('p.buyLimit < :id')
+            ->setParameter('id', $position->getBuyLimit())
+            ->orderBy('p.buyLimit', 'ASC');
+
+        $query = $qb->getQuery();
+
+        return $query->execute();
+    }
 }

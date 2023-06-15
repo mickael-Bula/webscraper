@@ -60,3 +60,15 @@ isClosed = true;
 saleDate = new DateTime(now);   // date du jour
 salePrice = saleTarget;         // qui pourra être ajustée à l'image de buySale
 ```
+
+## Algorithme de vérification des positions qui passent au statut isRunning
+
+Nous sommes à l'étape de vérification des données scrappées. On boucle sur ces données.
+A chaque tour de boucle, on récupère toutes les positions qui ont le statut isWaiting, triées par buyTarget.
+On vérifie si row.lower < position.isWaiting.buyTarget.
+Si c'est le cas, on change le statut de la position a isRunning et on lui fournit les données nécessaires.
+NOTE : on renseigne la propriété informative buyPrice qui correspond au véritable prix d'achat (le cours d'exécution réel)
+On vérifie s'il existe des position.isWaiting qui ont un lastHigh inférieur à cette position (on compare les ids).
+Si c'est le cas, on les supprime pour ne garder qu'une seule série active de trades.
+Si c'est la première position d'une nouvelle série de 3 ordres, on crée les nouveaux lastHigh, buyLimit et 3 positions isWaiting.
+
