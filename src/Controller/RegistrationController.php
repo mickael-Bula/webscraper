@@ -39,7 +39,7 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
-            // ajout à l'utilisateur le role par défaut retourné par getRoles()
+            // ajoute à l'utilisateur le role par défaut retourné par getRoles()
             $user->setRoles($user->getRoles());
 
             $entityManager->persist($user);

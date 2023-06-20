@@ -170,7 +170,7 @@ class SaveDataInDatabase
         $lastHighEntity->setBuyLimit(round($buyLimit, 2));
         $lastHighEntity->setDailyCac($cac);
 
-        // J'assigne ce plus haut à l'utilsateur courant
+        // J'assigne ce plus haut à l'utilisateur courant
         $user->setHigher($lastHighEntity);
 
         // à partir de l'entity Cac, je récupère l'objet LVC contemporain
