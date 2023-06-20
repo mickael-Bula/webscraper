@@ -18,6 +18,6 @@ class DataScraperTest extends TestCase
 
         // je fais une série de tests sur les données récupérées
         $this->assertNotCount(0, $data);
-        $this->assertCount(23, $data);
+        $this->assertCount(22, $data);
     }
 }

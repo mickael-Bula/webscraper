@@ -90,7 +90,7 @@ class HomeController extends AbstractController
         // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut ne lui a été affecté...
         if (is_null($user->getHigher())) {
             // ...on le fait ici avec le dernier plus haut du Cac en BDD
-            $user->setHigher($cacRepository->findOneBy([], ['id' => 'DESC']));
+            $saveDataInDatabase->setHigher($cacRepository->findOneBy([], ['id' => 'DESC']));
         };
 
         // je récupère toutes les positions pour affichage
