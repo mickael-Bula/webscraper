@@ -45,11 +45,12 @@ class LvcRepository extends ServiceEntityRepository
      * un tableau des objets insérés est retourné
      *
      * @param $data
-     * @return void
+     * @return array
      */
-    public function saveData($data): void
+    public function saveData($data): array
     {
         // TODO : cette méthode duplique celle de l'Entité Cac : à voir si je peux créer un BaseRepository...
+        $lvcEntities = [];
         foreach ($data as $item) {
             $entity = new Lvc();
             // je transforme le format 'May 23, 2022' en timestamp, puis j'en fais une date et enfin je l'enregistre comme DateTime
@@ -62,7 +63,11 @@ class LvcRepository extends ServiceEntityRepository
             $entity->setLower(Utils::stringToNumber($item[4]));
 
             $this->getEntityManager()->persist($entity);
+            $lvcEntities[] = $entity;
         }
         $this->getEntityManager()->flush();
+
+        // on retourne un tableau des objets insérés
+        return $lvcEntities;
     }
 }

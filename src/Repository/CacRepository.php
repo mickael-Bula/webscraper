@@ -46,8 +46,7 @@ class CacRepository extends ServiceEntityRepository
      *
      * @param $data
      * @return array
-     */
-    public function saveData($data): array
+     */public function saveData($data): array
     {
         $cacEntities = [];
         foreach ($data as $item) {

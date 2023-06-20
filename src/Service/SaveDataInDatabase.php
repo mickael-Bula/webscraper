@@ -44,9 +44,9 @@ class SaveDataInDatabase
      *
      * @param array $data
      * @param $entity
-     * @return array|null
+     * @return array
      */
-    public function appendData(array $data, $entity): ?array
+    public function appendData(array $data, $entity): array
     {
         // je précise le Repository que je veux utiliser à mon EntityManager
         $entityRepository = $this->entityManager->getRepository($entity);
