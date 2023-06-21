@@ -54,14 +54,13 @@ class SaveDataInDatabase
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $entityRepository->findOneBy([], ["id" => "DESC"]);
 
-        /* les données scrapées ($data) ayant des formats de date différents, je dois reformater celles reçues
-        de la BDD pour qu'elles leur correspondent */
+        // les dates scrapées ayant des formats différents, je reformate celles reçues de la BDD pour qu'elles correspondent
         if ($lastDate instanceof Cac) {
             // si $data représente les données du Cac, le format de date est "23/05/2022"
             $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
         } else if ($lastDate instanceof Lvc) {
-            // si $data représente les données du Lvc, le format de date est "May 23, 2022"
-            $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("M d, Y") : null;
+            // si $data représente les données du Lvc, le format de date est "06/23/2022"
+            $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("m/d/Y") : null;
         }
 
         // tri des entrées postérieures à lastDate
