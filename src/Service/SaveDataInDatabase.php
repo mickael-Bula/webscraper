@@ -116,17 +116,21 @@ class SaveDataInDatabase
                 /** @var Lvc $lvc */
                 /** @var Position $position */
                 if ($lvc->getLower() < $position->getLvcBuyTarget()) {
+                    // on passe le statut de la position à isRunning
                     $this->updatePosition($lvc, $position);
-
-                    // si la position mise à jour est la première de sa série, on génère un nouveau point haut
+                    // si la position mise à jour est la première de sa série...
                     if ($this->checkisFirst($position)) {
-                        $cac = $position->getBuyLimit()->getDailyCac();
-                        $this->setHigher($cac);
+                        // ...on génère un nouveau point haut...
+                        $this->setHigher($position->getBuyLimit()->getDailyCac());
+                        // ...puis on récupère toutes les positions en attente qui ont un point haut différent...
+                        $isWaitingPositions = $this->checkIsWaitingPositions($position);
+                        // ...pour enfin les supprimer si elles existent
+                        if ($isWaitingPositions) $this->removeIsWaitingPositions($isWaitingPositions);
                     }
-
-                    // Si des positions en attente ont un LastHigh antérieur au plus haut courant, on les supprime
-                    $positions = $this->checkIsWaitingPositions($position);
-                    if (count($positions) > 1) $this->removeIsWaitingPositions($positions);
+                    // en toute rigueur, il faudrait vérifier les positions de la plus basse en remontant vers la plus haute afin de s'assurer contre une volatilité extrème.
+                    // Si je vérifie d'abord la première position, alors un nouveau plus haut est créé et les positions en attente avec un plus haut antérieur sont supprimées.
+                    // Mais rien ne dit qu'en réalité, dans un contexte de volatilité élevée, ces positions n'ont pas été touchées.
+                    // Faire une vérification par le bas permet de s'en assurer avant de supprimer celles-ci dans un second temps.
                 }
                 //TODO : faire de même avec les positions à clôturer
             }
@@ -279,7 +283,7 @@ class SaveDataInDatabase
     }
 
     /**
-     * Change le status d'une position dont la limite d'achat a été atteinte
+     * Change le statut d'une position dont la limite d'achat a été atteinte
      * @param Lvc $lvc
      * @param Position $position
      * @return void

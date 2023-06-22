@@ -53,8 +53,6 @@ class PositionRepository extends ServiceEntityRepository
             ->setParameter('id', $position->getBuyLimit())
             ->orderBy('p.buyLimit', 'ASC');
 
-        $query = $qb->getQuery();
-
-        return $query->execute();
+        return $qb->getQuery()->execute();
     }
 }
