@@ -3,7 +3,24 @@
 .custom-table {
   /* Created with https://www.css-gradient.com */
   background: white;
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   box-shadow: 0 0 15px rgba(70,70,70,0.5);
   min-width: 500px;
+  &--title {
+    background-color: #1a2e45;
+    /* couleur à trancher : blanc ou bleu glacier ? */
+    /* color: #f1f2f3; */
+    color: #bad2ea;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 0 15px rgba(70,70,70,0.5);
+  }
+  &--borderless {
+    border-top-width: 0 !important;
+  }
+  &--margin-bottom {
+    margin-bottom: 0 !important;
+  }
+  &--paddingless {
+    padding: 0 !important;
+  }
 }

@@ -25,7 +25,10 @@ class DataScraper
             ->each(function ($node) {
                 return $node->text('rien à afficher');
             });
-    
+        
+        // je sélectionne la portion de 'tbody.datatable_body__3EPFZ' qui m'intéresse (NOTE : il faut creuser pour sélectionner un enfant en particulier)
+        $rawData = array_slice($rawData, 10, 147);
+        
         // la fonction array_chunk() divise le tableau passé en paramètre avec une taille fixée par le second
         $splitData = array_chunk($rawData, 7);
 
