@@ -102,10 +102,21 @@ class SaveDataInDatabase
     }
 
     /**
+     * Mise à jour des positions en attente et en cours à partir des données LVC récupérées
      * @param array $lvcData
      * @return void
      */
     public function checkLvcData(array $lvcData): void
+    {
+        $this->updateIsWaitingPositions($lvcData);
+        $this->updateIsRunningPositions($lvcData);
+    }
+
+    /**
+     * @param array $lvcData
+     * @return void
+     */
+    public function updateIsWaitingPositions(array $lvcData): void
     {
         // récupère les positions isWaiting du User
         $positions = $this->getPositionsOfCurrentUser("isWaiting");
@@ -117,7 +128,7 @@ class SaveDataInDatabase
                 /** @var Position $position */
                 if ($lvc->getLower() < $position->getLvcBuyTarget()) {
                     // on passe le statut de la position à isRunning
-                    $this->updatePosition($lvc, $position);
+                    $this->openPosition($lvc, $position);
                     // si la position mise à jour est la première de sa série...
                     if ($this->checkisFirst($position)) {
                         // ...on génère un nouveau point haut...
@@ -129,10 +140,32 @@ class SaveDataInDatabase
                     }
                     // en toute rigueur, il faudrait vérifier les positions de la plus basse en remontant vers la plus haute afin de s'assurer contre une volatilité extrème.
                     // Si je vérifie d'abord la première position, alors un nouveau plus haut est créé et les positions en attente avec un plus haut antérieur sont supprimées.
-                    // Mais rien ne dit qu'en réalité, dans un contexte de volatilité élevée, ces positions n'ont pas été touchées.
+                    // Mais rien ne dit qu'en réalité, dans un contexte de volatilité élevée, ces positions n'aient pas été touchées.
                     // Faire une vérification par le bas permet de s'en assurer avant de supprimer celles-ci dans un second temps.
                 }
-                //TODO : faire de même avec les positions à clôturer
+            }
+        }
+    }
+
+    /**
+     * @param array $lvcData
+     * @return void
+     */
+    public function updateIsRunningPositions(array $lvcData): void
+    {
+        // TODO : il reste à traiter le solde des positions clôturées pour l'afficher sur le dashboard
+        // récupère les positions isRunning du User
+        $positions = $this->getPositionsOfCurrentUser("isRunning");
+
+        // je boucle sur les données du LVC et vérifie, pour chacune des positions en cours, si lvc.higher > position.sellTarget
+        foreach ($lvcData as $lvc) {
+            foreach ($positions as $position) {
+                /** @var Lvc $lvc */
+                /** @var Position $position */
+                if ($lvc->getHigher() > $position->getLvcSellTarget()) {
+                    // on passe le statut de la position à isClosed
+                    $this->closePosition($lvc, $position);
+                }
             }
         }
     }
@@ -288,7 +321,7 @@ class SaveDataInDatabase
      * @param Position $position
      * @return void
      */
-    public function updatePosition(Lvc $lvc, Position $position)
+    public function openPosition(Lvc $lvc, Position $position)
     {
         // INFO : doit afficher 14/06/23 -23 LVC @ 32.15 PX=7400
         $position->setIsWaiting(false);
@@ -298,13 +331,15 @@ class SaveDataInDatabase
 
     /**
      * Clôture une position dont l'objectif de vente a été atteint
+     * @param Lvc $lvc
      * @param Position $position
      * @return void
      */
-    public function closePosition(Position $position)
+    public function closePosition(Lvc $lvc, Position $position)
     {
         $position->setIsRunning(false);
         $position->setIsClosed(true);
+        $position->setSellDate($lvc->getCreatedAt());
     }
 
     /**
