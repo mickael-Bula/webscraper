@@ -4,6 +4,7 @@ namespace App\Tests\Service;
 
 use App\Entity\Cac;
 use App\Service\DataScraper;
+use App\Service\SaveDataInDatabase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class SaveDataInDatabaseTest extends KernelTestCase
@@ -17,7 +18,8 @@ class SaveDataInDatabaseTest extends KernelTestCase
     {
         $kernel = self::bootKernel();
 
-        $this->entityManager = $kernel->getContainer()
+        $this->entityManager = $kernel
+            ->getContainer()
             ->get('doctrine')
             ->getManager();
     }

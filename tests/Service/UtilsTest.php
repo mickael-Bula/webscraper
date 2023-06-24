@@ -22,7 +22,7 @@ class UtilsTest extends TestCase
             echo "$date1 is less than $date2";
         else
             echo "$date1 is greater than $date2";
-        $this->assertGreaterThanOrEqual($date1, $date2);
+        $this->assertGreaterThanOrEqual($date2, $date1);
     }
 
     public function testGetMostRecentDate(): void

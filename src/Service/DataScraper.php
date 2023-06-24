@@ -12,16 +12,16 @@ class DataScraper
         $crawler = $client->request('GET', $stock);
 
         // on vérifie si le marché est fermé pour s'assurer de la pertinence de données à enregistrer
-        $greenClockIcon = $crawler
-            ->filter('.greenClockBigIcon')  // l'icône est présente quand le marché est ouvert
-            ->each(function($node) { return $node; });   // je récupère un tableau de nodes
+        $open = $crawler
+            ->filterXPath('//*[@id="__next"]/div[2]/div/div/div[2]/main/div/div[1]/div[2]/div[2]/div[2]/span[2]')
+            ->text("rien à afficher");
 
-        // si le tableau est vide le marché est fermé (false), sinon il est ouvert (true)
-        $isOpen = count($greenClockIcon) > 0;
+        // On évalue $open (true ou false) et on l'affecte à $isOpen
+        $isOpen = $open == "Ouvert";
 
         // je filtre le document pour ne récupérer que le contenu du tableau qui m'intéresse
         $rawData = $crawler
-            ->filter('tbody.datatable_body__3EPFZ > tr > td')
+            ->filter('table[data-test="historical-data-table"] > tbody > tr > td')
             ->each(function ($node) {
                 return $node->text('rien à afficher');
             });

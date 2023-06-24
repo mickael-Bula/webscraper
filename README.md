@@ -30,3 +30,6 @@ J'ai donc ajouté ses éléments :
 use Symfony\Component\BrowserKit\HttpBrowser;       // à la place de use Goutte\Client;
 ```
 
+## Détermination des constantes utilisées dans l'application
+
+Les valeurs qui définissent la taille et le niveau d'achat d'une ligne se trouvent dans l'entité Position. On pourrait également les définir dans le `.env`.
