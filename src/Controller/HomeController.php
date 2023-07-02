@@ -80,7 +80,6 @@ class HomeController extends AbstractController
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
 
-            // TODO : une seule responsabilité ici : mise à jour de last High, buy Limit et positions isWaiting
             // Pour finir, je fais une mise à jour de LastHigh...
             $saveDataInDatabase->checkLastHigh($newData);
 
@@ -103,5 +102,13 @@ class HomeController extends AbstractController
             'home/dashboard.html.twig',
             compact('cac', 'waitingPositions', 'runningPositions', 'closedPositions')
         );
+
+        //TODO Il faut ajouter sur le dashboard la buyLimit et lastHigh du user courant
+        // il faut créer un menu de configuration pour que l'utilisateur puisse paramétrer les données précédentes
+        // La buyLimt doit être paramétrable : SPREAD achat et revente
+        // Un plus haut doit pouvoir être déclaré, soit par la date, soit par la valeur la plus proche en valeur
+        // Pour ce dernier point, il faut ajouter un formulaire
+        // Il faut développer tout ce qui concerne la vue en Vue.js => permet de monter en compétence, de s'exercer en 'real'
+        // A terme, il faut externaliser le scraping dans un micro-service.
     }
 }
