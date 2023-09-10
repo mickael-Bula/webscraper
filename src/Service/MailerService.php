@@ -22,16 +22,19 @@ class MailerService
      * @return void
      * @throws TransportExceptionInterface
      */
-    public function sendEmail()
+    public function sendEmail($positions)
     {
         $email = (new Email())
             ->from('hello@example.com')
             ->to('you@example.com')
             ->subject("mail de l'application Webtrader")
-            ->text("Mail envoyé lorsqu'une action est requise de la part de l'utilisateur.")
-            ->html("<p>Il faut encore distinguer entre les différentes actions possibles.</p>");
+            ->text("Vos positions ont été actualisées.");
 
-        // envoi d'un mail
+        foreach ($positions as $position) {
+            $email->html("<p>{$position}</p>");
+        }
+
+        // envoi du mail
         $this->mailer->send($email);
 
         $this->logger->info("Mail envoyé par webtrader");

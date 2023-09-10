@@ -56,6 +56,46 @@ Lors du test de l'application lorsque le marché est ouvert, la dernière journ�
 Il a fallu relancer l'appli une seconde fois pour que cela soit le cas.
 Cela n'a concerné que le Cac et non le Lvc => TODO : à tenter de reproduire et corriger au besoin.
 
+## Tests
+
+Pour mes tests, j'ai pris le parti d'injecter les dépendances en utilisant le container.
+Pour cela, la méthode est d'utiliser : 
+
+```php
+        // je lance le kernel qui charge le service container
+        self::bootKernel();
+
+        //  j'utilise static::getContainer() pour accéder au service container
+        $container = static::getContainer();
+
+        // je récupère mes services depuis le container instancié précédemment
+        $this->security = $container->get(Security::class);
+```
+
+Ensuite, on récupère les services comme ceci :
+
+```php
+$entity = $this->entityManager->getRepository(LastHigh::class)->findOneBy(["id" => "1"]);
+```
+
+Pour produire les tests, il a fallu configurer le phpunit.xml, en fournissant les paramètres du .env manquant :
+
+```xml
+<env name="MAILER_DSN" value="smtp://user:pwd@smtp.mailtrap.io:2525?encryption=tls&amp;auth_mode=login" />
+```
+
+Les tests ont également besoin qu'une base de données de test soit déclarées.
+Pour cela, j'ai fait une copie de la base directement depuis l'interface phpMyAdmin :
+
+```sql
+CREATE DATABASE webtrader_test;
+```
+
+Puis j'ai effectué un export depuis la base d'origine et enfin un import dans la base cible.
+
+>NOTE : phpunit se connecte à la base de données en la suffixant avec _test.
+> Cela signifie qu'il ne faut pas ajouter ce suffixe dans la déclaration de la BDD dans le phpunit.xml.
+
 ## Développement à réaliser
 
 - Ajouter sur le dashboard le dernier Last High

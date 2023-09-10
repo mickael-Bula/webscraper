@@ -4,28 +4,33 @@ namespace App\Service;
 
 use App\Entity\{Cac, LastHigh, Lvc, Position, User};
 use App\Repository\UserRepository;
+use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Security\Core\Security;
 
 class SaveDataInDatabase
 {
-    private $entityManager;
-    private $userRepository;
-    private $security;
-    private $requestStack;
+    private EntityManagerInterface $entityManager;
+    private UserRepository $userRepository;
+    private Security $security;
+    private RequestStack $requestStack;
+    private MailerService $mailer;
 
-    // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $entityManager,  // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
         UserRepository $userRepository,
         Security $security,
-        RequestStack $requestStack)
+        RequestStack $requestStack,
+        MailerService $mailer
+    )
     {
         $this->entityManager    = $entityManager;
         $this->userRepository   = $userRepository;
         $this->security         = $security;
         $this->requestStack     = $requestStack;
+        $this->mailer           = $mailer;
     }
 
     /**
@@ -188,6 +193,7 @@ class SaveDataInDatabase
      *
      * @param Cac $cac l'objet cac qui a fait le plus haut
      * @return LastHigh
+     * @throws TransportExceptionInterface
      */
     public function setHigher(Cac $cac): LastHigh
     {
@@ -283,6 +289,7 @@ class SaveDataInDatabase
      * met à jour les positions en attente d'un utilisateur
      * @param LastHigh $entity
      * @return void
+     * @throws TransportExceptionInterface
      */
     public function setPositions(LastHigh $entity)
     {
@@ -313,6 +320,8 @@ class SaveDataInDatabase
             $this->entityManager->persist($position);
         }
         $this->entityManager->flush();
+
+        $this->mailer->sendEmail($positions);
     }
 
     /**

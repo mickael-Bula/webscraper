@@ -6,7 +6,6 @@ use App\Entity\Cac;
 use App\Entity\Lvc;
 use App\Entity\Position;
 use App\Entity\User;
-use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -43,15 +42,13 @@ class HomeController extends AbstractController
      * @param ManagerRegistry $doctrine
      * @param SaveDataInDatabase $saveDataInDatabase
      * @param Utils $utils
-     * @param MailerService $mailer
      * @return Response
      * @throws TransportExceptionInterface
      */
     public function dashboard(
         ManagerRegistry $doctrine,
         SaveDataInDatabase $saveDataInDatabase, // injection de mes services
-        Utils $utils,
-        MailerService $mailer
+        Utils $utils
     ): Response
     {
         /**
@@ -59,9 +56,6 @@ class HomeController extends AbstractController
          * @var User $user
          */
         $user = $this->getUser();
-
-        // TODO : test de l'envoi de mail
-        $mailer->sendEmail();
 
         $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();

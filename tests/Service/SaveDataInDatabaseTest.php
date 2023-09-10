@@ -3,9 +3,16 @@
 namespace App\Tests\Service;
 
 use App\Entity\Cac;
+use App\Entity\LastHigh;
+use App\Entity\User;
 use App\Service\DataScraper;
+use App\Service\MailerService;
 use App\Service\SaveDataInDatabase;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Security;
 
 class SaveDataInDatabaseTest extends KernelTestCase
 {
@@ -13,15 +20,37 @@ class SaveDataInDatabaseTest extends KernelTestCase
      * @var \Doctrine\ORM\EntityManager
      */
     private $entityManager;
+    private $userRepository;
+
+    /**
+     * @var Symfony\Component\Security\Core\Security
+     */
+    private $security;
+
+    /**
+     * @var Symfony\Component\HttpFoundation\RequestStack;
+     */
+    private $requestStack;
+
+    /**
+     * @var App\Service\MailerService
+     */
+    private $mailer;
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
+        // je lance le kernel qui charge le service container
+        self::bootKernel();
 
-        $this->entityManager = $kernel
-            ->getContainer()
-            ->get('doctrine')
-            ->getManager();
+        //  j'utilise static::getContainer() pour accéder au service container
+        $container = static::getContainer();
+
+        // je récupère mes services depuis le container instancié précédemment
+        $this->security = $container->get(Security::class);
+        $this->mailer = $container->get(MailerService::class);
+        $this->requestStack = $container->get(RequestStack::class);
+        $this->entityManager = $container->get(EntityManagerInterface::class);
+        $this->userRepository = $this->entityManager->getRepository(User::class);
     }
 
     /**
@@ -50,8 +79,25 @@ class SaveDataInDatabaseTest extends KernelTestCase
                 break;
             }
         }
-        // pb : l'utilisation de DateTime tient compte des heures et échoue à filtrer correctement la dernière date
-        dump($newData);
+        $this->assertNotEmpty($newData);
+        $this->assertCount(22, $newData);
+    }
+
+    public function testSetPositions()
+    {
+        $entity = $this->entityManager->getRepository(LastHigh::class)->findAll();
+        $data = new SaveDataInDatabase(
+            $this->entityManager,
+            $this->userRepository,
+            $this->security,
+            $this->requestStack,
+            $this->mailer
+        );
+
+        $this->assertInstanceOf(Security::class, $this->security);
+        $this->assertInstanceOf(MailerService::class, $this->mailer);
+        $this->assertInstanceOf(RequestStack::class, $this->requestStack);
+        $this->assertInstanceOf(LastHigh::class, $entity[0]);
     }
 
     protected function tearDown(): void
