@@ -50,3 +50,22 @@ Algo : si le jour est entre lundi et vendredi et qu'il est moins de 18:00, on su
 $isOpen = in_array(date('w'), range(1, 5)) && date("G") <= "18";
 ```
 
+## La dernière date disponible du Cac ne s'est pas mise à jour du premier coup
+
+Lors du test de l'application lorsque le marché est ouvert, la dernière journée complète disponible n'a pas été enregistrée en base du premier coup.
+Il a fallu relancer l'appli une seconde fois pour que cela soit le cas.
+Cela n'a concerné que le Cac et non le Lvc => TODO : à tenter de reproduire et corriger au besoin.
+
+## Développement à réaliser
+
+- Ajouter sur le dashboard le dernier Last High
+- Ajouter une colonne avec le cours de clôture du Lvc dans le tableau du Cac (ou ajouter un tableau équivalent à celui de Cac ?)
+- Modifier le design des positions
+- Adapter le design à la hauteur de l'écran
+- S'inspirer des exemples de dashboard réalisés en Vue.js pour créer celui de l'application
+- Créer le front en Vue.js (on pourra utiliser par exemple la librairie [Element](https://element-plus.org/en-US/component/table.html#table-with-fixed-group-header) pour le tableau)
+- Ajouter la notification par mail quand une position a été touchée pour que l'utilisateur passe effectivement les positions
+- Ajouter un ascenseur pour afficher davantafge de données ?
+- Mettre en surbrillance le plus haut et le plus bas (avec dezs couleurs différentes)
+- Ajouter un menu paramètres (avec roue crantée) : ce sera un panneau qui glissera en fonction de son étéat ouvert ou fermé
+- Ajouter un calcul du RSI et son graphique

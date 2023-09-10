@@ -28,14 +28,6 @@ class Utils
     }
 
     /**
-     * convert database's data to string
-     */
-    public static function fromNumber($flatNumber): string
-    {
-        return number_format($flatNumber, 2, ',', ' ');
-    }
-
-    /**
      * calculate the date which should be the most recent in the database 
      */
     public function getMostRecentDate(): string
@@ -46,16 +38,8 @@ class Utils
         // je récupère le numéro du jour courant
         $day = date('w');
 
-        // Avant 18:00 on considère que le marché est ouvert : le dernier jour complet est donc celui de la veille.
-        // On tient également compte des jours de week-end (non ouvrés)
-        if (date("G") >= "18") {
-            // $eves = ["numéro du jour dans la semaine" → "nombre de jours à retrancher pour obtenir la veille ouvrée"]
-            $eves = ["0" => "2", "6" => "1"];
-            $default = "0";
-        } else {
-            $eves = ["0" => "2", "1" => "3"];
-            $default = "1";
-        }
+        // Avant 18:00, marché ouvert : le dernier jour en base est celui de la veille (ou -2 jours pour dimanche et -3 pour lundi)
+        [$eves, $default] = intval(date("G")) >= 18 ? [["0" => "2", "6" => "1"], "0"] : [["0" => "2", "1" => "3"], "1"];
         $lastDay = array_key_exists($day, $eves) ? $eves[$day] : $default;
 
         // Calcul de la date la plus récente en tenant compte des contraintes de jours ouvrés
@@ -68,6 +52,8 @@ class Utils
      */
     private function getCurrentDate(string $lastDay): string
     {
-        return (new \DateTime)->sub(new \DateInterval("P{$lastDay}D"))->format("d/m/Y");
+        return (new \DateTime)
+            ->sub(new \DateInterval("P{$lastDay}D"))
+            ->format("d/m/Y");
     }
 }

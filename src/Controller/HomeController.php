@@ -6,10 +6,12 @@ use App\Entity\Cac;
 use App\Entity\Lvc;
 use App\Entity\Position;
 use App\Entity\User;
+use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\DataScraper;
 use App\Service\SaveDataInDatabase;
@@ -38,22 +40,33 @@ class HomeController extends AbstractController
      *
      * @Route("/dashboard", name="app_dashboard")
      *
-     * @param SaveDataInDatabase $saveDataInDatabase
      * @param ManagerRegistry $doctrine
+     * @param SaveDataInDatabase $saveDataInDatabase
+     * @param Utils $utils
+     * @param MailerService $mailer
      * @return Response
+     * @throws TransportExceptionInterface
      */
     public function dashboard(
-        SaveDataInDatabase $saveDataInDatabase,
-        ManagerRegistry $doctrine
+        ManagerRegistry $doctrine,
+        SaveDataInDatabase $saveDataInDatabase, // injection de mes services
+        Utils $utils,
+        MailerService $mailer
     ): Response
     {
-        /** @var User $user Récupère l'utilisateur en session. Je précise le type User pour en accéder à son id */
+        /**
+         * Récupère l'utilisateur en session. Je précise le type User pour accéder à son id
+         * @var User $user
+         */
         $user = $this->getUser();
+
+        // TODO : test de l'envoi de mail
+        $mailer->sendEmail();
 
         $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();
 
-        // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
+        // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
         if (!$session->has("cac")) {
             $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
             $session->set("cac", $cac);
@@ -61,7 +74,7 @@ class HomeController extends AbstractController
         $cac = $session->get("cac");
 
         // je demande à un Service de calculer la date la plus récente attendue en base de données
-        $lastDate = (new Utils())->getMostRecentDate();
+        $lastDate = $utils->getMostRecentDate();
 
         // je compare $lastDate avec la date la plus récente en session (si la base est vide j'affecte 'null')
         $lastDateInSession = (!empty($cac)) ? $cac[0]->getCreatedAt()->format("d/m/Y") : null;
