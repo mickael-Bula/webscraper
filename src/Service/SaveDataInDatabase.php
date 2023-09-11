@@ -87,6 +87,7 @@ class SaveDataInDatabase
      *
      * @param array $newData qui représente un tableau d'objets Cac
      * @return void
+     * @throws TransportExceptionInterface
      */
     public function checkLastHigh(array $newData): void
     {

@@ -22,21 +22,6 @@ class SaveDataInDatabaseTest extends KernelTestCase
     private $entityManager;
     private $userRepository;
 
-    /**
-     * @var Symfony\Component\Security\Core\Security
-     */
-    private $security;
-
-    /**
-     * @var Symfony\Component\HttpFoundation\RequestStack;
-     */
-    private $requestStack;
-
-    /**
-     * @var App\Service\MailerService
-     */
-    private $mailer;
-
     protected function setUp(): void
     {
         // je lance le kernel qui charge le service container
@@ -44,11 +29,6 @@ class SaveDataInDatabaseTest extends KernelTestCase
 
         //  j'utilise static::getContainer() pour accéder au service container
         $container = static::getContainer();
-
-        // je récupère mes services depuis le container instancié précédemment
-        $this->security = $container->get(Security::class);
-        $this->mailer = $container->get(MailerService::class);
-        $this->requestStack = $container->get(RequestStack::class);
         $this->entityManager = $container->get(EntityManagerInterface::class);
         $this->userRepository = $this->entityManager->getRepository(User::class);
     }
@@ -85,18 +65,23 @@ class SaveDataInDatabaseTest extends KernelTestCase
 
     public function testSetPositions()
     {
+        // je crée des doubles des dépendances requises
+        $security = $this->createMock(Security::class);
+        $requestStack = $this->createMock(RequestStack::class);
+        $mailer = $this->createMock(MailerService::class);
+
         $entity = $this->entityManager->getRepository(LastHigh::class)->findAll();
         $data = new SaveDataInDatabase(
             $this->entityManager,
             $this->userRepository,
-            $this->security,
-            $this->requestStack,
-            $this->mailer
+            $security,
+            $requestStack,
+            $mailer
         );
 
-        $this->assertInstanceOf(Security::class, $this->security);
-        $this->assertInstanceOf(MailerService::class, $this->mailer);
-        $this->assertInstanceOf(RequestStack::class, $this->requestStack);
+        $this->assertInstanceOf(Security::class, $security);
+        $this->assertInstanceOf(MailerService::class, $mailer);
+        $this->assertInstanceOf(RequestStack::class, $requestStack);
         $this->assertInstanceOf(LastHigh::class, $entity[0]);
     }
 
