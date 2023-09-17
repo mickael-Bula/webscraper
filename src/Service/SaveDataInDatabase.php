@@ -290,7 +290,6 @@ class SaveDataInDatabase
      * met à jour les positions en attente d'un utilisateur
      * @param LastHigh $entity
      * @return void
-     * @throws TransportExceptionInterface
      */
     public function setPositions(LastHigh $entity)
     {

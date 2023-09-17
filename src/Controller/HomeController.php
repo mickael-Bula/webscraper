@@ -6,8 +6,10 @@ use App\Entity\Cac;
 use App\Entity\Lvc;
 use App\Entity\Position;
 use App\Entity\User;
+use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -19,11 +21,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class HomeController extends AbstractController
 {
-    private $requestStack;
+    private RequestStack $requestStack;
+    private MailerService $mailer;
+    private LoggerInterface $logger;
 
-    public function __construct(RequestStack $requestStack)
+    public function __construct(RequestStack $requestStack, MailerService $mailer, LoggerInterface $myAppLogger)
     {
         $this->requestStack = $requestStack;
+        $this->mailer = $mailer;
+        $this->logger = $myAppLogger;
     }
 
     /**
@@ -76,8 +82,14 @@ class HomeController extends AbstractController
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
             // je lance la récupération des données du CAC et du LVC
-            $data = DataScraper::getData('https://fr.investing.com/indices/france-40-historical-data');
-            $lvcData = DataScraper::getData('https://www.investing.com/etfs/lyxor-leverage-cac-40-historical-data');
+            $scraper = new DataScraper($this->logger);
+            $data = $scraper->getData('https://fr.investing.com/indices/france-40-historical-data');
+
+            // si aucune données n'est récupérées, on affiche un message dans le template
+            if (is_null($data)) {
+                $this->addFlash('error', 'Aucune donnée récupérée');
+            }
+            $lvcData = $scraper->getData('https://www.investing.com/etfs/lyxor-leverage-cac-40-historical-data');
 
             // j'externalise l'insertion des données du CAC et du LVC en BDD dans un service dédié
             $newData = $saveDataInDatabase->appendData($data, Cac::class);

@@ -6,6 +6,12 @@
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
     <div class="container-fluid">
 
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger text-center" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+
         <div class="row ms-lg-4">
             {# colonne de gauche pour le tableau #}
             <div class="col-auto mt-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
