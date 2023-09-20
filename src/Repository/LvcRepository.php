@@ -70,4 +70,16 @@ class LvcRepository extends ServiceEntityRepository
         // on retourne un tableau des objets insérés
         return $lvcEntities;
     }
+
+    public function findLastTenClosingDesc()
+    {
+        return $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select('lvc.closing')
+            ->from(Lvc::class, 'lvc')
+            ->orderBy('lvc.id', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+    }
 }
