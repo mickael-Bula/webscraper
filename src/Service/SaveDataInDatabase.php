@@ -87,6 +87,7 @@ class SaveDataInDatabase
      *
      * @param array $newData qui représente un tableau d'objets Cac
      * @return void
+     * @throws TransportExceptionInterface
      */
     public function checkLastHigh(array $newData): void
     {
@@ -289,7 +290,6 @@ class SaveDataInDatabase
      * met à jour les positions en attente d'un utilisateur
      * @param LastHigh $entity
      * @return void
-     * @throws TransportExceptionInterface
      */
     public function setPositions(LastHigh $entity)
     {

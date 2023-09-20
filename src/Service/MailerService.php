@@ -12,31 +12,35 @@ class MailerService
     private MailerInterface $mailer;
     private LoggerInterface $logger;
 
-    public function __construct(MailerInterface $mailer, LoggerInterface $logger)
+    public function __construct(MailerInterface $mailer, LoggerInterface $myAppLogger)
     {
         $this->mailer = $mailer;
-        $this->logger = $logger;
+        $this->logger = $myAppLogger;
     }
 
     /**
      * @return void
-     * @throws TransportExceptionInterface
      */
     public function sendEmail($positions)
     {
-        $email = (new Email())
-            ->from('hello@example.com')
-            ->to('you@example.com')
-            ->subject("mail de l'application Webtrader")
-            ->text("Vos positions ont été actualisées.");
-
+        $content = 'Contenu de mon mail de test : ';
         foreach ($positions as $position) {
-            $email->html("<p>{$position}</p>");
+            $content .= $position . ' ';
         }
 
-        // envoi du mail
-        $this->mailer->send($email);
+        $email = (new Email())
+            ->from('mickael.bula@srf.fr')
+            ->to('bula.mickael@neuf.fr')
+            ->subject("mail de l'application Webtrader")
+            ->text("Vos positions ont été actualisées.")
+            ->html('<p>' . $content . '</p>');
 
-        $this->logger->info("Mail envoyé par webtrader");
+        // envoi du mail
+        try {
+            $this->mailer->send($email);
+            $this->logger->info("Mail envoyé par webtrader");
+        } catch (TransportExceptionInterface $e) {
+            $this->logger->error(sprintf("Impossible de se connecter au transport spécifié : %s", $e->getMessage()));
+        }
     }
 }

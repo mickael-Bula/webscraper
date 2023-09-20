@@ -2,11 +2,23 @@
 
 namespace App\Service;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\BrowserKit\HttpBrowser;
 
 class DataScraper
 {
-    public static function getData($stock): array
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $myAppLogger)
+    {
+        $this->logger = $myAppLogger;
+    }
+
+    /**
+     * @param $stock
+     * @return array|null
+     */
+    public function getData($stock): ?array
     {
         $client = new HttpBrowser();    
         $crawler = $client->request('GET', $stock);
@@ -17,6 +29,13 @@ class DataScraper
             ->each(function ($node) {
                 return $node->text('rien à afficher');
             });
+
+        // Si le tableau $splitData est vide, on retourne un message d'erreur
+        if (count($rawData) === 0) {
+            $this->logger->error("Aucune données récupérées depuis le site");
+
+            return null;
+        }
         
         // la fonction array_chunk() divise le tableau passé en paramètre avec une taille fixée par le second
         $splitData = array_chunk($rawData, 7);
