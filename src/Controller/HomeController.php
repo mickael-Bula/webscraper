@@ -81,15 +81,14 @@ class HomeController extends AbstractController
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
-            // je lance la récupération des données du CAC et du LVC
             $scraper = new DataScraper($this->logger);
-            $data = $scraper->getData('https://fr.investing.com/indices/france-40-historical-data');
+            $data = $scraper->getData($_ENV['CAC_DATA']);
 
             // si aucune données n'est récupérées, on affiche un message dans le template
             if (is_null($data)) {
                 $this->addFlash('error', 'Aucune donnée récupérée');
             }
-            $lvcData = $scraper->getData('https://www.investing.com/etfs/lyxor-leverage-cac-40-historical-data');
+            $lvcData = $scraper->getData($_ENV['LVC_DATA']);
 
             // j'externalise l'insertion des données du CAC et du LVC en BDD dans un service dédié
             $newData = $saveDataInDatabase->appendData($data, Cac::class);
@@ -105,6 +104,9 @@ class HomeController extends AbstractController
             // ...puis de celles du lvc et de chacune des positions
             $saveDataInDatabase->checkLvcData($lvcData);
         }
+        // je récupère les 10 dernières clôtures du Lvc
+        $lvc = $doctrine->getRepository(Lvc::class)->findLastTenClosingDesc();
+
         // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut ne lui a été affecté...
         if (is_null($user->getHigher())) {
             // ...on le fait ici avec le dernier plus haut du Cac en BDD
@@ -119,7 +121,7 @@ class HomeController extends AbstractController
 
         return $this->render(
             'home/dashboard.html.twig',
-            compact('cac', 'waitingPositions', 'runningPositions', 'closedPositions')
+            compact('cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions')
         );
 
         //TODO Il faut ajouter sur le dashboard la buyLimit et lastHigh du user courant
