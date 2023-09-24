@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Service;
+namespace App\Tests\IntegrationTests\Service;
 
 use App\Entity\Cac;
 use App\Entity\LastHigh;
@@ -8,17 +8,16 @@ use App\Entity\User;
 use App\Service\DataScraper;
 use App\Service\MailerService;
 use App\Service\SaveDataInDatabase;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 class SaveDataInDatabaseTest extends KernelTestCase
 {
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
+    /** @var EntityManager|object|null */
     private $entityManager;
     private $userRepository;
 
@@ -44,7 +43,8 @@ class SaveDataInDatabaseTest extends KernelTestCase
     public function testAppendData()
     {
         // je crée un objet de la classe dataScraper pour lancer le scraping
-        $dataScraper = new DataScraper();
+        $logger = $this->createMock(LoggerInterface::class);
+        $dataScraper = new DataScraper($logger);
         $data = $dataScraper->getData('https://fr.investing.com/indices/france-40-historical-data');
 
         $cac = $this->entityManager->getRepository(Cac::class)->findOneBy(["id" => "10"]);
@@ -71,6 +71,8 @@ class SaveDataInDatabaseTest extends KernelTestCase
         $mailer = $this->createMock(MailerService::class);
 
         $entity = $this->entityManager->getRepository(LastHigh::class)->findAll();
+
+        // TODO : vérifier le test sur cette variable créée maois non utilisée
         $data = new SaveDataInDatabase(
             $this->entityManager,
             $this->userRepository,

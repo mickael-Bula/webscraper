@@ -2,10 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Cac;
-use App\Entity\Lvc;
+use App\Entity\{ Cac, Lvc, User };
 use App\Entity\Position;
-use App\Entity\User;
 use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
@@ -67,11 +65,8 @@ class HomeController extends AbstractController
         $session = $this->requestStack->getSession();
 
         // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
-        if (!$session->has("cac")) {
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
-        }
-        $cac = $session->get("cac");
+        $cac = $session->has('cac') ? $session->get('cac') : $utils->setEntityInSession(Cac::class);
+        $lvc = $session->has('lvc') ? $session->get('lvc') : $utils->setEntityInSession(Lvc::class);
 
         // je demande à un Service de calculer la date la plus récente attendue en base de données
         $lastDate = $utils->getMostRecentDate();
@@ -94,9 +89,9 @@ class HomeController extends AbstractController
             $newData = $saveDataInDatabase->appendData($data, Cac::class);
             $lvcData = $saveDataInDatabase->appendData($lvcData, Lvc::class);
 
-            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
+            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session. Idem pour les clôtures du Lvc
+            $cac = $utils->setEntityInSession(Cac::class);
+            $lvc = $utils->setEntityInSession(Lvc::class);
 
             // Pour finir, je fais une mise à jour de LastHigh...
             $saveDataInDatabase->checkLastHigh($newData);
@@ -104,8 +99,6 @@ class HomeController extends AbstractController
             // ...puis de celles du lvc et de chacune des positions
             $saveDataInDatabase->checkLvcData($lvcData);
         }
-        // je récupère les 10 dernières clôtures du Lvc
-        $lvc = $doctrine->getRepository(Lvc::class)->findLastTenClosingDesc();
 
         // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut ne lui a été affecté...
         if (is_null($user->getHigher())) {

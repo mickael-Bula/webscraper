@@ -1,20 +1,30 @@
 <?php
 
-namespace App\Tests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use PHPUnit\Framework\TestCase;
 use App\Service\Utils;
+use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class UtilsTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        $entityManager = $this->createMock(EntityManager::class);
+        $session = $this->createMock(RequestStack::class)->getSession();
+        $logger = $this->createMock(LoggerInterface::class);
+        $this->utils = new Utils($entityManager, $logger, $session);
+    }
+
     /**
      * test de la transformation des données du cac en nombre décimal
      * le format 1.234,56 est particulier, la règle US étant 1,234.56 et french 1 234,56
      */
     public function testFromString(): void
     {
-        $utils = new Utils();
-        $this->assertEquals(6541.72, $utils->fromString("6.541,72"));
+        $this->assertEquals(6541.72, $this->utils->fromString("6.541,72"));
 
         $date1 = "2030-01-12";
         $date2 = "2020-12-14";
@@ -28,8 +38,7 @@ class UtilsTest extends TestCase
     public function testGetMostRecentDate(): void
     {
         // je récupère le jour de veille ouvré calculé par mon Service
-        $utils = new Utils();
-        $date = $utils->getMostRecentDate();
+        $date = $this->utils->getMostRecentDate();
 
         // je crée un timestamp à partir de la date courante
         $now = strtotime("now");

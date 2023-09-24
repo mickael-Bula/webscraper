@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Tests\Service;
+namespace App\Tests\UnitTests\Service;
 
-use PHPUnit\Framework\TestCase;
 use App\Service\DataScraper;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class DataScraperTest extends TestCase
 {
@@ -12,12 +13,14 @@ class DataScraperTest extends TestCase
      */
     public function testGetData()
     {
-        // je crée un objet de la classe dataScraper pouir lancer le scraping
-        $dataScraper = new DataScraper();
+        // je crée un objet de la classe dataScraper pour lancer le scraping en lui injectant un double du logger
+        $logger = $this->createMock(LoggerInterface::class);
+        $dataScraper = new DataScraper($logger);
+
         $data = $dataScraper->getData('https://fr.investing.com/indices/france-40-historical-data');
 
         // je fais une série de tests sur les données récupérées
         $this->assertNotCount(0, $data);
-        $this->assertCount(22, $data);
+        $this->assertCount(23, $data);
     }
 }
