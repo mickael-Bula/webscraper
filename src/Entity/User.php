@@ -49,6 +49,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $positions;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Cac::class, cascade={"persist", "remove"})
+     */
+    private $LastCacUpdated;
+
     public function __construct()
     {
         $this->positions = new ArrayCollection();
@@ -181,6 +186,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $position->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLastCacUpdated(): ?Cac
+    {
+        return $this->LastCacUpdated;
+    }
+
+    public function setLastCacUpdated(?Cac $LastCacUpdated): self
+    {
+        $this->LastCacUpdated = $LastCacUpdated;
 
         return $this;
     }
