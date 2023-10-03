@@ -20,11 +20,6 @@ class LastHigh
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=Cac::class, cascade={"persist", "remove"})
-     */
-    private $dailyCac;
-
-    /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="higher")
      */
     private $users;
@@ -55,7 +50,12 @@ class LastHigh
     private $lvcBuyLimit;
 
     /**
-     * @ORM\OneToOne(targetEntity=Lvc::class, cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Cac::class, inversedBy="lastHigher")
+     */
+    private $dailyCac;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Lvc::class, inversedBy="lastHigher")
      */
     private $dailyLvc;
 
@@ -68,18 +68,6 @@ class LastHigh
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getDailyCac(): ?Cac
-    {
-        return $this->dailyCac;
-    }
-
-    public function setDailyCac(?Cac $dailyCac): self
-    {
-        $this->dailyCac = $dailyCac;
-
-        return $this;
     }
 
     /**
@@ -186,6 +174,18 @@ class LastHigh
     public function setLvcBuyLimit(float $lvcBuyLimit): self
     {
         $this->lvcBuyLimit = $lvcBuyLimit;
+
+        return $this;
+    }
+
+    public function getDailyCac(): ?Cac
+    {
+        return $this->dailyCac;
+    }
+
+    public function setDailyCac(?Cac $dailyCac): self
+    {
+        $this->dailyCac = $dailyCac;
 
         return $this;
     }

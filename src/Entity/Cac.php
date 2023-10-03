@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CacRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +43,16 @@ class Cac
      * @ORM\Column(type="float")
      */
     private $lower;
+
+    /**
+     * @ORM\OneToMany(targetEntity=lastHigh::class, mappedBy="dailyCac")
+     */
+    private $lastHigher;
+
+    public function __construct()
+    {
+        $this->lastHigher = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +115,36 @@ class Cac
     public function setLower(float $lower): self
     {
         $this->lower = $lower;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, lastHigh>
+     */
+    public function getLastHigher(): Collection
+    {
+        return $this->lastHigher;
+    }
+
+    public function addLastHigher(lastHigh $lastHigher): self
+    {
+        if (!$this->lastHigher->contains($lastHigher)) {
+            $this->lastHigher[] = $lastHigher;
+            $lastHigher->setDailyCac($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLastHigher(lastHigh $lastHigher): self
+    {
+        if ($this->lastHigher->removeElement($lastHigher)) {
+            // set the owning side to null (unless already changed)
+            if ($lastHigher->getDailyCac() === $this) {
+                $lastHigher->setDailyCac(null);
+            }
+        }
 
         return $this;
     }

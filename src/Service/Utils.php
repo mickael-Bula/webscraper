@@ -86,14 +86,7 @@ class Utils
      */
     public function setEntityInSession($entity): array
     {
-        $entityName = explode('\\', $entity);
-        $entityName = strtolower(end($entityName));
-
-        // on logue une erreur si l'entité n'est ni cac ni lvc
-        if (!in_array($entityName, ['cac', 'lvc'])) {
-            $this->logger->error(sprintf("L'entité %s est inconnue.", $entity));
-            $this->session->getFlashBag()->add("error", "Tentative d'enregistrement d'une entité inconnue : vérifiez les logs applicatifs");
-        }
+        $entityName = $this->getEntityName($entity);
         $em = $this->entityManager->getRepository($entity);
 
         // Si l'entity est Cac, on récupère l'ensemble des 10 dernières cotations, si l'entity est Lvc on récupère uniquement les cours de clôtures
@@ -102,5 +95,23 @@ class Utils
         $this->session->set($entityName, $entities);
 
         return $this->session->get($entityName);
+    }
+
+    /**
+     * @param $entity
+     * @return string
+     */
+    private function getEntityName($entity): string
+    {
+        $entityName = explode('\\', $entity);
+        $entityName = strtolower(end($entityName));
+
+        // on logue une erreur si l'entité n'est ni cac ni lvc
+        if (!in_array($entityName, ['cac', 'lvc'])) {
+            $this->logger->error(sprintf("L'entité %s est inconnue.", $entity));
+            $this->session->getFlashBag()->add("error", "Tentative d'enregistrement d'une entité inconnue : vérifiez les logs applicatifs");
+        }
+
+        return $entityName;
     }
 }

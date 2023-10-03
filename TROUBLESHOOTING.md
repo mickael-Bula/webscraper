@@ -96,8 +96,14 @@ Puis j'ai effectué un export depuis la base d'origine et enfin un import dans l
 >NOTE : phpunit se connecte à la base de données en la suffixant avec _test.
 > Cela signifie qu'il ne faut pas ajouter ce suffixe dans la déclaration de la BDD dans le phpunit.xml.
 
+Il existe une autre manière plus rapide et plus simple de réaliser une copie de base avec PhpMyAdmin : utiliser le menu Opération > Copier la table vers
+
+Cette option permet de faire, au choix, une copie de la structure de la table ou une copie complète incluant les données.
+
 ## Développement à réaliser
 
+- Vérifier les données en session : il ne faut pas que les données d'un utilisateur soient confondues avec celles d'un autre.
+- Vérifier la mise à jour et la vérification des positions : les données scrapées peuvent avoir été mise à jour sans que les positions d'un user aient été vérifiées (cas d'une mise à jour faite à partir de la session d'un autre utilisateur)
 - Ajouter sur le dashboard le dernier Last High
 - Ajouter une colonne avec le cours de clôture du Lvc dans le tableau du Cac (ou ajouter un tableau équivalent à celui de Cac ?)
 - Modifier le design des positions

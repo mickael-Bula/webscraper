@@ -62,6 +62,7 @@ class HomeController extends AbstractController
         $user = $this->getUser();
 
         $cacRepository = $doctrine->getRepository(Cac::class);
+        $lvcRepository = $doctrine->getRepository(Lvc::class);
         $session = $this->requestStack->getSession();
 
         // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
@@ -77,34 +78,39 @@ class HomeController extends AbstractController
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
             $scraper = new DataScraper($this->logger);
-            $data = $scraper->getData($_ENV['CAC_DATA']);
-
-            // si aucune données n'est récupérées, on affiche un message dans le template
-            if (is_null($data)) {
-                $this->addFlash('error', 'Aucune donnée récupérée');
-            }
+            $cacData = $scraper->getData($_ENV['CAC_DATA']);
             $lvcData = $scraper->getData($_ENV['LVC_DATA']);
 
-            // j'externalise l'insertion des données du CAC et du LVC en BDD dans un service dédié
-            $newData = $saveDataInDatabase->appendData($data, Cac::class);
-            $lvcData = $saveDataInDatabase->appendData($lvcData, Lvc::class);
+            // si aucune données n'est récupérée, on affiche un message dans le template
+            if (is_null($cacData)) {
+                $this->addFlash('error', 'Aucune donnée récupérée');
+            }
 
-            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session. Idem pour les clôtures du Lvc
+            // j'externalise l'insertion des données du CAC et du LVC en BDD à l'aide d'un service dédié
+            $saveDataInDatabase->appendData($cacData, Cac::class);
+            $saveDataInDatabase->appendData($lvcData, Lvc::class);
+
+            // je récupère les 10 données les plus récentes en BDD pour les enregistrer en session. Idem pour les clôtures du Lvc
             $cac = $utils->setEntityInSession(Cac::class);
             $lvc = $utils->setEntityInSession(Lvc::class);
-
-            // Pour finir, je fais une mise à jour de LastHigh...
-            $saveDataInDatabase->checkLastHigh($newData);
-
-            // ...puis de celles du lvc et de chacune des positions
-            $saveDataInDatabase->checkLvcData($lvcData);
         }
-
         // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut ne lui a été affecté...
         if (is_null($user->getHigher())) {
             // ...on le fait ici avec le dernier plus haut du Cac en BDD
             $saveDataInDatabase->setHigher($cacRepository->findOneBy([], ['id' => 'DESC']));
         };
+
+        // récupération en base de la liste des données à mettre à jour
+        $cacList = $saveDataInDatabase->dataToCheck();
+        // pour chacune, on actualise le plus haut local et les positions
+        foreach ($cacList as $cacData) {
+            $saveDataInDatabase->checkLastHigh($cacData);
+            // récupération du lvc contemporain au cac, puis mise à jour de celui-ci
+            $lvcData = $lvcRepository->findOneBy(["createdAt" => $cacData->getCreatedAt()]);
+            $saveDataInDatabase->checkLvcData($lvcData);
+            // met à jour la date de la dernière visite de l'utilisateur
+            $saveDataInDatabase->updateLastCac($cacData);
+        }
 
         // je récupère toutes les positions pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);

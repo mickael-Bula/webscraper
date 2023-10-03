@@ -46,13 +46,13 @@ class PositionRepository extends ServiceEntityRepository
      */
     public function getIsWaitingPositionsByBuyLimitID(Position $position)
     {
-        $qb = $this
+        return $this
             ->createQueryBuilder('p')
             ->where('p.isWaiting = true')
-            ->andWhere('p.buyLimit < :id')
-            ->setParameter('id', $position->getBuyLimit())
-            ->orderBy('p.buyLimit', 'ASC');
-
-        return $qb->getQuery()->execute();
+            ->andWhere('p.buyLimit < :buyLimit')
+            ->setParameter('buyLimit', $position->getBuyLimit())
+            ->orderBy('p.buyLimit', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }
