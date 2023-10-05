@@ -100,6 +100,38 @@ Il existe une autre manière plus rapide et plus simple de réaliser une copie d
 
 Cette option permet de faire, au choix, une copie de la structure de la table ou une copie complète incluant les données.
 
+## Modification du schéma de la base de données
+
+J'avais fait une erreur lors de la modélisation de ma base de données : la relation One To One entre cac et Last High devait en fait être One To Many.
+Cela empêchait d'ajouter des nouveaux Last_High dès lors que le cours du Cac était déjà présent dans la table (pas de duplication en raison d'une clé contrainte de clé unique).
+
+Il m'a donc fallu changer de schéma, mais ce qui est simple sur le papier ne l'est pas avec une base contenant des données.
+
+Après avoir cherché et tenté plusieurs solution, j'en suis arrivé à la procédure suivante :
+
+- modifier les relations directement dans le code des entités, y compris les annotations
+- repartir d'une base vierge, créée avec Doctrine en spécifiant son nom dans le .env
+- lancer les commandes : 
+
+```bash
+$ php bin/console doctrine:database:create
+$ php bin/console doctrine:schema:create
+$ php bin/console doctrine:migrations:migrate # j'avais un seul fichier de migration reprenant les nouvelles relations 
+```
+
+- supprimer dans la table originale la colonne id (pour d'affranchir de la clé primaire et de son lien avec la clé unique)
+- remettre l'index primaire à 1 (pour repartir sur une base propre)
+- regénérer une colonne `id` avec un index AUTO INCREMENT
+- copier les données de la table d'origine (sans la structure) de l'ancienne base vers la nouvelle, ceci pour cac et lvc
+
+Les commandes sql sont les suivantes : 
+
+```sql
+ALTER TABLE `cac` DROP `id`;    -- il est plus efficace de supprimer la colonne depuis l'interface phpMyAdmin : table cac > structure > supprimer
+ALTER TABLE `cac` AUTO_INCREMENT = 1;
+ALTER TABLE `cac` ADD `id` int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+```
+
 ## Développement à réaliser
 
 - Vérifier les données en session : il ne faut pas que les données d'un utilisateur soient confondues avec celles d'un autre.
