@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Position;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -23,13 +24,17 @@ class MailerService
      */
     public function sendEmail($positions)
     {
+        // TODO : gérer le message envoyé avec les infos liées au statut des positions touchées notamment. A voir comment formuler le message
         $content = 'Contenu de mon mail de test : ';
         foreach ($positions as $position) {
-            $content .= $position . ' ';
+            /** @var Position $position */
+             $content .= 'La position avec une limite d\'achat sur le CAC à ' . $position->getBuyLimit()->getBuyLimit() . ' points a été touchée.' . PHP_EOL;
+             $content .= 'La limite d\'achat sur le LVC est ' . $position->getBuyLimit()->getLvcBuyLimit() . ' €' . PHP_EOL;
+             $content .= "Le statut de la position passe du statut xxx à yyy";
         }
 
         $email = (new Email())
-            ->from('mickael.bula@srf.fr')
+            ->from('mickael.bula@sfr.fr')
             ->to('bula.mickael@neuf.fr')
             ->subject("mail de l'application Webtrader")
             ->text("Vos positions ont été actualisées.")

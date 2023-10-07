@@ -9,3 +9,5 @@ AAAA-JJ-MM : pattern des dates
 2023-01-10 : Ajoute un champ LastCacUpdated dans la table User pour conserver une référence vers l'entité Cac en base lors de la dernière connexion de l'utilisateur. Si aucune référence n'est trouvée en base, on lui affecte par défaut la référence la plus récente.
 
 2023-07-10 : Modifie l'alogorithme de mise à jour ou de création des positions en attente. Si le nombre de positions en attente est différent de 0 ou de 3, c'est qu'au moins une position a été passée en iRunning et on ne met pas à jour pour geler la buyLimit.
+
+2023-07-10 : Modifie la méthode checkIsWaitingPositions() pour récupérer uniquement les positions isWaiting lorsqu'elles sont au nombre de trois pour une même buyLimit. Cela évite de supprimer des positions en attente appartenant à un cycle d'achat en cours, c'est-à-dire pour lequel au moins une position a été passée en isRunning.

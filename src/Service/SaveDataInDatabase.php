@@ -141,9 +141,11 @@ class SaveDataInDatabase
                     // ...on génère un nouveau point haut...
                     $this->setHigher($position->getBuyLimit()->getDailyCac());
                     // ...puis on récupère toutes les positions en attente qui ont un point haut différent...
-                    $isWaitingPositions = $this->checkIsWaitingPositions($position);
-                    // ...pour enfin les supprimer si elles existent
-                    if ($isWaitingPositions) $this->removeIsWaitingPositions($isWaitingPositions);
+                    $isWaitingPositions = $this->getIsWaitingPositions($position);
+                    // ...pour vérifier celles qui sont toujours au nombre de 3 pour une même buyLimit (pas de position passée à isRunning)...
+                    $isWaitingpositionsChecked = $this->checkIsWaitingPositions($isWaitingPositions);
+                    // ...et les supprimer
+                    if ($isWaitingPositions) $this->removeIsWaitingPositions($isWaitingpositionsChecked);
                 }
             }
         }
@@ -356,6 +358,7 @@ class SaveDataInDatabase
      */
     public function closePosition(Lvc $lvc, Position $position)
     {
+        //FIXME ajouter un appel vers la vérification des positions avec la même buyLimit pour suppression
         $position->setIsRunning(false);
         $position->setIsClosed(true);
         $position->setSellDate($lvc->getCreatedAt());
@@ -368,11 +371,36 @@ class SaveDataInDatabase
      * @param Position $position
      * @return array|null
      */
-    public function checkIsWaitingPositions(Position $position): ?array
+    public function getIsWaitingPositions(Position $position): ?array
     {
         return $this->entityManager
             ->getRepository(Position::class)
             ->getIsWaitingPositionsByBuyLimitID($position);
+    }
+
+    /**
+     * Récupère les positions d'une même buyLimit lorsqu'elles sont au nombre de trois
+     * @param array $positions
+     * @return array|null
+     */
+    public function checkIsWaitingPositions(array $positions): ?array
+    {
+        // on trie les positions en fonction de la propriété buyLimit
+        $results = array_reduce($positions, function ($result, $position) {
+            /** @var Position $position */
+            // je récupère l'id de la propriété buyLimit. S'il n'existe pas dans le tableau $result, je l'ajoute.
+            $buyLimit  = $position->getBuyLimit()->getId();
+            if (!isset($result[$buyLimit])) {
+                $result[$buyLimit] = [];
+            }
+            // j'ajoute la position courante en valeur de la clé correspondant à sa buyLimit
+            $result[$buyLimit][] = $position;
+
+            return $result;
+        }, []);
+
+        // pour chacun des résultats, si on trouve 3 positions, on les ajoute à la liste des positions à traiter
+        return array_filter($results, fn($item) => count($item) === 3);
     }
 
     /**

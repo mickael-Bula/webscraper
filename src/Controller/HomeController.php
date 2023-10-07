@@ -59,11 +59,14 @@ class HomeController extends AbstractController
          * Récupère l'utilisateur en session. Je précise le type User pour accéder à son id
          * @var User $user
          */
-        $user = $this->getUser();
-
         $cacRepository = $doctrine->getRepository(Cac::class);
         $lvcRepository = $doctrine->getRepository(Lvc::class);
         $session = $this->requestStack->getSession();
+
+        //FIXME Il faut ajouter une méthode qui supprime les positions isWaiting lorsqu'une position isRunning d'une même buyLimt passe au statut isClosed
+        // Ajouter une nouvelle table pour récupérer le statut d'une position (isWaiting, isRunning, isClosed)
+        // une fois fait, mettre à jour le mailer pour afficher le changment de statut de la position
+        // Ajouter des index pour accélérer les requêtes, notamment sur cac et lvc (https://zestedesavoir.com/tutoriels/730/administrez-vos-bases-de-donnees-avec-mysql/949_index-jointures-et-sous-requetes/3935_index/)
 
         // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
         $cac = $session->has('cac') ? $session->get('cac') : $utils->setEntityInSession(Cac::class);
@@ -105,10 +108,11 @@ class HomeController extends AbstractController
         // pour chacune, on actualise le plus haut local et les positions
         foreach ($cacList as $cacData) {
             $saveDataInDatabase->checkLastHigh($cacData);
-            // récupération du lvc contemporain au cac, puis mise à jour de celui-ci
+            // récupération du lvc contemporain au cac
             $lvcData = $lvcRepository->findOneBy(["createdAt" => $cacData->getCreatedAt()]);
+            // mise à jour des positions...
             $saveDataInDatabase->checkLvcData($lvcData);
-            // met à jour la date de la dernière visite de l'utilisateur
+            // ...puis de la date de la dernière visite de l'utilisateur
             $saveDataInDatabase->updateLastCac($cacData);
         }
 
