@@ -138,8 +138,9 @@ class SaveDataInDatabase
                 $this->openPosition($lvc, $position);
                 // si la position mise à jour est la première de sa série...
                 if ($this->checkisFirst($position)) {
-                    // ...on génère un nouveau point haut...
-                    $this->setHigher($position->getBuyLimit()->getDailyCac());
+                    // ...on génère un nouveau point haut en transmettant l'objet cac contemporain du lvc courant...
+                    $cac = $this->entityManager->getRepository(Cac::class)->findOneBy(['createdAt' => $lvc->getCreatedAt()]);
+                    $this->setHigher($cac);
                     // ...puis on récupère toutes les positions en attente qui ont un point haut différent...
                     $isWaitingPositions = $this->getIsWaitingPositions($position);
                     // ...pour vérifier celles qui sont toujours au nombre de 3 pour une même buyLimit (pas de position passée à isRunning)...
@@ -201,15 +202,13 @@ class SaveDataInDatabase
         // je récupère le plus haut de l'objet Cac transmis en paramètre
         $lastHigher = $cac->getHigher();
 
+        // FIXME Il vaudrait mieux faier un update du lastHigh du user plutôt que de créer une nouvelle instance
         // je crée une nouvelle instance de LastHigh et je l'hydrate
         $lastHighEntity = new LastHigh();
         $lastHighEntity->setHigher($lastHigher);
         $buyLimit = $lastHigher - ($lastHigher * Position::SPREAD);    // buyLimit se situe 6 % sous higher
         $lastHighEntity->setBuyLimit(round($buyLimit, 2));
         $lastHighEntity->setDailyCac($cac);
-
-        // J'assigne ce plus haut à l'utilisateur courant
-        $user->setHigher($lastHighEntity);
 
         // à partir de l'entity Cac, je récupère l'objet LVC contemporain
         $lvc = $lvcRepository->findOneBy(["createdAt" => $cac->getCreatedAt()]);
@@ -223,8 +222,13 @@ class SaveDataInDatabase
         $lastHighEntity->setLvcBuyLimit(round($lvcBuyLimit, 2));
         $lastHighEntity->setDailyLvc($lvc);
 
-        // je persiste les données et je les insère en base
+        // je persiste les données et je les insère en base. Je le fais avant de le transmettre au user pour qu'un id soit créé
         $lastHighRepository->add($lastHighEntity, true);
+
+        // J'assigne ce plus haut à l'utilisateur courant et j'enregistre à nouveau en base
+        $user->setHigher($lastHighEntity);
+
+        $this->entityManager->flush();
 
         // je crée également les positions en rapport avec la nouvelle buyLimit
         $this->setPositions($lastHighEntity);
@@ -295,7 +299,10 @@ class SaveDataInDatabase
         $positions = $this->getPositionsOfCurrentUser("isWaiting");
 
         // je fixe les % d'écart entre les lignes pour le cac et pour le lvc (qui a un levier x2)
-        $delta = [[0, 2, 4], [0, 4, 8]];
+        $delta = [
+            'cac' => [0, 2, 4],
+            'lvc' => [0, 4, 8]
+        ];
 
         // je récupère le nombre de positions isWaiting actuellement ouvertes.
         $nbPositions = count($positions) === 0 ? 3 : count($positions);
@@ -316,12 +323,12 @@ class SaveDataInDatabase
             $position = $nbPositions === 0 ? new Position() : $positions[$i];
             $position->setBuyLimit($entity);
             $buyLimit = $entity->getBuyLimit();
-            $positionDeltaCac = $buyLimit - ($buyLimit * $delta[0][$i] /100);  // les positions sont prises à 0, -2 et -4 %
+            $positionDeltaCac = $buyLimit - ($buyLimit * $delta['cac'][$i] /100);  // les positions sont prises à 0, -2 et -4 %
             $position->setBuyTarget(round($positionDeltaCac, 2));
             $position->setIsWaiting(true);
             $position->setUser($user);
             $lvcBuyLimit = $entity->getLvcBuyLimit();
-            $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta[1][$i] /100);  // les positions sont prises à 0, -4 et -8 %
+            $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta['lvc'][$i] /100);  // les positions sont prises à 0, -4 et -8 %
             $position->setLvcBuyTarget(round($positionDeltaLvc, 2));
             $position->setQuantity(round(Position::LINE_VALUE / $positionDeltaLvc));
             $position->setLvcSellTarget(round($positionDeltaLvc * 1.12, 2));    // revente d'une position à +12 %
@@ -367,7 +374,7 @@ class SaveDataInDatabase
     }
 
     /**
-     * Retourne les positions 'isWaiting' dont la buyLimit_id est inférieure à celle de la position courante
+     * Retourne les positions 'isWaiting' dont la buyLimit_id est différente de celle de la position courante
      * @param Position $position
      * @return array|null
      */

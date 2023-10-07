@@ -59,13 +59,15 @@ class HomeController extends AbstractController
          * Récupère l'utilisateur en session. Je précise le type User pour accéder à son id
          * @var User $user
          */
+        $user = $this->getUser();
+
         $cacRepository = $doctrine->getRepository(Cac::class);
         $lvcRepository = $doctrine->getRepository(Lvc::class);
         $session = $this->requestStack->getSession();
 
         //FIXME Il faut ajouter une méthode qui supprime les positions isWaiting lorsqu'une position isRunning d'une même buyLimt passe au statut isClosed
         // Ajouter une nouvelle table pour récupérer le statut d'une position (isWaiting, isRunning, isClosed)
-        // une fois fait, mettre à jour le mailer pour afficher le changment de statut de la position
+        // une fois fait, mettre à jour le mailer pour afficher le changement de statut de la position
         // Ajouter des index pour accélérer les requêtes, notamment sur cac et lvc (https://zestedesavoir.com/tutoriels/730/administrez-vos-bases-de-donnees-avec-mysql/949_index-jointures-et-sous-requetes/3935_index/)
 
         // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
