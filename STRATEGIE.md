@@ -8,6 +8,12 @@ J'en reprends ici les grandes lignes.
 
 J'entends par *position* l'ouverture d'un cycle d'achat de trois lignes, prises à chaque variation de -2 %.
 
+Le cycle de vie d'une position a trois états :
+
+- isWaiting : sa buyLimit n'a pas été touchée
+- isRunning : sa buyLimit a été touchée mais pas encore sa SellTarget
+- isSold : sa buyTarget a été touchée
+
 ## Définition d'une ligne
 
 J'entends par *ligne* l'achat de LVC pour un montant de 750 €.
@@ -21,6 +27,11 @@ Les écarts entre les 3 lignes d'achat étant de 2%, ce seuil permet d'avoir des
 Lorsque le seuil d'achat est touché, donc à l'achat de la première ligne, ce seuil devient le nouveau plus haut.
 A partir de ce plus haut, une nouvelle limite d'achat est calculée 6% plus bas, avec des achats sur 3 niveaux séparés de 2%.
 
+En outre, lorsque la première position d'un cycle d'achat passe en isRunning, la buyLimit des autres positions de ce cycle est figée.
+
+Lorsque la SellTarget d'une position est touchée, toutes les positions isWaiting appartenant au même cycle d'achat sont supprimées.
+Les positions isRunning attendront que leur SellTarget soit touchées.
+
 ## Trade
 
 J'entends par *trade* l'achat d'une ou plusieurs lignes en rapport avec un plus haut. Un trade peut donc comporter jusqu'à 3 lignes.
@@ -28,7 +39,7 @@ Un trade est clôturé à la revente de la dernière de ces lignes.
 
 ## Trades multiples
 
-Chaque *trade* étant lié à un plus haut particulier, et chaque entrée dans un *trade* se caractérisant par la définition d'un nouveau plus haut avec ses lignes, plusieurs *trade* peuvent coexister.
+Chaque *trade* étant lié à un plus haut particulier, et chaque entrée dans un *trade* se caractérisant par la définition d'un nouveau plus haut avec ses lignes, plusieurs *trades* peuvent coexister.
 
 ## Seuil de revente
 

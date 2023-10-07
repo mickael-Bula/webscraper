@@ -6,6 +6,7 @@ use App\Entity\{Cac, LastHigh, Lvc, Position, User};
 use App\Repository\UserRepository;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Security\Core\Security;
@@ -17,13 +18,15 @@ class SaveDataInDatabase
     private Security $security;
     private RequestStack $requestStack;
     private MailerService $mailer;
+    private LoggerInterface $logger;
 
     public function __construct(
         EntityManagerInterface $entityManager,  // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
         UserRepository $userRepository,
         Security $security,
         RequestStack $requestStack,
-        MailerService $mailer
+        MailerService $mailer,
+        LoggerInterface $myAppLogger
     )
     {
         $this->entityManager    = $entityManager;
@@ -31,6 +34,7 @@ class SaveDataInDatabase
         $this->security         = $security;
         $this->requestStack     = $requestStack;
         $this->mailer           = $mailer;
+        $this->logger           = $myAppLogger;
     }
 
     /**
@@ -276,7 +280,7 @@ class SaveDataInDatabase
     }
 
     /**
-     * met à jour les positions en attente d'un utilisateur
+     * Met à jour les positions en attente d'un utilisateur dont la buyLimit n'a pas été touchée
      * @param LastHigh $entity
      * @return void
      */
@@ -291,9 +295,23 @@ class SaveDataInDatabase
         // je fixe les % d'écart entre les lignes pour le cac et pour le lvc (qui a un levier x2)
         $delta = [[0, 2, 4], [0, 4, 8]];
 
-        // je boucle sur le tableau des positions s'il n'est pas vide, sinon j'en crée de nouvelles
-        for ($i=0; $i < 3; $i++) {
-            $position = (count($positions) === 3) ? $positions[$i] : new Position();
+        // je récupère le nombre de positions isWaiting actuellement ouvertes.
+        $nbPositions = count($positions) === 0 ? 3 : count($positions);
+
+        /* Si la taille du tableau n'est pas égal à 0 ou 3, c'est qu'une position du cycle d'achat
+        a été passée en isRunning : les positions isWaiting de la même buyLimit sont alors gelées */
+        if (!in_array(count($positions), ["0", "3"])) {
+            $this->logger->info(sprintf(
+                "Pas de mise à jour des positions : au moins une position isRunning existe avec une buyLimit = %s",
+                $entity->getBuyLimit()
+            ));
+
+            return;
+        }
+
+        // je boucle sur les positions existantes, sinon j'en crée 3 nouvelles
+        for ($i = 0; $i < 3; $i++) {
+            $position = $nbPositions === 0 ? new Position() : $positions[$i];
             $position->setBuyLimit($entity);
             $buyLimit = $entity->getBuyLimit();
             $positionDeltaCac = $buyLimit - ($buyLimit * $delta[0][$i] /100);  // les positions sont prises à 0, -2 et -4 %
@@ -310,7 +328,8 @@ class SaveDataInDatabase
         }
         $this->entityManager->flush();
 
-        $this->mailer->sendEmail($positions);
+        // NOTE : 100 mails par mois dans le cadre du plan gratuit proposé par Mailtrap
+         $this->mailer->sendEmail($positions);
     }
 
     /**
