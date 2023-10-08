@@ -119,7 +119,7 @@ $ php bin/console doctrine:schema:create
 $ php bin/console doctrine:migrations:migrate # j'avais un seul fichier de migration reprenant les nouvelles relations 
 ```
 
-- supprimer dans la table originale la colonne id (pour d'affranchir de la clé primaire et de son lien avec la clé unique)
+- supprimer dans la table originale la colonne id (pour s'affranchir de la clé primaire et de son lien avec la clé unique)
 - remettre l'index primaire à 1 (pour repartir sur une base propre)
 - regénérer une colonne `id` avec un index AUTO INCREMENT
 - copier les données de la table d'origine (sans la structure) de l'ancienne base vers la nouvelle, ceci pour cac et lvc
@@ -127,6 +127,9 @@ $ php bin/console doctrine:migrations:migrate # j'avais un seul fichier de migra
 Les commandes sql sont les suivantes : 
 
 ```sql
+SHOW CREATE TABLE `cac`;        -- met en évidence les clés étrangères et les index a supprimer pour libérer la colonne `id`
+ALTER TABLE `last_high` DROP FOREIGN KEY FK_672E2009AA5DF1C9;   -- suppression d'une clé étrangère liée à cac.id
+ALTER TABLE `user` DROP INDEX IDX_8D93D6495D69E1F5;             -- la même chose, mais pour un index
 ALTER TABLE `cac` DROP `id`;    -- il est plus efficace de supprimer la colonne depuis l'interface phpMyAdmin : table cac > structure > supprimer
 ALTER TABLE `cac` AUTO_INCREMENT = 1;
 ALTER TABLE `cac` ADD `id` int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;

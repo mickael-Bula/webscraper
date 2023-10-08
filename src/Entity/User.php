@@ -50,9 +50,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $positions;
 
     /**
-     * @ORM\OneToOne(targetEntity=Cac::class, cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=cac::class, inversedBy="users")
      */
-    private $LastCacUpdated;
+    private $lastCacUpdated;
 
     public function __construct()
     {
@@ -190,14 +190,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLastCacUpdated(): ?Cac
+    public function getLastCacUpdated(): ?cac
     {
-        return $this->LastCacUpdated;
+        return $this->lastCacUpdated;
     }
 
-    public function setLastCacUpdated(?Cac $LastCacUpdated): self
+    public function setLastCacUpdated(?cac $lastCacUpdated): self
     {
-        $this->LastCacUpdated = $LastCacUpdated;
+        $this->lastCacUpdated = $lastCacUpdated;
 
         return $this;
     }

@@ -284,11 +284,11 @@ class SaveDataInDatabase
         // je persite et j'enregistre les données
         $lastHighRepository->add($lastHigh, true);
 
-        // je récupère les positions en attente du user liées au lasHigh pour les mettre à jour
+        // je récupère les positions en attente du user liées au lastHigh (via la buyLimit) pour les mettre à jour
         $positions = $positionsRepository->findBy([
             "User" => $this->getCurrentUser(),
             "isWaiting" => true,
-            "lashHigh" => $lastHigh->getId()
+            "buyLimit" => $lastHigh->getId()
         ]);
         $this->setPositions($lastHigh, $positions);
     }
