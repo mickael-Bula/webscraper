@@ -24,6 +24,8 @@ class MailerService
      */
     public function sendEmail($positions)
     {
+        //FIX: Lorsqu'une position change de statut, un mail est envoyé : il faut gérer ce cas d'un paramètre qui n'est pas un tableau
+
         // TODO : gérer le message envoyé avec les infos liées au statut des positions touchées notamment. A voir comment formuler le message
         $content = 'Contenu de mon mail de test : ';
         foreach ($positions as $position) {
