@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\{Cac, LastHigh, Lvc, Position, User};
+use App\Entity\{ Cac, LastHigh, Lvc, Position, User };
 use App\Repository\UserRepository;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,17 +14,17 @@ use Symfony\Component\Security\Core\Security;
 class SaveDataInDatabase
 {
     private EntityManagerInterface $entityManager;
-    private UserRepository $userRepository;
-    private Security $security;
-    private MailerService $mailer;
-    private LoggerInterface $logger;
+    private UserRepository          $userRepository;
+    private Security                $security;
+    private MailerService           $mailer;
+    private LoggerInterface         $logger;
 
     public function __construct(
         EntityManagerInterface $entityManager,  // pour accéder à Doctrine hors du controller, je dois injecter l'EntityManager
-        UserRepository $userRepository,
-        Security $security,
-        MailerService $mailer,
-        LoggerInterface $myAppLogger
+        UserRepository         $userRepository,
+        Security               $security,
+        MailerService          $mailer,
+        LoggerInterface        $myAppLogger
     )
     {
         $this->entityManager    = $entityManager;
@@ -73,17 +73,41 @@ class SaveDataInDatabase
         }
 
         // tri des entrées postérieures à lastDate
-         $newData = [];
-         foreach ($data as $row) {
-             if ($lastDate !== $row[0]) {
-                 $newData[] = $row;
-             } else {
-                 break;
-             }
+        $newData = [];
+        foreach ($data as $row) {
+            if ($lastDate !== $row[0]) {
+                $newData[] = $row;
+            } else {
+                break;
+            }
         }
 
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
         $entityRepository->saveData(array_reverse($newData));
+    }
+
+    /**
+     * Actualise le plus haut local et les positions d'une liste de données Cac
+     * @param array $cacData
+     * @return void
+     */
+    public function updateCacData(array $cacData): void
+    {
+        $lvcRepository = $this->entityManager->getRepository(Lvc::class);
+
+        foreach ($cacData as $cac) {
+            $this->checkLastHigh($cac);
+            // récupération du lvc contemporain au cac
+            $lvcData = $lvcRepository->findOneBy(["createdAt" => $cac->getCreatedAt()]);
+            if ($lvcData) {
+                // mise à jour des positions...
+                $this->checkLvcData($lvcData);
+            } else {
+                $this->logger->error("Pas de LVC correpondant pour le CAC fournit en date du %s", $cac->getCreatedAt());
+            }
+            // ...puis de la date de la dernière visite de l'utilisateur
+            $this->updateLastCac($cac);
+        }
     }
 
     /**
@@ -193,7 +217,7 @@ class SaveDataInDatabase
     public function getIsWaitingPositionsByLashHighId(User $user, LastHigh $lastHigh): array
     {
         return $this->entityManager->getRepository(Position::class)
-            ->findBy(["User" => $user->getId(),"isWaiting" => true, "buyLimit" => $lastHigh->getId()]);
+            ->findBy(["User" => $user->getId(), "isWaiting" => true, "buyLimit" => $lastHigh->getId()]);
     }
 
     /**
@@ -343,22 +367,22 @@ class SaveDataInDatabase
             $position = $nbPositions === 0 ? new Position() : $positions[$i];
             $position->setBuyLimit($lastHigh);
             $buyLimit = $lastHigh->getBuyLimit();
-            $positionDeltaCac = $buyLimit - ($buyLimit * $delta['cac'][$i] /100);  // les positions sont prises à 0, -2 et -4 %
+            $positionDeltaCac = $buyLimit - ($buyLimit * $delta['cac'][$i] / 100);  // les positions sont prises à 0, -2 et -4 %
             $position->setBuyTarget(round($positionDeltaCac, 2));
             $position->setIsWaiting(true);
             $position->setUser($user);
             $lvcBuyLimit = $lastHigh->getLvcBuyLimit();
-            $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta['lvc'][$i] /100);  // les positions sont prises à 0, -4 et -8 %
+            $positionDeltaLvc = $lvcBuyLimit - ($lvcBuyLimit * $delta['lvc'][$i] / 100);  // les positions sont prises à 0, -4 et -8 %
             $position->setLvcBuyTarget(round($positionDeltaLvc, 2));
             $position->setQuantity(round(Position::LINE_VALUE / $positionDeltaLvc));
-            $position->setLvcSellTarget(round($positionDeltaLvc * 1.12, 2));    // revente d'une position à +12 %
+            $position->setLvcSellTarget(round($positionDeltaLvc * 1.2, 2));    // revente d'une position à +20 %
 
             $this->entityManager->persist($position);
         }
         $this->entityManager->flush();
 
         // NOTE : 100 mails par mois dans le cadre du plan gratuit proposé par Mailtrap
-         $this->mailer->sendEmail($positions);
+        $this->mailer->sendEmail($positions);
     }
 
     /**
@@ -381,16 +405,19 @@ class SaveDataInDatabase
 
     /**
      * Clôture une position dont l'objectif de vente a été atteint
+     * et supprime le reliquat de position en attente ayant la même buyLimiy
      * @param Lvc $lvc
      * @param Position $position
      * @return void
      */
     public function closePosition(Lvc $lvc, Position $position): void
     {
-        //FIX faire une vérification des positions isWaiting ayant la même buyLimit afin de les supprimer
         $position->setIsRunning(false);
         $position->setIsClosed(true);
         $position->setSellDate($lvc->getCreatedAt());
+
+        $positions = $this->getIsWaitingPositionsByLashHighId($this->getCurrentUser(), $position->getBuyLimit());
+        $this->removeIsWaitingPositions($positions);
 
         $this->entityManager->flush();
     }
@@ -418,7 +445,7 @@ class SaveDataInDatabase
         $results = array_reduce($positions, static function ($result, $position) {
             /** @var Position $position */
             // je récupère l'id de la propriété buyLimit. S'il n'existe pas dans le tableau $result, je l'ajoute.
-            $buyLimit  = $position->getBuyLimit() ? $position->getBuyLimit()->getId() : null;
+            $buyLimit = $position->getBuyLimit() ? $position->getBuyLimit()->getId() : null;
             if (!isset($result[$buyLimit])) {
                 $result[$buyLimit] = [];
             }
@@ -472,9 +499,10 @@ class SaveDataInDatabase
 
         // si lastCacUpdated est null, je lui assigne en référence la dernière donnée du cac disponible en BDD
         if (is_null($user->getLastCacUpdated())) {
+            $cac = $cacRepository->findOneBy([], ['id' => 'DESC']);
+
             //FIX Lignes utilisées pour les tests
-//            $cac = $cacRepository->findOneBy([], ['id' => 'DESC']);
-            $cac = $cacRepository->findOneBy(['id' => 14]);
+//            $cac = $cacRepository->findOneBy(['id' => 14]);
             $user->setLastCacUpdated($cac);
             $this->entityManager->flush();
         }
