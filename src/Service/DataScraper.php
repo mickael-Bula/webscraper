@@ -44,7 +44,7 @@ class DataScraper
         $splitData = array_filter($splitData, fn($row) => preg_match("/^\d{2}\/\d{2}\/\d{4}$/", $row[0]));
 
         // si l'on est un jour de semaine (lundi=1...) ET qu'il est moins de 18h, on considère le marché ouvert
-        $isOpen = in_array(date('w'), range(1, 5)) && date("G") <= "18";
+        $isOpen = in_array(date('w'), range(1, 5), true) && date("G") <= "18";
 
         // si le marché est ouvert, je supprime la valeur du jour courant du tableau de résultats
         if ($isOpen) {
@@ -52,6 +52,6 @@ class DataScraper
         }
 
         // je filtre le tableau de résultats pour ne récupérer que les données utiles (date, closing, opening, higher, lower)
-        return array_map(fn($chunk) => array_slice($chunk, 0, 5), $splitData);
+        return array_map(static fn($chunk) => array_slice($chunk, 0, 5), $splitData);
     }
 }

@@ -96,8 +96,49 @@ Puis j'ai effectué un export depuis la base d'origine et enfin un import dans l
 >NOTE : phpunit se connecte à la base de données en la suffixant avec _test.
 > Cela signifie qu'il ne faut pas ajouter ce suffixe dans la déclaration de la BDD dans le phpunit.xml.
 
+Il existe une autre manière plus rapide et plus simple de réaliser une copie de base avec PhpMyAdmin : utiliser le menu Opération > Copier la table vers
+
+Cette option permet de faire, au choix, une copie de la structure de la table ou une copie complète incluant les données.
+
+## Modification du schéma de la base de données
+
+J'avais fait une erreur lors de la modélisation de ma base de données : la relation One To One entre cac et Last High devait en fait être One To Many.
+Cela empêchait d'ajouter des nouveaux Last_High dès lors que le cours du Cac était déjà présent dans la table (pas de duplication en raison d'une clé contrainte de clé unique).
+
+Il m'a donc fallu changer de schéma, mais ce qui est simple sur le papier ne l'est pas avec une base contenant des données.
+
+Après avoir cherché et tenté plusieurs solution, j'en suis arrivé à la procédure suivante :
+
+- modifier les relations directement dans le code des entités, y compris les annotations
+- repartir d'une base vierge, créée avec Doctrine en spécifiant son nom dans le .env
+- lancer les commandes : 
+
+```bash
+$ php bin/console doctrine:database:create
+$ php bin/console doctrine:schema:create
+$ php bin/console doctrine:migrations:migrate # j'avais un seul fichier de migration reprenant les nouvelles relations 
+```
+
+- supprimer dans la table originale la colonne id (pour s'affranchir de la clé primaire et de son lien avec la clé unique)
+- remettre l'index primaire à 1 (pour repartir sur une base propre)
+- regénérer une colonne `id` avec un index AUTO INCREMENT
+- copier les données de la table d'origine (sans la structure) de l'ancienne base vers la nouvelle, ceci pour cac et lvc
+
+Les commandes sql sont les suivantes : 
+
+```sql
+SHOW CREATE TABLE `cac`;        -- met en évidence les clés étrangères et les index a supprimer pour libérer la colonne `id`
+ALTER TABLE `last_high` DROP FOREIGN KEY FK_672E2009AA5DF1C9;   -- suppression d'une clé étrangère liée à cac.id
+ALTER TABLE `user` DROP INDEX IDX_8D93D6495D69E1F5;             -- la même chose, mais pour un index
+ALTER TABLE `cac` DROP `id`;    -- il est plus efficace de supprimer la colonne depuis l'interface phpMyAdmin : table cac > structure > supprimer
+ALTER TABLE `cac` AUTO_INCREMENT = 1;
+ALTER TABLE `cac` ADD `id` int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+```
+
 ## Développement à réaliser
 
+- Vérifier les données en session : il ne faut pas que les données d'un utilisateur soient confondues avec celles d'un autre.
+- Vérifier la mise à jour et la vérification des positions : les données scrapées peuvent avoir été mise à jour sans que les positions d'un user aient été vérifiées (cas d'une mise à jour faite à partir de la session d'un autre utilisateur)
 - Ajouter sur le dashboard le dernier Last High
 - Ajouter une colonne avec le cours de clôture du Lvc dans le tableau du Cac (ou ajouter un tableau équivalent à celui de Cac ?)
 - Modifier le design des positions

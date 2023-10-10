@@ -2,10 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Cac;
-use App\Entity\Lvc;
+use App\Entity\{ Cac, Lvc, User };
 use App\Entity\Position;
-use App\Entity\User;
 use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
@@ -22,13 +20,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class HomeController extends AbstractController
 {
     private RequestStack $requestStack;
-    private MailerService $mailer;
     private LoggerInterface $logger;
 
-    public function __construct(RequestStack $requestStack, MailerService $mailer, LoggerInterface $myAppLogger)
+    public function __construct(RequestStack $requestStack, LoggerInterface $myAppLogger)
     {
         $this->requestStack = $requestStack;
-        $this->mailer = $mailer;
         $this->logger = $myAppLogger;
     }
 
@@ -49,7 +45,6 @@ class HomeController extends AbstractController
      * @param SaveDataInDatabase $saveDataInDatabase
      * @param Utils $utils
      * @return Response
-     * @throws TransportExceptionInterface
      */
     public function dashboard(
         ManagerRegistry $doctrine,
@@ -66,12 +61,13 @@ class HomeController extends AbstractController
         $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();
 
+        //FIX Ajouter une nouvelle table pour récupérer le statut d'une position (isWaiting, isRunning, isClosed)
+        // une fois fait, mettre à jour le mailer pour afficher le changement de statut de la position
+        // Ajouter des index pour accélérer les requêtes, notamment sur cac et lvc (https://zestedesavoir.com/tutoriels/730/administrez-vos-bases-de-donnees-avec-mysql/949_index-jointures-et-sous-requetes/3935_index/)
+
         // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
-        if (!$session->has("cac")) {
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
-        }
-        $cac = $session->get("cac");
+        $cac = $session->has('cac') ? $session->get('cac') : $utils->setEntityInSession(Cac::class);
+        $lvc = $session->has('lvc') ? $session->get('lvc') : $utils->setEntityInSession(Lvc::class);
 
         // je demande à un Service de calculer la date la plus récente attendue en base de données
         $lastDate = $utils->getMostRecentDate();
@@ -82,36 +78,34 @@ class HomeController extends AbstractController
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
             $scraper = new DataScraper($this->logger);
-            $data = $scraper->getData($_ENV['CAC_DATA']);
-
-            // si aucune données n'est récupérées, on affiche un message dans le template
-            if (is_null($data)) {
-                $this->addFlash('error', 'Aucune donnée récupérée');
-            }
+            $cacData = $scraper->getData($_ENV['CAC_DATA']);
             $lvcData = $scraper->getData($_ENV['LVC_DATA']);
 
-            // j'externalise l'insertion des données du CAC et du LVC en BDD dans un service dédié
-            $newData = $saveDataInDatabase->appendData($data, Cac::class);
-            $lvcData = $saveDataInDatabase->appendData($lvcData, Lvc::class);
+            // si aucune données n'est récupérée, on affiche un message dans le template
+            if (is_null($cacData)) {
+                $this->addFlash('error', 'Aucune donnée récupérée');
+            }
 
-            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
+            // j'externalise l'insertion des données du CAC et du LVC en BDD à l'aide d'un service dédié
+            $saveDataInDatabase->appendData($cacData, Cac::class);
+            $saveDataInDatabase->appendData($lvcData, Lvc::class);
 
-            // Pour finir, je fais une mise à jour de LastHigh...
-            $saveDataInDatabase->checkLastHigh($newData);
-
-            // ...puis de celles du lvc et de chacune des positions
-            $saveDataInDatabase->checkLvcData($lvcData);
+            // je récupère les 10 données les plus récentes en BDD pour les enregistrer en session. Idem pour les clôtures du Lvc
+            $cac = $utils->setEntityInSession(Cac::class);
+            $lvc = $utils->setEntityInSession(Lvc::class);
         }
-        // je récupère les 10 dernières clôtures du Lvc
-        $lvc = $doctrine->getRepository(Lvc::class)->findLastTenClosingDesc();
-
-        // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut ne lui a été affecté...
+        // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut n'a encore été affecté...
         if (is_null($user->getHigher())) {
-            // ...on le fait ici avec le dernier plus haut du Cac en BDD
+            // ...on le fait donc ici, en utilisant le plus haut de la cotation du Cac la plus récente en BDD
             $saveDataInDatabase->setHigher($cacRepository->findOneBy([], ['id' => 'DESC']));
-        };
+
+            //FIX Ligne utilisée pour les tests que je peux reproduire à partir d'une copie de la base webtrader_save_structure
+//            $saveDataInDatabase->setHigher($cacRepository->findOneBy(['id' => 14]));
+        }
+
+        // récupération de la liste des données à mettre à jour, puis enregistrement en base
+        $cacList = $saveDataInDatabase->dataToCheck();
+        $saveDataInDatabase->updateCacData($cacList);
 
         // je récupère toutes les positions pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
@@ -131,5 +125,6 @@ class HomeController extends AbstractController
         // Pour ce dernier point, il faut ajouter un formulaire
         // Il faut développer tout ce qui concerne la vue en Vue.js => permet de monter en compétence, de s'exercer en 'real'
         // A terme, il faut externaliser le scraping dans un micro-service.
+        // Présenter les positions en cours sous forme de tableau pouvant contenir jusqu'à 5 lignes différentes
     }
 }

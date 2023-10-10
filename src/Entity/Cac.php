@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CacRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +43,22 @@ class Cac
      * @ORM\Column(type="float")
      */
     private $lower;
+
+    /**
+     * @ORM\OneToMany(targetEntity=LastHigh::class, mappedBy="dailyCac")
+     */
+    private $lastHigher;
+
+    /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="lastCacUpdated")
+     */
+    private $users;
+
+    public function __construct()
+    {
+        $this->lastHigher = new ArrayCollection();
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +121,66 @@ class Cac
     public function setLower(float $lower): self
     {
         $this->lower = $lower;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, lastHigh>
+     */
+    public function getLastHigher(): Collection
+    {
+        return $this->lastHigher;
+    }
+
+    public function addLastHigher(lastHigh $lastHigher): self
+    {
+        if (!$this->lastHigher->contains($lastHigher)) {
+            $this->lastHigher[] = $lastHigher;
+            $lastHigher->setDailyCac($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLastHigher(lastHigh $lastHigher): self
+    {
+        if ($this->lastHigher->removeElement($lastHigher)) {
+            // set the owning side to null (unless already changed)
+            if ($lastHigher->getDailyCac() === $this) {
+                $lastHigher->setDailyCac(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setLastCacUpdated($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getLastCacUpdated() === $this) {
+                $user->setLastCacUpdated(null);
+            }
+        }
 
         return $this;
     }

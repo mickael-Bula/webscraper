@@ -49,6 +49,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $positions;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Cac::class, inversedBy="users")
+     */
+    private $lastCacUpdated;
+
     public function __construct()
     {
         $this->positions = new ArrayCollection();
@@ -137,7 +142,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -181,6 +186,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $position->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLastCacUpdated(): ?cac
+    {
+        return $this->lastCacUpdated;
+    }
+
+    public function setLastCacUpdated(?cac $lastCacUpdated): self
+    {
+        $this->lastCacUpdated = $lastCacUpdated;
 
         return $this;
     }

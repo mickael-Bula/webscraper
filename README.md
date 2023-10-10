@@ -60,4 +60,4 @@ Pour ajouter le logger, j'ajoute un channel et un hander dans le fichier monolog
                     channels: ["app"]   # je déclare que mon channel myapp récupère uniquement les logs du channel app (l'applicatif)
 ```
 
-Pour utiliser mon logger aisni défini, il me suffit d'injecter dans le controller le LoggerInterface que je nomme $myAppLogger (suivant le pattern nom du channel en camel-case + Logger).
+Pour utiliser mon logger ainsi défini, il me suffit d'injecter dans le controller le LoggerInterface que je nomme $myAppLogger (suivant le pattern nom du channel en camel-case + Logger).

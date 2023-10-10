@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LvcRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +43,16 @@ class Lvc
      * @ORM\Column(type="float")
      */
     private $lower;
+
+    /**
+     * @ORM\OneToMany(targetEntity=LastHigh::class, mappedBy="dailyLvc")
+     */
+    private $lastHigher;
+
+    public function __construct()
+    {
+        $this->lastHigher = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +115,36 @@ class Lvc
     public function setLower(float $lower): self
     {
         $this->lower = $lower;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LastHigh>
+     */
+    public function getLastHigher(): Collection
+    {
+        return $this->lastHigher;
+    }
+
+    public function addLastHigher(LastHigh $lastHigher): self
+    {
+        if (!$this->lastHigher->contains($lastHigher)) {
+            $this->lastHigher[] = $lastHigher;
+            $lastHigher->setDailyLvc($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLastHigher(LastHigh $lastHigher): self
+    {
+        if ($this->lastHigher->removeElement($lastHigher)) {
+            // set the owning side to null (unless already changed)
+            if ($lastHigher->getDailyLvc() === $this) {
+                $lastHigher->setDailyLvc(null);
+            }
+        }
 
         return $this;
     }
