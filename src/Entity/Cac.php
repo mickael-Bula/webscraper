@@ -45,7 +45,7 @@ class Cac
     private $lower;
 
     /**
-     * @ORM\OneToMany(targetEntity=lastHigh::class, mappedBy="dailyCac")
+     * @ORM\OneToMany(targetEntity=LastHigh::class, mappedBy="dailyCac")
      */
     private $lastHigher;
 

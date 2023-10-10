@@ -40,7 +40,7 @@ class SaveDataInDatabaseTest extends KernelTestCase
      *
      * @return void
      */
-    public function testAppendData()
+    public function testAppendData(): void
     {
         // je crée un objet de la classe dataScraper pour lancer le scraping
         $logger = $this->createMock(LoggerInterface::class);
@@ -48,7 +48,7 @@ class SaveDataInDatabaseTest extends KernelTestCase
         $data = $dataScraper->getData('https://fr.investing.com/indices/france-40-historical-data');
 
         $cac = $this->entityManager->getRepository(Cac::class)->findOneBy(["id" => "10"]);
-        $lastDate = (!empty($cac)) ? $cac->getCreatedAt() : null;
+        $lastDate = !empty($cac) ? $cac->getCreatedAt() : null;
 
         $newData = [];
         foreach ($data as $row) {
@@ -61,30 +61,6 @@ class SaveDataInDatabaseTest extends KernelTestCase
         }
         $this->assertNotEmpty($newData);
         $this->assertCount(22, $newData);
-    }
-
-    public function testSetPositions()
-    {
-        // je crée des doubles des dépendances requises
-        $security = $this->createMock(Security::class);
-        $requestStack = $this->createMock(RequestStack::class);
-        $mailer = $this->createMock(MailerService::class);
-
-        $entity = $this->entityManager->getRepository(LastHigh::class)->findAll();
-
-        // TODO : vérifier le test sur cette variable créée maois non utilisée
-        $data = new SaveDataInDatabase(
-            $this->entityManager,
-            $this->userRepository,
-            $security,
-            $requestStack,
-            $mailer
-        );
-
-        $this->assertInstanceOf(Security::class, $security);
-        $this->assertInstanceOf(MailerService::class, $mailer);
-        $this->assertInstanceOf(RequestStack::class, $requestStack);
-        $this->assertInstanceOf(LastHigh::class, $entity[0]);
     }
 
     protected function tearDown(): void

@@ -50,7 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $positions;
 
     /**
-     * @ORM\ManyToOne(targetEntity=cac::class, inversedBy="users")
+     * @ORM\ManyToOne(targetEntity=Cac::class, inversedBy="users")
      */
     private $lastCacUpdated;
 

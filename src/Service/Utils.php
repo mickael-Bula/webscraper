@@ -14,6 +14,7 @@ class Utils
     private EntityManagerInterface $entityManager;
     private LoggerInterface $logger;
     private SessionInterface $session;
+    private $entityName;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -35,6 +36,7 @@ class Utils
     public static function fromString(string $stringNumber): float
     {
         $flatNumber = str_replace('.', '', $stringNumber);
+
         return str_replace(',', '.', $flatNumber);
     }
 
@@ -86,7 +88,8 @@ class Utils
      */
     public function setEntityInSession($entity): array
     {
-        $entityName = $this->getEntityName($entity);
+        $this->entityName = $this->getEntityName($entity);
+        $entityName = $this->entityName;
         $em = $this->entityManager->getRepository($entity);
 
         // Si l'entity est Cac, on récupère l'ensemble des 10 dernières cotations, si l'entity est Lvc on récupère uniquement les cours de clôtures

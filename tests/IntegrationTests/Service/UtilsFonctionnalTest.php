@@ -31,14 +31,14 @@ class UtilsFonctionnalTest extends KernelTestCase
         $this->logger = $this->createMock(LoggerInterface::class);
     }
 
-    public function testSetEntityInSession()
+    public function testSetEntityInSession(): void
     {
         // Je crée le répertoire destiné à accueillir les données de la session mockée
         $path = realpath('.' . '/tests');
         $fileSystem = new Filesystem();
         if (!$fileSystem->exists($path . '/mockFileSessionStorage')) {
             $fileSystem->mkdir($path . '/mockFileSessionStorage');
-            $path = $path . '/mockFileSessionStorage';
+            $path .= '/mockFileSessionStorage';
         }
         // j'utilise la classe MockFileSessionStorage qui simule le comportement d'une session par enregistrement dans un fichier
         $storage = new MockFileSessionStorage($path);

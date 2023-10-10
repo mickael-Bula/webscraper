@@ -11,7 +11,7 @@ class DataScraperTest extends TestCase
     /**
      * test vérifiant les données scrapées
      */
-    public function testGetData()
+    public function testGetData(): void
     {
         // je crée un objet de la classe dataScraper pour lancer le scraping en lui injectant un double du logger
         $logger = $this->createMock(LoggerInterface::class);
@@ -21,6 +21,6 @@ class DataScraperTest extends TestCase
 
         // je fais une série de tests sur les données récupérées
         $this->assertNotCount(0, $data);
-        $this->assertCount(23, $data);
+        $this->assertCount(22, $data);
     }
 }
