@@ -57,19 +57,19 @@ class SaveDataInDatabase
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $entityRepository->findOneBy([], ["id" => "DESC"]);
-        if (!$lastDate) {
+        if ($lastDate) {
+            // les dates scrapées ayant des formats différents, je reformate celles reçues de la BDD pour qu'elles correspondent
+            if ($lastDate->getCreatedAt() instanceof Cac) {
+                // si $data représente les données du Cac, le format de date est "23/05/2022"
+                $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
+            } else if ($lastDate->getCreatedAt() instanceof Lvc) {
+                // si $data représente les données du Lvc, le format de date est "06/23/2022"
+                $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("m/d/Y") : null;
+            }
+        } else {
             // récupère le nom de l'entité
             $className = $this->entityManager->getClassMetadata($entity)->getName();
             $this->logger->error(sprintf("Pas de dernier plus haut trouvé pour l'entité %s", $className));
-        }
-
-        // les dates scrapées ayant des formats différents, je reformate celles reçues de la BDD pour qu'elles correspondent
-        if ($lastDate->getCreatedAt() instanceof Cac) {
-            // si $data représente les données du Cac, le format de date est "23/05/2022"
-            $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
-        } else if ($lastDate->getCreatedAt() instanceof Lvc) {
-            // si $data représente les données du Lvc, le format de date est "06/23/2022"
-            $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("m/d/Y") : null;
         }
 
         // tri des entrées postérieures à lastDate
