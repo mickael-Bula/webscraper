@@ -2,13 +2,15 @@
 
 namespace App\Controller;
 
-use App\Entity\Cac;
-use App\Entity\Lvc;
+use App\Entity\{ Cac, Lvc, User };
 use App\Entity\Position;
+use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\DataScraper;
 use App\Service\SaveDataInDatabase;
@@ -17,11 +19,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class HomeController extends AbstractController
 {
-    private $requestStack;
+    private RequestStack $requestStack;
+    private LoggerInterface $logger;
 
-    public function __construct(RequestStack $requestStack)
+    public function __construct(RequestStack $requestStack, LoggerInterface $myAppLogger)
     {
         $this->requestStack = $requestStack;
+        $this->logger = $myAppLogger;
     }
 
     /**
@@ -37,65 +41,90 @@ class HomeController extends AbstractController
      *
      * @Route("/dashboard", name="app_dashboard")
      *
-     * @param SaveDataInDatabase $saveDataInDatabase
      * @param ManagerRegistry $doctrine
+     * @param SaveDataInDatabase $saveDataInDatabase
+     * @param Utils $utils
      * @return Response
      */
     public function dashboard(
-        SaveDataInDatabase $saveDataInDatabase,
-        ManagerRegistry $doctrine): Response
+        ManagerRegistry $doctrine,
+        SaveDataInDatabase $saveDataInDatabase, // injection de mes services
+        Utils $utils
+    ): Response
     {
-        // on passe par le ManagerRegistry() pour récupérer le repository du Cac
-        $cacRepository = $doctrine->getRepository(Cac::class);
+        /**
+         * Récupère l'utilisateur en session. Je précise le type User pour accéder à son id
+         * @var User $user
+         */
+        $user = $this->getUser();
 
-        // on commence par vérifier en session la présence des données du CAC, sinon on y charge celles-ci
+        $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();
-        if (!$session->has("cac")) {
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
-        }
-        $cac = $session->get("cac");
+
+        //FIX Ajouter une nouvelle table pour récupérer le statut d'une position (isWaiting, isRunning, isClosed)
+        // une fois fait, mettre à jour le mailer pour afficher le changement de statut de la position
+        // Ajouter des index pour accélérer les requêtes, notamment sur cac et lvc (https://zestedesavoir.com/tutoriels/730/administrez-vos-bases-de-donnees-avec-mysql/949_index-jointures-et-sous-requetes/3935_index/)
+
+        // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
+        $cac = $session->has('cac') ? $session->get('cac') : $utils->setEntityInSession(Cac::class);
+        $lvc = $session->has('lvc') ? $session->get('lvc') : $utils->setEntityInSession(Lvc::class);
+
         // je demande à un Service de calculer la date la plus récente attendue en base de données
-        $lastDate = (new Utils())->getMostRecentDate();
+        $lastDate = $utils->getMostRecentDate();
 
         // je compare $lastDate avec la date la plus récente en session (si la base est vide j'affecte 'null')
         $lastDateInSession = (!empty($cac)) ? $cac[0]->getCreatedAt()->format("d/m/Y") : null;
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
         if ($lastDate !== $lastDateInSession) {
-            // je lance la récupération des données du cac
-            $data = DataScraper::getData('https://fr.investing.com/indices/france-40-historical-data');
+            $scraper = new DataScraper($this->logger);
+            $cacData = $scraper->getData($_ENV['CAC_DATA']);
+            $lvcData = $scraper->getData($_ENV['LVC_DATA']);
 
-            // j'externalise l'insertion des données du Cac en BDD dans un service dédié
-            $newData = $saveDataInDatabase->appendData($data, Cac::class);
+            // si aucune données n'est récupérée, on affiche un message dans le template
+            if (is_null($cacData)) {
+                $this->addFlash('error', 'Aucune donnée récupérée');
+            }
 
-            // je récupère ensuite les données du LVC
-            $lvcData = DataScraper::getData('https://www.investing.com/etfs/lyxor-leverage-cac-40-historical-data');
-
-            // puis je sauvegarde en BDD
+            // j'externalise l'insertion des données du CAC et du LVC en BDD à l'aide d'un service dédié
+            $saveDataInDatabase->appendData($cacData, Cac::class);
             $saveDataInDatabase->appendData($lvcData, Lvc::class);
 
-            // j'externalise ensuite la vérification d'un nouveau plus haut et les modifications en BDD qui en résulte
-            $saveDataInDatabase->checkNewData($newData);
+            // je récupère les 10 données les plus récentes en BDD pour les enregistrer en session. Idem pour les clôtures du Lvc
+            $cac = $utils->setEntityInSession(Cac::class);
+            $lvc = $utils->setEntityInSession(Lvc::class);
+        }
+        // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut n'a encore été affecté...
+        if (is_null($user->getHigher())) {
+            // ...on le fait donc ici, en utilisant le plus haut de la cotation du Cac la plus récente en BDD
+            $saveDataInDatabase->setHigher($cacRepository->findOneBy([], ['id' => 'DESC']));
 
-            // je récupère les 10 données les plus récentes en BDD et je les enregistre en session
-            $cac = $cacRepository->findBy([], ['id' => 'DESC'], 10);
-            $session->set("cac", $cac);
+            //FIX Ligne utilisée pour les tests que je peux reproduire à partir d'une copie de la base webtrader_save_structure
+//            $saveDataInDatabase->setHigher($cacRepository->findOneBy(['id' => 14]));
         }
 
-        // je récupère l'utilisateur en session (je passe par une méthode personnalisée car j'aurai besoin de son id)
-        $user = $saveDataInDatabase->getCurrentUser();
+        // récupération de la liste des données à mettre à jour, puis enregistrement en base
+        $cacList = $saveDataInDatabase->dataToCheck();
+        $saveDataInDatabase->updateCacData($cacList);
 
-        // je récupère toutes les positions en attente pour affichage
+        // je récupère toutes les positions pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
-        $waitingPositions = $positionRepository->findBy(["User" => $user->getId(), "isWaiting" => true]);
-        $runningPositions = $positionRepository->findBy(["User" => $user->getId(), "isRunning" => true]);
-        $closedPositions = $positionRepository->findBy(["User" => $user->getId(), "isClosed" => true]);
-
+        $waitingPositions   = $positionRepository->findBy(["User" => $user->getId(), "isWaiting"    => true]);
+        $runningPositions   = $positionRepository->findBy(["User" => $user->getId(), "isRunning"    => true]);
+        $closedPositions    = $positionRepository->findBy(["User" => $user->getId(), "isClosed"     => true]);
 
         return $this->render(
             'home/dashboard.html.twig',
-            compact('cac', 'waitingPositions', 'runningPositions', 'closedPositions')
+            compact('cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions')
         );
+
+        //TODO Il faut ajouter sur le dashboard la buyLimit et lastHigh du user courant
+        // il faut créer un menu de configuration pour que l'utilisateur puisse paramétrer les données précédentes
+        // La buyLimt doit être paramétrable : SPREAD achat et revente
+        // Un plus haut doit pouvoir être déclaré, soit par la date, soit par la valeur la plus proche en valeur
+        // Pour ce dernier point, il faut ajouter un formulaire
+        // Il faut développer tout ce qui concerne la vue en Vue.js => permet de monter en compétence, de s'exercer en 'real'
+        // A terme, il faut externaliser le scraping dans un micro-service.
+        // Présenter les positions en cours sous forme de tableau pouvant contenir jusqu'à 5 lignes différentes
     }
 }

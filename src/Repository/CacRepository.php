@@ -45,14 +45,11 @@ class CacRepository extends ServiceEntityRepository
      * un tableau des objets insérés est retourné
      *
      * @param $data
-     * @return array
-     */
-    public function saveData($data): array
+     */public function saveData($data): void
     {
-        $cacEntities = [];
         foreach ($data as $item) {
             $entity = new Cac();
-            // reformat date () to conform with expected DataTime format (d-m-Y)
+            // reformat date to conform with expected DataTime format (d-m-Y)
             $date = str_replace('/', '-', $item[0]);
             $entity->setCreatedAt(\DateTime::createFromFormat('d-m-Y', $date));
             $entity->setClosing(Utils::fromString($item[1]));
@@ -63,36 +60,21 @@ class CacRepository extends ServiceEntityRepository
             // ### excerpt from Doctrine documentation : https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/
             // "You can consider all values on Objects inserted and updated through Doctrine\ORM\EntityManager#persist() to be safe from SQL injection"
             $this->getEntityManager()->persist($entity);
-            $cacEntities[] = $entity;
         }
         $this->getEntityManager()->flush();
-
-        // on retourne un tableau des objets insérés
-        return $cacEntities;
     }
 
-    //    /**
-    //     * @return Cac[] Returns an array of Cac objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Cac
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * récupère toutes les entités cac qui ont une date supérieure à celle de $lastCacUpdated, triées par ancienneté
+     * @param Cac $lastCacUpdated
+     * @return array
+     */
+    public function getDataToUpdateFromUser(Cac $lastCacUpdated): array
+    {
+        return $this->createQueryBuilder('cac')
+            ->where('cac.createdAt > :date')
+            ->setParameter('date', $lastCacUpdated->getCreatedAt())
+            ->getQuery()
+            ->getResult();
+    }
 }

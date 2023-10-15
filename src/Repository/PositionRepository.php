@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\LastHigh;
 use App\Entity\Position;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -37,5 +38,22 @@ class PositionRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * Récupère les positions en attente qui ont une buyLimit différente de celle de la position courante
+     * @param Position $position
+     * @return Position[]|null
+     */
+    public function getIsWaitingPositionsByBuyLimitID(Position $position): ?array
+    {
+        return $this
+            ->createQueryBuilder('p')
+            ->where('p.isWaiting = true')
+            ->andWhere('p.buyLimit <> :buyLimit')
+            ->setParameter('buyLimit', $position->getBuyLimit())
+            ->orderBy('p.buyLimit', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

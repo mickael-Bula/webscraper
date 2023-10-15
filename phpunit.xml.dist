@@ -15,6 +15,8 @@
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
+        <env name="MAILER_DSN" value="smtp://1b6d6e9439f364:f773d3bae6ec1f@smtp.mailtrap.io:2525?encryption=tls&amp;auth_mode=login" />
+        <env name="DATABASE_URL" value="mysql://webtraderUser:1812@127.0.0.1:3308/webtrader?serverVersion=8.0.27&amp;amp;charset=utf8mb4"/>
     </php>
 
     <testsuites>

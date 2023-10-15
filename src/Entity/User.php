@@ -6,11 +6,13 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
  */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -46,6 +48,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\OneToMany(targetEntity=Position::class, mappedBy="User")
      */
     private $positions;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Cac::class, inversedBy="users")
+     */
+    private $lastCacUpdated;
 
     public function __construct()
     {
@@ -135,7 +142,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -179,6 +186,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $position->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLastCacUpdated(): ?cac
+    {
+        return $this->lastCacUpdated;
+    }
+
+    public function setLastCacUpdated(?cac $lastCacUpdated): self
+    {
+        $this->lastCacUpdated = $lastCacUpdated;
 
         return $this;
     }

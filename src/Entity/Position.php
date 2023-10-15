@@ -16,7 +16,14 @@ class Position
      *
      * @var integer
      */
-    public const LINE_VALUE = 1000;
+    public const LINE_VALUE = 750;
+
+    /**
+     * déclaration du pourcentage de baisse fixant le niveau de Buy_limit
+     *
+     * @var integer
+     */
+    public const SPREAD = 0.06; // on fixe ici la limite à 6 % de baisse, le palier d'achat étant fixé à 2 % pout 3 lignes
 
     /**
      * @ORM\Id
@@ -66,7 +73,7 @@ class Position
     private $isRunning = false;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="positions", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity=LastHigh::class, inversedBy="positions", cascade={"persist", "remove"})
      */
     private $buyLimit;
 

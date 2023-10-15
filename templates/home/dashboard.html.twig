@@ -6,6 +6,12 @@
     {# TODO : inspiration pour les cards à ajouter : https://codepen.io/JavaScriptJunkie/pen/WgRBxw #}
     <div class="container-fluid">
 
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger text-center" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+
         <div class="row ms-lg-4">
             {# colonne de gauche pour le tableau #}
             <div class="col-auto mt-4">{# non auto : col-md-6 col-lg-5 col-xl-4 col-xxl-3 mx-sm-1 ms-lg-4 #}
@@ -21,16 +27,18 @@
                             <th scope="col" class="text-center">ouverture</th>
                             <th scope="col" class="text-center">plus haut</th>
                             <th scope="col" class="text-center">plus bas</th>
+                            <th scope="col" class="text-center">clôture LVC</th>
                         </tr>
                         </thead>
                         <tbody class="custom-table--borderless">
-                        {% for row in cac %}
+                        {% for index, row in cac %}
                             <tr>
-                                <td class="text-center">{{ row.createdAt|date("d/m/y") }}</td>
+                                <td class="text-center">{{ row.createdAt | date("d/m/y") }}</td>
                                 <td class="text-center">{{ row.closing }}</td>
                                 <td class="text-center">{{ row.opening }}</td>
                                 <td class="text-center">{{ row.higher }}</td>
                                 <td class="text-center">{{ row.lower }}</td>
+                                <td class="text-center">{{ lvc[index].closing }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

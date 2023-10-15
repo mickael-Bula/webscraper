@@ -45,11 +45,9 @@ class LvcRepository extends ServiceEntityRepository
      * un tableau des objets insérés est retourné
      *
      * @param $data
-     * @return void
      */
-    public function saveData($data): void
+    public function saveData($data)
     {
-        // TODO : cette méthode duplique celle de l'Entité Cac : à voir si je peux créer un BaseRepository...
         foreach ($data as $item) {
             $entity = new Lvc();
             // je transforme le format 'May 23, 2022' en timestamp, puis j'en fais une date et enfin je l'enregistre comme DateTime
@@ -64,5 +62,15 @@ class LvcRepository extends ServiceEntityRepository
             $this->getEntityManager()->persist($entity);
         }
         $this->getEntityManager()->flush();
+    }
+
+    public function findLastTenClosingDesc()
+    {
+        return $this->createQueryBuilder('lvc')
+            ->select('lvc.closing')
+            ->orderBy('lvc.id', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
     }
 }

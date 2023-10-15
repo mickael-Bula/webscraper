@@ -1,25 +1,35 @@
 <?php
 
-namespace App\Tests\Service;
+namespace App\Tests\IntegrationTests\Service;
 
 use App\Entity\Cac;
+use App\Entity\LastHigh;
+use App\Entity\User;
 use App\Service\DataScraper;
+use App\Service\MailerService;
+use App\Service\SaveDataInDatabase;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Security;
 
 class SaveDataInDatabaseTest extends KernelTestCase
 {
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
+    /** @var EntityManager|object|null */
     private $entityManager;
+    private $userRepository;
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
+        // je lance le kernel qui charge le service container
+        self::bootKernel();
 
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
+        //  j'utilise static::getContainer() pour accéder au service container
+        $container = static::getContainer();
+        $this->entityManager = $container->get(EntityManagerInterface::class);
+        $this->userRepository = $this->entityManager->getRepository(User::class);
     }
 
     /**
@@ -30,14 +40,15 @@ class SaveDataInDatabaseTest extends KernelTestCase
      *
      * @return void
      */
-    public function testAppendData()
+    public function testAppendData(): void
     {
         // je crée un objet de la classe dataScraper pour lancer le scraping
-        $dataScraper = new DataScraper();
+        $logger = $this->createMock(LoggerInterface::class);
+        $dataScraper = new DataScraper($logger);
         $data = $dataScraper->getData('https://fr.investing.com/indices/france-40-historical-data');
 
         $cac = $this->entityManager->getRepository(Cac::class)->findOneBy(["id" => "10"]);
-        $lastDate = (!empty($cac)) ? $cac->getCreatedAt() : null;
+        $lastDate = !empty($cac) ? $cac->getCreatedAt() : null;
 
         $newData = [];
         foreach ($data as $row) {
@@ -48,8 +59,8 @@ class SaveDataInDatabaseTest extends KernelTestCase
                 break;
             }
         }
-        // pb : l'utilisation de DateTime tient compte des heures et échoue à filtrer correctement la dernière date
-        dump($newData);
+        $this->assertNotEmpty($newData);
+        $this->assertCount(22, $newData);
     }
 
     protected function tearDown(): void
