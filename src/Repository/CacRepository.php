@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Cac;
+use Doctrine\DBAL\Exception;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Service\Utils;
@@ -76,5 +77,22 @@ class CacRepository extends ServiceEntityRepository
             ->setParameter('date', $lastCacUpdated->getCreatedAt())
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function displayCacAndLvcData(): array
+    {
+        $sql = "SELECT c.closing, c.higher, c.lower, c.opening, c.created_at, l.closing as lvc_closing
+                FROM cac c
+                JOIN lvc l ON c.created_at = l.created_at
+                ORDER BY c.created_at DESC
+                LIMIT 10";
+
+        return $this->getEntityManager()
+            ->getConnection()
+            ->executeQuery($sql)
+            ->fetchAllAssociative();
     }
 }

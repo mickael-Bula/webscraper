@@ -31,7 +31,7 @@ class UtilsFonctionnalTest extends KernelTestCase
         $this->logger = $this->createMock(LoggerInterface::class);
     }
 
-    public function testSetEntityInSession(): void
+    public function testSetCacInSession(): void
     {
         // Je crée le répertoire destiné à accueillir les données de la session mockée
         $path = realpath('.' . '/tests');
@@ -46,7 +46,7 @@ class UtilsFonctionnalTest extends KernelTestCase
 
         // je passe la session créée en paramètre de ma classe Utils afin que les données y soient enregistrées
         $utils = new Utils($this->entityManager, $this->logger, $session);
-        $results = $utils->setEntityInSession(Cac::class);
+        $results = $utils->setCacInSession();
 
         $this->assertNotEmpty($results);
         $this->assertIsArray($results);

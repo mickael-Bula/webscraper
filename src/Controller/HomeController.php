@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\{ Cac, Lvc, User };
 use App\Entity\Position;
+use Doctrine\DBAL\Exception;
 use App\Service\MailerService;
 use App\Service\Utils;
 use Doctrine\Persistence\ManagerRegistry;
@@ -45,6 +46,7 @@ class HomeController extends AbstractController
      * @param SaveDataInDatabase $saveDataInDatabase
      * @param Utils $utils
      * @return Response
+     * @throws Exception
      */
     public function dashboard(
         ManagerRegistry $doctrine,
@@ -57,6 +59,7 @@ class HomeController extends AbstractController
          * @var User $user
          */
         $user = $this->getUser();
+        // TODO : voir comment récupérer la session propre à un user
 
         $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();
@@ -66,17 +69,16 @@ class HomeController extends AbstractController
         // Ajouter des index pour accélérer les requêtes, notamment sur cac et lvc (https://zestedesavoir.com/tutoriels/730/administrez-vos-bases-de-donnees-avec-mysql/949_index-jointures-et-sous-requetes/3935_index/)
 
         // on commence par vérifier en session la présence des données du CAC, sinon on les y insère
-        $cac = $session->has('cac') ? $session->get('cac') : $utils->setEntityInSession(Cac::class);
-        $lvc = $session->has('lvc') ? $session->get('lvc') : $utils->setEntityInSession(Lvc::class);
+        $cac = $session->has('cac') ? $session->get('cac') : $utils->setCacInSession();
 
         // je demande à un Service de calculer la date la plus récente attendue en base de données
         $lastDate = $utils->getMostRecentDate();
 
         // je compare $lastDate avec la date la plus récente en session (si la base est vide j'affecte 'null')
-        $lastDateInSession = (!empty($cac)) ? $cac[0]->getCreatedAt()->format("d/m/Y") : null;
+        $lastDateInSession = !empty($cac) ? $cac[0]->getCreatedAt() : null;
 
         // si les dates ne correspondent pas, je lance le scraping pour récupérer les données manquantes
-        if ($lastDate !== $lastDateInSession) {
+        if (is_null($lastDateInSession) || $lastDate !== $lastDateInSession->format("d/m/Y")) {
             $scraper = new DataScraper($this->logger);
             $cacData = $scraper->getData($_ENV['CAC_DATA']);
             $lvcData = $scraper->getData($_ENV['LVC_DATA']);
@@ -90,9 +92,8 @@ class HomeController extends AbstractController
             $saveDataInDatabase->appendData($cacData, Cac::class);
             $saveDataInDatabase->appendData($lvcData, Lvc::class);
 
-            // je récupère les 10 données les plus récentes en BDD pour les enregistrer en session. Idem pour les clôtures du Lvc
-            $cac = $utils->setEntityInSession(Cac::class);
-            $lvc = $utils->setEntityInSession(Lvc::class);
+            // j'enregistre en session les 10 données les plus récentes de la BDD
+            $utils->setCacInSession();
         }
         // A la création d'un user, si les données sont à jour ($lastDate === $lastDateInSession), aucun plus haut n'a encore été affecté...
         if (is_null($user->getHigher())) {
@@ -107,6 +108,9 @@ class HomeController extends AbstractController
         $cacList = $saveDataInDatabase->dataToCheck();
         $saveDataInDatabase->updateCacData($cacList);
 
+        // récupère la liste des données à afficher
+        $cacAndLvcData = $cacRepository->displayCacAndLvcData();
+
         // je récupère toutes les positions pour affichage
         $positionRepository = $doctrine->getRepository(Position::class);
         $waitingPositions   = $positionRepository->findBy(["User" => $user->getId(), "isWaiting"    => true]);
@@ -115,7 +119,7 @@ class HomeController extends AbstractController
 
         return $this->render(
             'home/dashboard.html.twig',
-            compact('cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions')
+            compact('cacAndLvcData', 'waitingPositions', 'runningPositions', 'closedPositions')
         );
 
         //TODO Il faut ajouter sur le dashboard la buyLimit et lastHigh du user courant
