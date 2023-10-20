@@ -49,23 +49,23 @@ class SaveDataInDatabase
      *
      * @param array $data
      * @param $entity
+     * @return mixed|object|string|null
      */
-    public function appendData(array $data, $entity): void
+    public function appendData(array $data, $entity)
     {
         // je précise le Repository que je veux utiliser à mon EntityManager
         $entityRepository = $this->entityManager->getRepository($entity);
 
         // puis je récupère lastDate en BDD (ou null si aucune valeur n'est présente)
         $lastDate = $entityRepository->findOneBy([], ["id" => "DESC"]);
-        if ($lastDate) {
-            // les dates scrapées ayant des formats différents, je reformate celles reçues de la BDD pour qu'elles correspondent
-            if ($lastDate->getCreatedAt() instanceof Cac) {
-                // si $data représente les données du Cac, le format de date est "23/05/2022"
-                $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
-            } else if ($lastDate->getCreatedAt() instanceof Lvc) {
-                // si $data représente les données du Lvc, le format de date est "06/23/2022"
-                $lastDate = (!empty($lastDate)) ? $lastDate->getCreatedAt()->format("m/d/Y") : null;
-            }
+
+        // les dates scrapées ayant des formats différents, je reformate celles reçues de la BDD pour qu'elles correspondent
+        if ($lastDate instanceof Cac) {
+            // si $data représente les données du Cac, le format de date est "23/05/2022"
+            $lastDate = $lastDate->getCreatedAt() !== null ? $lastDate->getCreatedAt()->format("d/m/Y") : null;
+        } else if ($lastDate instanceof Lvc) {
+            // si $data représente les données du Lvc, le format de date est "05/23/2022"
+            $lastDate = $lastDate->getCreatedAt() !== null ? $lastDate->getCreatedAt()->format("m/d/Y") : null;
         } else {
             // récupère le nom de l'entité
             $className = $this->entityManager->getClassMetadata($entity)->getName();
@@ -84,6 +84,9 @@ class SaveDataInDatabase
 
         // inversion du tableau pour que les nouvelles entrées soient ordonnées chronologiquement et insertion en BDD
         $entityRepository->saveData(array_reverse($newData));
+
+        // on retourne un résultat pour effectuer les tests unitaires
+        return $lastDate;
     }
 
     /**

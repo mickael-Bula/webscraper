@@ -14,8 +14,7 @@ class UtilsTest extends TestCase
     {
         $entityManager = $this->createMock(EntityManager::class);
         $session = $this->createMock(RequestStack::class)->getSession();
-        $logger = $this->createMock(LoggerInterface::class);
-        $this->utils = new Utils($entityManager, $logger, $session);
+        $this->utils = new Utils($entityManager, $session);
     }
 
     /**
