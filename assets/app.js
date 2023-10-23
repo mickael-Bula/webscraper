@@ -17,6 +17,7 @@ import './js/scroll-up';
 import './images/stocks.jpg';
 
 import 'bootstrap';
+import 'boxicons';
 
 // start the Stimulus application
 import './bootstrap';

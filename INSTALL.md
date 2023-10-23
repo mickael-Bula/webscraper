@@ -35,3 +35,19 @@ npm run build   # et le lancement du build qui crée les fichiers nécessaires
 ```
 
 Après cela, asset() fonctionne sans souci.
+
+## Installation de Bootstrap et Boxicons
+
+J'installe ces librairie via composer plutôt qu'avec le CDN :
+
+```bash
+$ npm install boxicons
+```
+
+Ensuite, j'importe les librairie dans le fichier que Webpack utilise comme point d'entrée pour le build : assets/app.js
+
+Une fois le build lancé avec `yarn dev`, les classes et les éléments propores aux librairies sont disponibles.
+Par exemple, pour afficher une icône Facebook : 
+
+<box-icon  type="logo" name="facebook-square"></box-icon>
+

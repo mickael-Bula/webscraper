@@ -130,5 +130,8 @@ class HomeController extends AbstractController
         // Il faut développer tout ce qui concerne la vue en Vue.js => permet de monter en compétence, de s'exercer en 'real'
         // A terme, il faut externaliser le scraping dans un micro-service.
         // Présenter les positions en cours sous forme de tableau pouvant contenir jusqu'à 5 lignes différentes
+        // Ajouter des graphiques à l'aide de la librairie echart ? : https://echarts.apache.org/v4/examples/en/editor.html?c=candlestick-sh
+        // Ajouter une sidebar bootstrap en suivant ce tuto : https://bootstrapious.com/p/bootstrap-sidebar?utm_content=cmp-true
+        // Ajouter une roue animée au clic pour gérer la side-bar (https://boxicons.com/usage#animation)
     }
 }
