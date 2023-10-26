@@ -59,7 +59,9 @@ class HomeController extends AbstractController
          * @var User $user
          */
         $user = $this->getUser();
-        // TODO : voir comment récupérer la session propre à un user
+
+        // si la session actuelle n'est pas celle du user connecté, je supprime la session
+        $user = $utils->checkUserInSession($user);
 
         $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();
@@ -133,5 +135,6 @@ class HomeController extends AbstractController
         // Ajouter des graphiques à l'aide de la librairie echart ? : https://echarts.apache.org/v4/examples/en/editor.html?c=candlestick-sh
         // Ajouter une sidebar bootstrap en suivant ce tuto : https://bootstrapious.com/p/bootstrap-sidebar?utm_content=cmp-true
         // Ajouter une roue animée au clic pour gérer la side-bar (https://boxicons.com/usage#animation)
+        // Ressource pour les charts : https://echarts.apache.org/v4/examples/en/editor.html?c=candlestick-sh
     }
 }

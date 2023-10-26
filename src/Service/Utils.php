@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Cac;
+use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -76,13 +77,30 @@ class Utils
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function setCacInSession()
+    public function setCacInSession(): array
     {
         $cacList = $this->entityManager->getRepository(Cac::class)->findBy([], ['id' => 'DESC'], 10);
         $this->session->set('cac', $cacList);
 
         return $this->session->get('cac');
+    }
+
+    /**
+     * Si un utilisateur précédent existe et n'est pas le même que le nouvel utilisateur, je détruis sa session
+     * @param User|null $user
+     * @return User|null
+     */
+    public function checkUserInSession(?User $user): ?User
+    {
+        $previousUser = $this->session->get('previous_user');
+        if ($previousUser !== null && $user!== null && $previousUser->getId() !== $user->getId()) {
+            $this->session->invalidate();
+        }
+        // Stocke l'utilisateur courant dans la session
+        $this->session->set('previous_user', $user);
+
+        return $user;
     }
 }
