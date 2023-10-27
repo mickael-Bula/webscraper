@@ -19,22 +19,51 @@ class MailerService
         $this->logger = $myAppLogger;
     }
 
+    public function createMailContentWhenPositionIsOpened(Position $position): void
+    {
+        if ($position->getBuyLimit() && $position->getBuyLimit()->getBuyLimit()) {
+            $content = "Ouverture d'une position.\n" ;
+            $content .= "La position avec une limite d'achat sur le CAC à {$position->getBuyTarget()} points a été touchée.\n";
+            $content .= "La limite d'achat sur le LVC est {$position->getLvcBuyTarget()} €.\n";
+            $content .= "Le statut de la position passe de isWaiting à isRunning";
+            $this->sendEmail($content);
+        } else {
+            $this->logger->info("Mail non expédié : vérifiez la position {$position}");
+        }
+    }
+
+    public function createMailContentWhenPositionIsClosed(Position $position): void
+    {
+        if ($position->getBuyLimit() && $position->getBuyLimit()->getBuyLimit()) {
+            $content = 'Contenu de mon mail de test : ';
+            $content .= "La position avec une limite de vente sur le CAC à {$position->getSellTarget()} points a été touchée.\n";
+            $content .= "La limite de vente sur le LVC est {$position->getLvcSellTarget()} €.\n";
+            $content .= "Le statut de la position passe de isRunning à isClosed";
+            $this->sendEmail($content);
+        } else {
+            $this->logger->info("Mail non expédié : vérifiez la position {$position}");
+        }
+    }
+
+    public function createMailContentWhenPositionsAreUpdated(array $data): void
+    {
+        $index = 1;
+        $content = "Voici les niveaux d'achats relatif au LAST_HIGH={$data[0]->getBuyLimit()->getBuyLimit()} pts pour le CAC :\n";
+        foreach ($data as $position) {
+            /** @var Position $position */
+            $content .= "Position {(string)$index} : +{$position->getQuantity()} LVC à {$position->getLvcBuyTarget()} €, CAC={$position->getBuyTarget()}.\n";
+            $index++;
+        }
+        $this->sendEmail($content);
+    }
+
     /**
+     * @param $content
      * @return void
      */
-    public function sendEmail($positions)
+    public function sendEmail($content): void
     {
-        //FIX: Lorsqu'une position change de statut, un mail est envoyé : il faut gérer ce cas d'un paramètre qui n'est pas un tableau
-
-        // TODO : gérer le message envoyé avec les infos liées au statut des positions touchées notamment. A voir comment formuler le message
-        $content = 'Contenu de mon mail de test : ';
-        foreach ($positions as $position) {
-            /** @var Position $position */
-             $content .= 'La position avec une limite d\'achat sur le CAC à ' . $position->getBuyLimit()->getBuyLimit() . ' points a été touchée.' . PHP_EOL;
-             $content .= 'La limite d\'achat sur le LVC est ' . $position->getBuyLimit()->getLvcBuyLimit() . ' €' . PHP_EOL;
-             $content .= "Le statut de la position passe du statut xxx à yyy";
-        }
-
+        // préparation du mail
         $email = (new Email())
             ->from('mickael.bula@sfr.fr')
             ->to('bula.mickael@neuf.fr')

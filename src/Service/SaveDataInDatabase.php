@@ -385,7 +385,7 @@ class SaveDataInDatabase
         $this->entityManager->flush();
 
         // NOTE : 100 mails par mois dans le cadre du plan gratuit proposé par Mailtrap
-        $this->mailer->sendEmail($positions);
+        $this->mailer->createMailContentWhenPositionsAreUpdated($positions);
     }
 
     /**
@@ -403,7 +403,7 @@ class SaveDataInDatabase
 
         $this->entityManager->flush();
 
-        $this->mailer->sendEmail($position);
+        $this->mailer->createMailContentWhenPositionIsOpened($position);
     }
 
     /**
@@ -423,6 +423,8 @@ class SaveDataInDatabase
         $this->removeIsWaitingPositions($positions);
 
         $this->entityManager->flush();
+
+        $this->mailer->createMailContentWhenPositionIsClosed($position);
     }
 
     /**
