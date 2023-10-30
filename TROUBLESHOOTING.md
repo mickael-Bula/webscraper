@@ -135,6 +135,43 @@ ALTER TABLE `cac` AUTO_INCREMENT = 1;
 ALTER TABLE `cac` ADD `id` int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
 ```
 
+## Ajout de la librairie DataTable
+
+Lors de la refonte de mon application Front-End, j'ai ajouté la librairie DataTable. Celle-ci dépendant de jQuery et Bootstrap 5 ne chargeant plus ce module Javascript par défaut, il m'a fallu procéder à l'installation de celui-ci de manière indépendante.
+
+Après plusieurs essais infructueux, j'ai trouvé la procédure fonctionnelle suivante :
+
+```bash
+# installation des dépendances
+$ npm install datatables.net
+$ npm install datatables.net-bs5
+$ npm install jquery
+$ npm install webpack --save-dev
+```
+
+Dans mon fichier `webpack.config.js`, j'ai ajouté la modification suivante à la fin du script :
+
+```js
+Encore
+    // ... instructions initiales...
+    .addPlugin(new (require('webpack')).ProvidePlugin({
+        $: 'jquery',
+        jQuery: 'jquery',
+    }))
+;
+
+module.exports = Encore.getWebpackConfig();
+```
+
+Il faut également veiller à importer les css de DataTable : 
+
+```
+@import '~bootstrap/scss/bootstrap';
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.css';
+```
+
+Après compilation et appel des datatables à partir du code html présent dans mon twig et le code Javascript faisant appel à jQuery, les objets de la librairie sont bien disponibles.
+
 ## Développement à réaliser
 
 - Vérifier les données en session : il ne faut pas que les données d'un utilisateur soient confondues avec celles d'un autre.

@@ -3,6 +3,7 @@ $enable-negative-margins: true;
 $enable-responsive-font-sizes: true;
 
 @import '~bootstrap/scss/bootstrap';
+@import '~datatables.net-bs5/css/dataTables.bootstrap5.css';
 @import 'custom-components';
 @import 'table.scss';
 @import 'custom-cards';
