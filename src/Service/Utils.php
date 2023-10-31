@@ -92,8 +92,8 @@ class Utils
         $entityName = $this->entityName;
         $em = $this->entityManager->getRepository($entity);
 
-        // Si l'entity est Cac, on récupère l'ensemble des 10 dernières cotations, si l'entity est Lvc on récupère uniquement les cours de clôtures
-        $entities = $entityName === 'cac' ? $em->findBy([], ['id' => 'DESC'], 10) : $em->findLastTenClosingDesc();
+        // Si l'entity est Cac, on récupère les dernières cotations, si l'entity est Lvc on récupère uniquement les cours de clôtures
+        $entities = $entityName === 'cac' ? $em->findBy([], ['id' => 'DESC']) : $em->findLastClosingDesc();
 
         $this->session->set($entityName, $entities);
 

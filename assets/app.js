@@ -5,9 +5,6 @@
  * (and its CSS file) in your base layout (base.html.twig).
  */
 
-// il faut commencer par importer jquery pour qu'il soit disponible dans les imports suivants
-import 'jquery';
-
 // ensuite import de bootstrap, suivi de ses extensions
 import 'bootstrap';
 import 'datatables.net';

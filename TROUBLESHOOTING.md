@@ -172,6 +172,23 @@ Il faut également veiller à importer les css de DataTable :
 
 Après compilation et appel des datatables à partir du code html présent dans mon twig et le code Javascript faisant appel à jQuery, les objets de la librairie sont bien disponibles.
 
+## Traduction des DataTables
+
+Pour afficher en français les informations du wrapper des dataTables, j'ai dû installer un plugin :
+
+```bash
+npm install datatables.net-plugins
+```
+
+Ensuite, dans l'appel à DataTables, j'ai déclaré le langage désiré :
+
+```js
+        $('#data').DataTable({
+            // utilisation de la traduction chargée depuis le module datatables.net-plugins/i18n
+            language: languageFR,
+        });
+```
+
 ## Développement à réaliser
 
 - Vérifier les données en session : il ne faut pas que les données d'un utilisateur soient confondues avec celles d'un autre.
