@@ -1,26 +1,31 @@
 /* personnalisation de la table des cotations du CAC */
 
-.custom-table {
-  /* Created with https://www.css-gradient.com */
-  background: white;
-  border-radius: 0 0 10px 10px;
-  box-shadow: 0 0 15px rgba(70,70,70,0.5);
-  min-width: 500px;
-  &--title {
+.custom-table--title {
     background-color: #1a2e45;
     /* couleur à trancher : blanc ou bleu glacier ? */
     /* color: #f1f2f3; */
     color: #bad2ea;
     border-radius: 6px 6px 0 0;
     box-shadow: 0 0 15px rgba(70,70,70,0.5);
-  }
-  &--borderless {
-    border-top-width: 0 !important;
-  }
-  &--margin-bottom {
-    margin-bottom: 0 !important;
-  }
-  &--paddingless {
-    padding: 0 !important;
-  }
+    min-width: 510px;
+    max-width: 550px;
+}
+
+/* personnalise le rendu des DataTables */
+.dataTables_wrapper {
+  border: 1px solid #ccc; /* Couleur et épaisseur de la bordure */
+  padding: 10px; /* Espace intérieur pour un aspect visuel */
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 0 15px rgba(70,70,70,0.5);
+  min-width: 510px;
+  max-width: 550px;
+}
+
+/* Ciblez l'élément d'input de recherche de DataTables */
+#data_filter input {
+  max-width: 100px; /* Limite la margeur de l'input */
+}
+
+.dataTables_info {
+  display: none;
 }

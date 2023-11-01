@@ -3,40 +3,53 @@
 {% block title %}dashboard{% endblock %}
 
 {% block body %}
-<div class="d-flex m-5">
-    <table id="data" class="table table-striped table-hover">
-        <thead>
-        <tr>
-            <th scope="col" class="text-center">Date</th>
-            <th scope="col" class="text-center">clôture</th>
-            <th scope="col" class="text-center">ouverture</th>
-            <th scope="col" class="text-center">plus haut</th>
-            <th scope="col" class="text-center">plus bas</th>
-            <th scope="col" class="text-center">clôture LVC</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for index, row in cac %}
-            <tr>
-                <td class="text-center">{{ row.createdAt | date("d/m/y") }}</td>
-                <td class="text-center">{{ row.closing }}</td>
-                <td class="text-center">{{ row.opening }}</td>
-                <td class="text-center">{{ row.higher }}</td>
-                <td class="text-center">{{ row.lower }}</td>
-                <td class="text-center">{{ lvc[index].closing }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <th scope="col" class="text-center">Date</th>
-                <th scope="col" class="text-center">clôture</th>
-                <th scope="col" class="text-center">ouverture</th>
-                <th scope="col" class="text-center">plus haut</th>
-                <th scope="col" class="text-center">plus bas</th>
-                <th scope="col" class="text-center">clôture LVC</th>
-            </tr>
-        </tfoot>
-    </table>
+<div class="row">
+    <div class="col-lg-6 col-md-8 col-sm-12">
+        <div class="flex-row m-5">
+            <div class="custom-table--title text-center p-1">cotations du CAC40</div>
+            <table id="data" class="table-bordered table-striped table-hover table-secondary">
+                <thead>
+                <tr>
+                    <th scope="col" class="text-center">Date</th>
+                    <th scope="col" class="text-center">clôture</th>
+                    <th scope="col" class="text-center">ouverture</th>
+                    <th scope="col" class="text-center">plus haut</th>
+                    <th scope="col" class="text-center">plus bas</th>
+                    <th scope="col" class="text-center">clôture LVC</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for index, row in cac %}
+                    <tr>
+                        <td class="text-center">{{ row.createdAt | date("d/m/y") }}</td>
+                        <td class="text-center">{{ row.closing }}</td>
+                        <td class="text-center">{{ row.opening }}</td>
+                        <td class="text-center">{{ row.higher }}</td>
+                        <td class="text-center">{{ row.lower }}</td>
+                        <td class="text-center">{{ lvc[index].closing }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th scope="col" class="text-center">Date</th>
+                    <th scope="col" class="text-center">clôture</th>
+                    <th scope="col" class="text-center">ouverture</th>
+                    <th scope="col" class="text-center">plus haut</th>
+                    <th scope="col" class="text-center">plus bas</th>
+                    <th scope="col" class="text-center">clôture LVC</th>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card m-md-4">
+            <div class="card-header">Chart</div>
+            <div class="card-body">
+                <canvas class="chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
