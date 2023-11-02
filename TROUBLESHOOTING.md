@@ -107,7 +107,7 @@ Cela empêchait d'ajouter des nouveaux Last_High dès lors que le cours du Cac �
 
 Il m'a donc fallu changer de schéma, mais ce qui est simple sur le papier ne l'est pas avec une base contenant des données.
 
-Après avoir cherché et tenté plusieurs solution, j'en suis arrivé à la procédure suivante :
+Après avoir cherché et tenté plusieurs solutions, j'en suis arrivé à la procédure suivante :
 
 - modifier les relations directement dans le code des entités, y compris les annotations
 - repartir d'une base vierge, créée avec Doctrine en spécifiant son nom dans le .env
@@ -137,7 +137,8 @@ ALTER TABLE `cac` ADD `id` int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRS
 
 ## Ajout de la librairie DataTable
 
-Lors de la refonte de mon application Front-End, j'ai ajouté la librairie DataTable. Celle-ci dépendant de jQuery et Bootstrap 5 ne chargeant plus ce module Javascript par défaut, il m'a fallu procéder à l'installation de celui-ci de manière indépendante.
+Lors de la refonte de mon application Front-End, j'ai ajouté la librairie DataTable.
+Celle-ci dépendant de jQuery et Bootstrap 5 ne chargeant plus ce module Javascript par défaut, il m'a fallu procéder à l'installation de celui-ci de manière indépendante.
 
 Après plusieurs essais infructueux, j'ai trouvé la procédure fonctionnelle suivante :
 
@@ -172,7 +173,7 @@ Il faut également veiller à importer les css de DataTable :
 
 Après compilation et appel des datatables à partir du code html présent dans mon twig et le code Javascript faisant appel à jQuery, les objets de la librairie sont bien disponibles.
 
-## Traduction des DataTables
+### Traduction des DataTables
 
 Pour afficher en français les informations du wrapper des dataTables, j'ai dû installer un plugin :
 
@@ -187,6 +188,94 @@ Ensuite, dans l'appel à DataTables, j'ai déclaré le langage désiré :
             // utilisation de la traduction chargée depuis le module datatables.net-plugins/i18n
             language: languageFR,
         });
+```
+
+### Tri des dates avec DataTable
+
+Par défaut, le tri effectué par DataTable sur les dates ne semble pas correspondre au format que j'utilise nativement (dd/mm/yyyy).
+Pour activer de manière cohérente cette fonctionnalité, j'ai donc dû ajouter la librairie `moment`, puis définir cette librairie dans DataTable pour gérer les formats de date :
+
+```bash
+$ npm install moment
+```
+
+```js
+// js\app.js
+import moment from "moment";
+
+$('#data').DataTable({
+    // définition du format de date utilisé pour obtenir un tri efficace
+    columnDefs: [{
+        type: 'datetime-moment',
+        targets: 0,
+        render: function (data, type) {
+            if (type === 'sort' || type === 'type') {
+                return moment(data, 'DD/MM/YY').valueOf();
+            }
+            return data;
+        }
+    }]
+});
+```
+
+## Ajout de la librairie ApexCharts
+
+Pour gérer les graphiques en chandeliers, j'ai opté pour la librairie ApexCharts. L'installation se déroule en trois temps :
+
+- installation de la librairie : `$ npm install apexcharts`
+- dans le code HTML, il faut ajouter une balise qui sera ciblée pour l'insertion : `<div id="chart">`
+- ajout du code dans un fichier javascript dédié, que j'ai nommé `apexCharts.js`
+- appel de la librairie au début de ce fichier : `import ApexCharts from 'apexcharts';`
+- import du fichier dans `assets\app.js` : `import './js/apexCharts';`
+
+### Importation des données dans ApexCharts depuis la BDD
+
+Pour bénéficier de mes données personnalisées, j'ai construit et fourni un tableau à ApexCharts :
+
+#### récupération et construction du tableau de données
+
+Dans mon controller, je construit le tableau `$chartData` que je passe ensuite à ma vue :
+```php
+$chartData = [];
+$data = $cacRepository->findAll();
+
+foreach ($data as $key => $row) {
+    if (!$row->getCreatedAt()) {
+        $this->logger->error("Problème lors de la récupération de la date en base de données");
+    }
+    $timestampInMilliseconds = $row->getCreatedAt()->getTimestamp() * 1000;
+
+    $chartData[$key]['x'] = $timestampInMilliseconds;
+    $chartData[$key]['y'] = [
+        $row->getOpening(),
+        $row->getHigher(),
+        $row->getLower(),
+        $row->getClosing()
+    ];
+}
+```
+
+Pour rendre le tableau accessible en javascript, depuis la vue, je le transmets au format json au moyen d'un dataset :
+
+```html
+<div id="chart" data-chart-data='{{ chartData|json_encode|raw }}'></div>
+```
+
+Dans le fichier `apexCharts.js`, je convertis du json vers le js :
+
+```js
+chartData = JSON.parse(chartElement.dataset.chartData);
+```
+
+Enfin, je transmets le tableau de données à la classe ApexCharts :
+
+```js
+const options = {
+    series: [{
+        data: chartData,
+    }],
+// ...
+}
 ```
 
 ## Développement à réaliser

@@ -15,8 +15,9 @@ import './styles/app.scss';
 import './styles/scroll-up.scss';
 
 // import de mes fichiers js qui, placés ici, sont compilés sans problèmes
-import './js/app.js';
-import './js/scroll-up.js';
+import './js/app';
+import './js/scroll-up';
+import './js/apexCharts';
 
 // import des images pour qu'elles soient compilées par wabpack
 import './images/stocks.jpg';

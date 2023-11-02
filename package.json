@@ -23,9 +23,11 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "apexcharts": "^3.44.0",
         "datatables.net": "^1.13.6",
         "datatables.net-bs5": "^1.13.6",
         "datatables.net-plugins": "^1.13.6",
-        "jquery": "^3.7.1"
+        "jquery": "^3.7.1",
+        "moment": "^2.29.4"
     }
 }

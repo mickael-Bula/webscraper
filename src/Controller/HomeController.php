@@ -45,6 +45,7 @@ class HomeController extends AbstractController
      * @param SaveDataInDatabase $saveDataInDatabase
      * @param Utils $utils
      * @return Response
+     * @throws \Exception
      */
     public function dashboard(
         ManagerRegistry $doctrine,
@@ -113,9 +114,12 @@ class HomeController extends AbstractController
         $runningPositions   = $positionRepository->findBy(["User" => $user->getId(), "isRunning"    => true]);
         $closedPositions    = $positionRepository->findBy(["User" => $user->getId(), "isClosed"     => true]);
 
+        // récupération des cotations pour affichage du graphique
+        $chartData = $utils->getChartData();
+
         return $this->render(
             'home/dashboard.html.twig',
-            compact('cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions')
+            compact('cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions', 'chartData')
         );
 
         //TODO Il faut ajouter sur le dashboard la buyLimit et lastHigh du user courant

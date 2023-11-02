@@ -1,9 +1,6 @@
-/* personnalisation de la table des cotations du CAC */
-
+/* personnalise la table des cotations du CAC */
 .custom-table--title {
     background-color: #1a2e45;
-    /* couleur à trancher : blanc ou bleu glacier ? */
-    /* color: #f1f2f3; */
     color: #bad2ea;
     border-radius: 6px 6px 0 0;
     box-shadow: 0 0 15px rgba(70,70,70,0.5);
@@ -21,11 +18,16 @@
   max-width: 550px;
 }
 
-/* Ciblez l'élément d'input de recherche de DataTables */
+/* Cible l'élément d'input de recherche de DataTables */
 #data_filter input {
   max-width: 100px; /* Limite la margeur de l'input */
 }
 
 .dataTables_info {
   display: none;
+}
+
+.chart_card {
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 0 15px rgba(70,70,70,0.5);
 }

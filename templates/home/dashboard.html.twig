@@ -3,6 +3,11 @@
 {% block title %}dashboard{% endblock %}
 
 {% block body %}
+<a href="#top-of-page" class="svg-container reveal">
+    <svg width="64" height="64" viewBox="0 0 100 100">
+        <path fill="white" d="m50 0c-13.262 0-25.98 5.2695-35.355 14.645s-14.645 22.094-14.645 35.355 5.2695 25.98 14.645 35.355 22.094 14.645 35.355 14.645 25.98-5.2695 35.355-14.645 14.645-22.094 14.645-35.355-5.2695-25.98-14.645-35.355-22.094-14.645-35.355-14.645zm20.832 62.5-20.832-22.457-20.625 22.457c-1.207 0.74219-2.7656 0.57812-3.7891-0.39844-1.0273-0.98047-1.2695-2.5273-0.58594-3.7695l22.918-25c0.60156-0.61328 1.4297-0.96094 2.2891-0.96094 0.86328 0 1.6914 0.34766 2.293 0.96094l22.918 25c0.88672 1.2891 0.6875 3.0352-0.47266 4.0898-1.1562 1.0508-2.9141 1.0859-4.1133 0.078125z"></path>
+    </svg>
+</a>
 <div class="row">
     <div class="col-lg-6 col-md-8 col-sm-12">
         <div class="flex-row m-5">
@@ -11,10 +16,10 @@
                 <thead>
                 <tr>
                     <th scope="col" class="text-center">Date</th>
-                    <th scope="col" class="text-center">clôture</th>
                     <th scope="col" class="text-center">ouverture</th>
                     <th scope="col" class="text-center">plus haut</th>
                     <th scope="col" class="text-center">plus bas</th>
+                    <th scope="col" class="text-center">clôture</th>
                     <th scope="col" class="text-center">clôture LVC</th>
                 </tr>
                 </thead>
@@ -22,10 +27,10 @@
                 {% for index, row in cac %}
                     <tr>
                         <td class="text-center">{{ row.createdAt | date("d/m/y") }}</td>
-                        <td class="text-center">{{ row.closing }}</td>
                         <td class="text-center">{{ row.opening }}</td>
                         <td class="text-center">{{ row.higher }}</td>
                         <td class="text-center">{{ row.lower }}</td>
+                        <td class="text-center">{{ row.closing }}</td>
                         <td class="text-center">{{ lvc[index].closing }}</td>
                     </tr>
                 {% endfor %}
@@ -33,10 +38,10 @@
                 <tfoot>
                 <tr>
                     <th scope="col" class="text-center">Date</th>
-                    <th scope="col" class="text-center">clôture</th>
                     <th scope="col" class="text-center">ouverture</th>
                     <th scope="col" class="text-center">plus haut</th>
                     <th scope="col" class="text-center">plus bas</th>
+                    <th scope="col" class="text-center">clôture</th>
                     <th scope="col" class="text-center">clôture LVC</th>
                 </tr>
                 </tfoot>
@@ -44,12 +49,14 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card m-md-4">
-            <div class="card-header">Chart</div>
+        <div class="card chart_card m-md-5">
+            <div class="card-header custom-table--title text-center p-1">Graphique du Cac</div>
             <div class="card-body">
-                <canvas class="chart" width="400" height="200"></canvas>
+            <div id="chart" data-chart-data='{{ chartData|json_encode|raw }}'></div>
             </div>
         </div>
     </div>
+    ajout d'un élément vide pour servir de support à la classe reveal-btn permettant d'afficher le scroll-up
+    <div class="reveal-btn"></div>
 </div>
 {% endblock %}
