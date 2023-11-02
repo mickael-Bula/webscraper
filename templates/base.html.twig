@@ -27,10 +27,10 @@
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
-    <body class="d-flex flex-column h-100">
+    <body>
         {% include 'header.html.twig' %}
 
-        <main>
+        <main class="d-flex flex-column" style="min-height: 100vh;">
         {% block body %}{% endblock %}
         </main>
 

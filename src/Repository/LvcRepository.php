@@ -64,12 +64,11 @@ class LvcRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function findLastTenClosingDesc()
+    public function findLastClosingDesc()
     {
         return $this->createQueryBuilder('lvc')
             ->select('lvc.closing')
             ->orderBy('lvc.id', 'DESC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult();
     }

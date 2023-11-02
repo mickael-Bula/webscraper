@@ -23,7 +23,7 @@ Encore
     .addEntry('app', './assets/app.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
-    .enableStimulusBridge('./assets/controllers.json')
+    // .enableStimulusBridge('./assets/controllers.json')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
@@ -58,18 +58,10 @@ Encore
     // enables Sass/SCSS support
     .enableSassLoader()
 
-    // uncomment if you use TypeScript
-    //.enableTypeScriptLoader()
-
-    // uncomment if you use React
-    //.enableReactPreset()
-
-    // uncomment to get integrity="..." attributes on your script & link tags
-    // requires WebpackEncoreBundle 1.4 or higher
-    //.enableIntegrityHashes(Encore.isProduction())
-
-    // uncomment if you're having problems with a jQuery plugin
-    //.autoProvidejQuery()
+    .addPlugin(new (require('webpack')).ProvidePlugin({
+        $: 'jquery',
+        jQuery: 'jquery',
+    }))
 ;
 
 module.exports = Encore.getWebpackConfig();

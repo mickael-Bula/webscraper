@@ -14,7 +14,6 @@ class Utils
     private EntityManagerInterface $entityManager;
     private LoggerInterface $logger;
     private SessionInterface $session;
-    private $entityName;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -88,12 +87,11 @@ class Utils
      */
     public function setEntityInSession($entity): array
     {
-        $this->entityName = $this->getEntityName($entity);
-        $entityName = $this->entityName;
+        $entityName = $this->getEntityName($entity);
         $em = $this->entityManager->getRepository($entity);
 
-        // Si l'entity est Cac, on récupère l'ensemble des 10 dernières cotations, si l'entity est Lvc on récupère uniquement les cours de clôtures
-        $entities = $entityName === 'cac' ? $em->findBy([], ['id' => 'DESC'], 10) : $em->findLastTenClosingDesc();
+        // Si l'entity est Cac, on récupère les dernières cotations, si l'entity est Lvc on récupère uniquement les cours de clôtures
+        $entities = $entityName === 'cac' ? $em->findBy([], ['id' => 'DESC']) : $em->findLastClosingDesc();
 
         $this->session->set($entityName, $entities);
 
@@ -116,5 +114,35 @@ class Utils
         }
 
         return $entityName;
+    }
+
+    /**
+     * récupération des données du Cac sous la forme [x => date, y => [open, high, low, close]] pour affichage du graphique
+     * @return array
+     */
+    public function getChartData(): array
+    {
+        $chartData = [];
+        $cacRepository = $this->entityManager->getRepository(Cac::class);
+        $data = $cacRepository->findAll();
+
+        foreach ($data as $row) {
+            if (!$row->getCreatedAt()) {
+                $this->logger->error("Problème lors de la récupération de la date en base de données");
+            }
+            $timestampInMilliseconds = $row->getCreatedAt()->getTimestamp() * 1000;
+
+            $chartData[] = [
+                'x' => $timestampInMilliseconds,
+                'y' => [
+                    $row->getOpening(),
+                    $row->getHigher(),
+                    $row->getLower(),
+                    $row->getClosing()
+                ]
+            ];
+        }
+
+        return $chartData;
     }
 }
