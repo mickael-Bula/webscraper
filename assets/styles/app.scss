@@ -17,6 +17,45 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+header {
+    position: relative;
+    z-index: 2;
+}
+
+#menu {
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    transition: width 0.3s;
+    overflow-x: hidden;
+}
+
+#menu.show {
+    width: 150px; /* Largeur maximale du menu lors de l'ouverture */
+    transition: width 0.3s ease-in-out; /* Animation de la largeur lors de la fermeture */
+}
+
+#menu.show ul {
+    margin-top: 40px;
+    visibility: visible;
+    opacity: 1; /* Opacité maximale pour les éléments affichés */
+}
+
+#menu ul {
+    padding: 50px 20px 0 0;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s 0.3s; /* Retarde l'animation de l'opacité */
+}
+
+#menu a {
+    color: #fff;
+    text-decoration: none;
+}
+
 .custom-login-form {
     background: linear-gradient(45deg, rgba(43,119,158,1) 0%, rgba(65,181,237,1) 90%, rgba(65,181,237,1) 100%);
     border-radius: 10px;
@@ -129,4 +168,12 @@ body {
 .custom-dropdown {
     min-width: 80px !important;
     max-width: 180px !important;
+}
+
+.card {
+    box-sizing: border-box;
+}
+
+.no-margin {
+    margin: 0;
 }

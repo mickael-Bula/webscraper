@@ -2,6 +2,7 @@ const app = {
     init: function() {
         console.log("scroll-up.init()");
         app.reveal();
+        app.closeMenu();
     },
 
     reveal: function() {
@@ -15,6 +16,13 @@ const app = {
             reveal.classList.add("active");
         } else {
             reveal.classList.remove("active");
+        }
+    },
+
+    closeMenu: function() {
+        if (document.getElementById("menu").classList.contains("show")) {
+            // Si le menu est ouvert, fermez-le
+            document.getElementById("menu").classList.remove("show");
         }
     }
 }
