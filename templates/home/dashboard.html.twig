@@ -3,9 +3,9 @@
 {% block title %}dashboard{% endblock %}
 
 {% block body %}
-<div class="row offset-lg-1">
-    <div class="col-lg-4 col-md-6">
-        <div class="card bg-success text-light mx-1 my-2">
+<div class="row justify-content-center mt-3">
+    <div class="col-3">
+        <div class="card bg-success text-light">
             <div class="card-header">
                 <h5 class="card-title fw-bolder">Positions en attente</h5>
             </div>
@@ -16,70 +16,72 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4 col-md-6">
-        <div class="card bg-warning text-light mx-1 my-2">
+    <div class="col-3">
+        <div class="card bg-warning text-light">
             <div class="card-header">
                 <h5 class="card-title fw-bolder">Positions en cours</h5>
             </div>
             <div class="card-body">
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                {% for position in runningPositions %}
+                    <p class="card-text no-margin text-center">+ {{ position.quantity }} LVC @ {{ position.lvcBuyTarget }} - CAC {{ position.buyTarget }} pts</p>
+                {% endfor %}
             </div>
         </div>
     </div>
-    <div class="col-lg-4 col-md-6">
-        <div class="card bg-danger text-light mx-1 my-2">
+    <div class="col-3">
+        <div class="card bg-danger text-light">
             <div class="card-header">
                 <h5 class="card-title fw-bolder">Positions clôturées</h5>
             </div>
             <div class="card-body">
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                {% for position in closedPositions %}
+                    <p class="card-text no-margin text-center">+ {{ position.quantity }} LVC @ {{ position.lvcBuyTarget }} - CAC {{ position.buyTarget }} pts</p>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="mt-5 ms-auto col-lg-5 col-md-8 col-sm-12 g-0">
-        <div class="flex-row">
-            <div class="custom-table--title text-center p-1">cotations du CAC40</div>
-            <table id="data" class="table-bordered table-striped table-hover table-secondary">
-                <thead>
+<div class="row justify-content-center">
+    <div class="col-5 mt-3">
+        <div class="custom-table text-center p-1">cotations du CAC40</div>
+        <table id="data" class="table-bordered table-striped table-hover table-secondary">
+            <thead>
+            <tr>
+                <th scope="col" class="text-center">Date</th>
+                <th scope="col" class="text-center">ouverture</th>
+                <th scope="col" class="text-center">plus haut</th>
+                <th scope="col" class="text-center">plus bas</th>
+                <th scope="col" class="text-center">clôture</th>
+                <th scope="col" class="text-center">clôture LVC</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for index, row in cac %}
                 <tr>
-                    <th scope="col" class="text-center">Date</th>
-                    <th scope="col" class="text-center">ouverture</th>
-                    <th scope="col" class="text-center">plus haut</th>
-                    <th scope="col" class="text-center">plus bas</th>
-                    <th scope="col" class="text-center">clôture</th>
-                    <th scope="col" class="text-center">clôture LVC</th>
+                    <td class="text-center">{{ row.createdAt | date("d/m/y") }}</td>
+                    <td class="text-center">{{ row.opening }}</td>
+                    <td class="text-center">{{ row.higher }}</td>
+                    <td class="text-center">{{ row.lower }}</td>
+                    <td class="text-center">{{ row.closing }}</td>
+                    <td class="text-center">{{ lvc[index].closing }}</td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for index, row in cac %}
-                    <tr>
-                        <td class="text-center">{{ row.createdAt | date("d/m/y") }}</td>
-                        <td class="text-center">{{ row.opening }}</td>
-                        <td class="text-center">{{ row.higher }}</td>
-                        <td class="text-center">{{ row.lower }}</td>
-                        <td class="text-center">{{ row.closing }}</td>
-                        <td class="text-center">{{ lvc[index].closing }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-                <tfoot>
-                <tr>
-                    <th scope="col" class="text-center">Date</th>
-                    <th scope="col" class="text-center">ouverture</th>
-                    <th scope="col" class="text-center">plus haut</th>
-                    <th scope="col" class="text-center">plus bas</th>
-                    <th scope="col" class="text-center">clôture</th>
-                    <th scope="col" class="text-center">clôture LVC</th>
-                </tr>
-                </tfoot>
-            </table>
-        </div>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr>
+                <th scope="col" class="text-center">Date</th>
+                <th scope="col" class="text-center">ouverture</th>
+                <th scope="col" class="text-center">plus haut</th>
+                <th scope="col" class="text-center">plus bas</th>
+                <th scope="col" class="text-center">clôture</th>
+                <th scope="col" class="text-center">clôture LVC</th>
+            </tr>
+            </tfoot>
+        </table>
     </div>
-    <div class="col-xl-5 col-md-6 me-1 g-0">
-        <div class="card chart_card m-md-5">
-            <div class="card-header custom-table--title text-center p-1">Graphique du Cac</div>
+    <div class="col-5 mt-3">
+        <div class="card chart_card">
+            <div class="card-header custom-table text-center p-1">Graphique du Cac</div>
             <div class="card-body">
             <div id="chart" data-chart-data='{{ chartData|json_encode|raw }}'></div>
             </div>

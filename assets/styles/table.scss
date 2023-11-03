@@ -1,11 +1,9 @@
 /* personnalise la table des cotations du CAC */
-.custom-table--title {
+.custom-table {
     background-color: #1a2e45;
     color: #bad2ea;
     border-radius: 6px 6px 0 0;
     box-shadow: 0 0 15px rgba(70,70,70,0.5);
-    min-width: 510px;
-    max-width: 550px;
 }
 
 /* personnalise le rendu des DataTables */
@@ -14,8 +12,6 @@
   padding: 10px; /* Espace intérieur pour un aspect visuel */
   border-radius: 0 0 10px 10px;
   box-shadow: 0 0 15px rgba(70,70,70,0.5);
-  min-width: 510px;
-  max-width: 550px;
 }
 
 /* Cible l'élément d'input de recherche de DataTables */

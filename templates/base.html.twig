@@ -30,6 +30,31 @@
     <body>
         {% include 'header.html.twig' %}
 
+        <!-- menu latéral -->
+        <div id="menu" class="bg-primary collapse">
+            <ul class="list-unstyled">
+                <li class="d-flex justify-content-between align-items-center">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none">
+                        <i class="bi bi-gear ms-2 me-2"></i> <!-- Icône à gauche avec espacement -->
+                        <span class="ms-2">paramètres</span> <!-- Label à droite en blanc -->
+                    </a>
+                </li>
+                <li class="d-flex justify-content-between align-items-center">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none">
+                        <i class="bi bi-speedometer ms-2 me-2"></i>
+                        <span class="ms-2">gestion</span>
+                    </a>
+                </li>
+                <li class="d-flex justify-content-between align-items-center">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none">
+                        <i class="bi bi-bar-chart ms-2 me-2"></i>
+                        <span class="ms-2">positions</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- menu latéral -->
+
         <main class="d-flex flex-column" style="min-height: 100vh;">
             <a href="#top-of-page" class="svg-container reveal">
                 <svg width="64" height="64" viewBox="0 0 100 100">
