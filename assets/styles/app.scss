@@ -4,17 +4,34 @@ $enable-responsive-font-sizes: true;
 
 @import '~bootstrap/scss/bootstrap';
 @import '~datatables.net-bs5/css/dataTables.bootstrap5.css';
+@import '~theme-toggles/css/classic.css';
+@import 'table';
 @import 'custom-components';
-@import 'table.scss';
 @import 'custom-cards';
+@import 'dark-mode';
 
 html {
     scroll-behavior: smooth;
 }
 
+[data-theme="light"] {
+    --bg-color: #EDEEF1;
+    --header-color: #b383f2;
+    --links: #000000;
+    --theme-mode: yellow;
+}
+
+[data-theme="dark"] {
+    --bg-color: #21232f;
+    --links: #FFFFFF;
+    --theme-mode: #c0bebe;
+    --bg-primary: #2f4496;
+}
+
 body {
-    background-color: #EDEEF1;
+    background-color: var(--bg-color);
     font-family: 'Roboto', sans-serif;
+    transition: 350ms ease-in-out;
 }
 
 header {
@@ -31,29 +48,21 @@ header {
     width: 0;
     transition: width 0.3s;
     overflow-x: hidden;
-}
-
-#menu.show {
-    width: 150px; /* Largeur maximale du menu lors de l'ouverture */
-    transition: width 0.3s ease-in-out; /* Animation de la largeur lors de la fermeture */
-}
-
-#menu.show ul {
-    margin-top: 40px;
-    visibility: visible;
-    opacity: 1; /* Opacité maximale pour les éléments affichés */
-}
-
-#menu ul {
-    padding: 50px 20px 0 0;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s, opacity 0.3s 0.3s; /* Retarde l'animation de l'opacité */
-}
-
-#menu a {
-    color: #fff;
-    text-decoration: none;
+    ul {
+        padding: 50px 20px 0 0;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.3s 0.3s; /* Retarde l'animation de l'opacité */
+    }
+    &.show {
+        width: 150px; /* Largeur maximale du menu lors de l'ouverture */
+        transition: width 0.3s ease-in-out; /* Animation de la largeur lors de la fermeture */
+        ul {
+            margin-top: 40px;
+            visibility: visible;
+            opacity: 1; /* Opacité maximale pour les éléments affichés */
+        }
+    }
 }
 
 .custom-login-form {
@@ -71,13 +80,12 @@ header {
     border: 0 solid deepskyblue;
     transition: box-shadow .2s ease, border .2s ease, background-color .2s ease, color .2s ease;
     box-shadow: inset 0 0 0 0 rgba(43,119,158,1), inset 0 0 0 2px deepskyblue, 0 0 0 0 rgba(43,119,158,1);
-}
-
-.custom-btn:hover {
-    box-shadow: inset 0 0 0 4px rgba(43,119,158,1), inset 0 0 0 6px deepskyblue, 0 0 0 0 rgba(43,119,158,1);
-    background-color: #0d6efd;
-    color: white;
-    border-radius: 5px;
+    &:hover {
+        box-shadow: inset 0 0 0 4px rgba(43,119,158,1), inset 0 0 0 6px deepskyblue, 0 0 0 0 rgba(43,119,158,1);
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 5px;
+    }
 }
 
 .underlying-shape {
@@ -114,17 +122,16 @@ header {
     &--light {
         color: $gray-700;
     }
-}
-
-.custom-card--mini {
-    background-color: #D1ECFA;
-    color: inherit;
-    text-decoration: inherit;
-    transition: background-color .5s;
-    &:hover {
+    &--mini {
+        background-color: #D1ECFA;
         color: inherit;
+        text-decoration: inherit;
         transition: background-color .5s;
-        background-color: darken(#D1ECFA, 5%);
+        &:hover {
+            color: inherit;
+            transition: background-color .5s;
+            background-color: darken(#D1ECFA, 5%);
+        }
     }
 }
 
@@ -134,35 +141,32 @@ header {
 
 .transparent-bg {
     position: relative;
-    overflow: hidden
-}
-
-.transparent-bg:before {
-    position: absolute;
-    content: "";
-    width: 100%;
-    height: 100%;
-    opacity: .1;
+    overflow: hidden;
+    &:before {
+        position: absolute;
+        content: "";
+        width: 100%;
+        height: 100%;
+        opacity: .1;
+    }
 }
 
 .CAC {
     background-color: $blue-400;
     text-shadow: 0 0 2px #565656;
-}
-
-.CAC:before {
-    background-image: url(../images/stocks.jpg);
-    background-size: contain;
+    &:before {
+        background-image: url(../images/stocks.jpg);
+        background-size: contain;
+    }
 }
 
 .portfolio {
     background-color: $teal-400;
-}
-
-.portfolio:before {
-    background-image: url(../images/NewYork.jpg);
-    background-position: center;
-    background-size: cover;
+    &:before {
+        background-image: url(../images/NewYork.jpg);
+        background-position: center;
+        background-size: cover;
+    }
 }
 
 .custom-dropdown {
@@ -176,4 +180,15 @@ header {
 
 .no-margin {
     margin: 0;
+}
+
+.bg-orange {
+    background-color: #fd7e14;
+}
+
+.theme-toggle__classic {
+    fill: var(--theme-mode); /* Utilise la couleur du texte du thème light */
+    g {
+        stroke: var(--theme-mode);
+    }
 }
