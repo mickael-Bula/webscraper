@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }],
         chart: {
             type: 'candlestick',
-            height: 350,
+            width: '100%',
         },
         title: {
             text: 'Cotations quotidiennes',
@@ -38,18 +38,28 @@ document.addEventListener("DOMContentLoaded", function () {
             max: endRow,
             labels: {
                 formatter: function (val) {
-                        return new Date(val).toLocaleString("fr-FR", {
-                            year: '2-digit',
-                            month: '2-digit',
-                            day: '2-digit'
-                        });
-                    }
+                    return new Date(val).toLocaleString("fr-FR", {
+                        year: '2-digit',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
                 }
-            },
+            }
+        },
         yaxis: {
             tooltip: {
                 enabled: true
             }
+        },
+        theme: {
+            mode: 'light',
+            palette: 'palette1',
+            monochrome: {
+                enabled: false,
+                color: '#255aee',
+                shadeTo: 'light',
+                shadeIntensity: 0.65
+            },
         }
     }
 

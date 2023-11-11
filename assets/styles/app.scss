@@ -22,14 +22,16 @@ html {
 }
 
 [data-theme="dark"] {
-    --bg-color: #21232f;
+    --bg-color: #343E59;
     --links: #FFFFFF;
     --theme-mode: #c0bebe;
     --bg-primary: #2f4496;
+    --color: #A6BDB5;
 }
 
 body {
     background-color: var(--bg-color);
+    color: var(--color);
     font-family: 'Roboto', sans-serif;
     transition: 350ms ease-in-out;
 }
