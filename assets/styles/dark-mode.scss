@@ -1,0 +1,45 @@
+/* je surcharge les variables Bootstrap en mode sombre */
+
+
+[data-theme="light"] {
+  nav,
+  footer,
+  #menu {
+    background-color: #0d6efd;
+    transition: 350ms ease-in-out;
+  }
+}
+
+[data-theme="dark"] {
+  .btn-primary {
+    background-color: var(--bg-primary);
+    border-color: var(--bg-primary);
+    &:hover {
+      border-color: #3064CA;
+    }
+  }
+  nav,
+  footer {
+    background-color: var(--bg-primary);
+    transition: 350ms ease-in-out;
+  }
+  .dataTables_wrapper {
+    background-color: #424242;
+    color: #F3F7F8;
+    border: 1px solid #F3F7F8;
+    transition: 350ms ease-in-out;
+  }
+  .chart_card .card-body {
+    background-color: #424242;
+  }
+  /*
+  .chart_card {
+    background-color: #343E59;
+    color: #A6BDB5;
+    transition: 350ms ease-in-out;
+  }
+   */
+  #menu {
+    background-color: var(--bg-primary);
+  }
+}

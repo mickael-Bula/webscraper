@@ -33,7 +33,11 @@ class HomeController extends AbstractController
      */
     public function index(): Response
     {
-        return $this->render('home/index.html.twig');
+        // récupération du thème enregistré en session
+        $session = $this->requestStack->getSession();
+        $theme = $session->get('theme', 'light');
+
+        return $this->render('home/index.html.twig', compact('theme'));
     }
 
     /**
@@ -61,6 +65,9 @@ class HomeController extends AbstractController
 
         $cacRepository = $doctrine->getRepository(Cac::class);
         $session = $this->requestStack->getSession();
+
+        // récupération du thème enregistré en session
+        $theme = $session->get('theme', 'light');
 
         //FIX Ajouter une nouvelle table pour récupérer le statut d'une position (isWaiting, isRunning, isClosed)
         // une fois fait, mettre à jour le mailer pour afficher le changement de statut de la position
@@ -119,7 +126,7 @@ class HomeController extends AbstractController
 
         return $this->render(
             'home/dashboard.html.twig',
-            compact('cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions', 'chartData')
+            compact('theme', 'cac', 'lvc', 'waitingPositions', 'runningPositions', 'closedPositions', 'chartData')
         );
 
         //TODO Il faut ajouter sur le dashboard la buyLimit et lastHigh du user courant
