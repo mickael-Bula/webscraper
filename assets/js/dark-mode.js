@@ -17,6 +17,9 @@ const darkMode = {
             document.querySelector(".theme-toggle").classList.remove("theme-toggle--toggled");
             darkMode.updateSession("light");
         }
+        // Émet un événement personnalisé après la mise à jour du thème
+        document.dispatchEvent(new Event('themeUpdated'));
+
     },
     updateSession: function(value) {
         // Envoyer la valeur au serveur (via une requête AJAX)
