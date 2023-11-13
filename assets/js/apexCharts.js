@@ -116,23 +116,29 @@ const apexChart = {
             await apexChart.init();
 
             const chart = apexChart.getChartInstance();
+            const theme = document.body.dataset.theme;
 
             // Vérifie si le graphique est toujours disponible
             if (chart) {
-                const theme = document.body.dataset.theme;
-                await chart.updateOptions({
-                    theme: {
-                        mode: theme,
-                        palette: 'palette1',
-                        monochrome: {
-                            enabled: false,
-                            color: '#255aee',
-                            shadeTo: theme,
-                            shadeIntensity: 0.65
-                        },
-                    }
+                // Écoute l'événement personnalisé pour le changement de thème général
+                document.body.addEventListener('themeUpdated', async () => {
+                    // Ajoute un délai de 350 ms avant de mettre à jour le thème
+                    setTimeout(async () => {
+                        await chart.updateOptions({
+                            theme: {
+                                mode: theme,
+                                palette: 'palette1',
+                                monochrome: {
+                                    enabled: false,
+                                    color: '#255aee',
+                                    shadeTo: theme,
+                                    shadeIntensity: 0.65
+                                },
+                            }
+                        });
+                        console.log("Mise à jour du graphique complétée");
+                    }, 350);
                 });
-                console.log("Mise à jour du graphique complétée");
             } else {
                 console.error("Le graphique n'est pas disponible");
             }

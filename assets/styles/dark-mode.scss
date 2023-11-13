@@ -1,6 +1,5 @@
 /* je surcharge les variables Bootstrap en mode sombre */
 
-
 [data-theme="light"] {
   nav,
   footer,
@@ -18,20 +17,35 @@
       border-color: #3064CA;
     }
   }
+
   nav,
   footer {
     background-color: var(--bg-primary);
     transition: 350ms ease-in-out;
   }
+
+  .chart_card {
+    background-color: #424242;
+    box-shadow: 0 0 15px rgba(160, 160, 160, 0.5);
+    .card-body {
+      background-color: #424242;
+      border: 1px solid #676464;
+      border-radius: 0 0 10px 10px;
+      transition: 350ms ease-in-out;
+    }
+    .custom-table {
+      border-radius: 6px 6px 0 0;
+    }
+  }
+
   .dataTables_wrapper {
     background-color: #424242;
     color: #F3F7F8;
-    border: 1px solid #F3F7F8;
+    border: 1px solid #676464;
+    box-shadow: 0 0 15px rgba(160, 160, 160, 0.5);
     transition: 350ms ease-in-out;
   }
-  .chart_card .card-body {
-    background-color: #424242;
-  }
+
   /*
   .chart_card {
     background-color: #343E59;
