@@ -44,8 +44,9 @@ class CacRepository extends ServiceEntityRepository
      * méthode qui enregistre en BDD des objets Cac hydratés avec les données issues du 'scraping'
      * un tableau des objets insérés est retourné
      *
-     * @param $data
-     */public function saveData($data): void
+     * @param array<string> $data
+     */
+    public function saveData(array $data): void
     {
         foreach ($data as $item) {
             $entity = new Cac();
@@ -57,8 +58,10 @@ class CacRepository extends ServiceEntityRepository
             $entity->setHigher(Utils::fromString($item[3]));
             $entity->setLower(Utils::fromString($item[4]));
 
-            // ### excerpt from Doctrine documentation : https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/
-            // "You can consider all values on Objects inserted and updated through Doctrine\ORM\EntityManager#persist() to be safe from SQL injection"
+            /* ### excerpt from Doctrine documentation :
+            https://www.doctrine-project.org/projects/doctrine-orm/en/2.11/reference/security.html ###/
+            "You can consider all values on Objects inserted and updated through Doctrine\ORM\EntityManager#persist()
+             to be safe from SQL injection" */
             $this->getEntityManager()->persist($entity);
         }
         $this->getEntityManager()->flush();
@@ -67,7 +70,7 @@ class CacRepository extends ServiceEntityRepository
     /**
      * récupère toutes les entités cac qui ont une date supérieure à celle de $lastCacUpdated, triées par ancienneté
      * @param Cac $lastCacUpdated
-     * @return array
+     * @return array<Cac>
      */
     public function getDataToUpdateFromUser(Cac $lastCacUpdated): array
     {
