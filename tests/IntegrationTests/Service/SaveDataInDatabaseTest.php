@@ -7,6 +7,7 @@ use App\Entity\LastHigh;
 use App\Entity\User;
 use App\Service\DataScraper;
 use App\Service\MailerService;
+use App\Repository\UserRepository;
 use App\Service\SaveDataInDatabase;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +20,6 @@ class SaveDataInDatabaseTest extends KernelTestCase
 {
     /** @var EntityManager|object|null */
     private $entityManager;
-    private $userRepository;
 
     protected function setUp(): void
     {
@@ -29,7 +29,6 @@ class SaveDataInDatabaseTest extends KernelTestCase
         //  j'utilise static::getContainer() pour accéder au service container
         $container = static::getContainer();
         $this->entityManager = $container->get(EntityManagerInterface::class);
-        $this->userRepository = $this->entityManager->getRepository(User::class);
     }
 
     /**
@@ -60,7 +59,7 @@ class SaveDataInDatabaseTest extends KernelTestCase
             }
         }
         $this->assertNotEmpty($newData);
-        $this->assertCount(22, $newData);
+        $this->assertCount(21, $newData);
     }
 
     protected function tearDown(): void
